@@ -1,9 +1,9 @@
-=== Plugin Name ===
+=== WPide ===
 Contributors: WPsites
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3
-Stable tag: trunk
+Stable tag: 1.0
 
 Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing.
 

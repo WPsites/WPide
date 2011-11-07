@@ -4,7 +4,7 @@
 Plugin Name: WPide
 Plugin URI: https://github.com/WPsites/WPide
 Description: Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing.
-Version: 1.0
+Version: 1.0.1
 Author: Simon Dunton
 Author URI: http://www.wpsites.co.uk
 
@@ -2526,32 +2526,10 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 				}
 
 
-
-
-
-
-
 			});
 
 
-
-
-
-
-
 		});
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2561,48 +2539,14 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-
-
-
-
-
-
-
-
-
-
     <?php
-
-
-
-
-
-
-
+    
     }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     public static function add_admin_js()
-
-
-
-
-
-
-
     {
 
 
@@ -2638,42 +2582,7 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 	wp_enqueue_script('ace-theme', $plugin_path . 'ace-0.2.0/src/theme-dawn.js');//monokai is nice
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2699,31 +2608,21 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-
-
-
-
 		if ($edit_type==='theme'){
 
 
-
 			$theme_root = get_theme_root();
-
-
-
-				
-
 
 
 				$short_path = str_replace($theme_root, '', $file_name);
 
 
 
-				$new_file_path_daily = WP_PLUGIN_DIR.'/WPide/backups/themes'.$short_path.'.'.date("Ymd");
+				$new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("Ymd");
 
 
 
-				$new_file_path_hourly = WP_PLUGIN_DIR.'/WPide/backups/themes'.$short_path.'.'.date("YmdH");
+				$new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("YmdH");
 
 
 
@@ -2791,11 +2690,11 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-                                $new_file_path_daily = WP_PLUGIN_DIR.'/WPide/backups/plugins/'.$short_path.'.'.date("Ymd");
+                                $new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("Ymd");
 
 
 
-                                $new_file_path_hourly = WP_PLUGIN_DIR.'/WPide/backups/plugins/'.$short_path.'.'.date("YmdH");
+                                $new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("YmdH");
 
 
 
@@ -2855,25 +2754,13 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-		//echo "final debug info : " . WP_PLUGIN_DIR.'/WPide/backups/'.$short_path.'.backup';
+		//echo "final debug info : " . WP_PLUGIN_DIR.'/wpide/backups/'.$short_path.'.backup';
 
 
 
 		die(); // this is required to return a proper result
 
-
-
-
-
-
-
 	}
-
-
-
-
-
-
 
 }
 
@@ -2883,45 +2770,14 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-
-
-
-
-
-
-
-
 //only include this plugin if on theme editor or plugin editor
 
-
-
-
-
-
-
 if ( $_SERVER['PHP_SELF'] === '/wp-admin/plugin-editor.php' || 
-
-
-
 	$_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php' ||
-
-
-
 		$_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ){
 
 
-
-
-
-
-
 	add_action("init", create_function('', 'new WPide();'));
-
-
-
-
-
-
 
 }
 

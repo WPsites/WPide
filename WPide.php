@@ -4,7 +4,7 @@
 Plugin Name: WPide
 Plugin URI: https://github.com/WPsites/WPide
 Description: Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing.
-Version: 1.0.1
+Version: 1.0.2
 Author: Simon Dunton
 Author URI: http://www.wpsites.co.uk
 
@@ -19,183 +19,33 @@ class WPide
 
 	function __construct() {
 
-
-
 		// Uncomment any of these calls to add the functionality that you need.
-
-
-
 		add_action('admin_head', 'WPide::add_admin_head');
-
-
-
 		add_action('admin_head', 'WPide::load_editor');
-
-
-
 		add_action('admin_init', 'WPide::add_admin_js');
 
-
-
-
-
-
-
 		//setup ajax function to save a backup
-
-
-
 		add_action('wp_ajax_ace_backup_call', 'WPide::ace_backup_call');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public static function add_admin_head()
-
-
-
-
-
-
-
     {
-
-
-
-
-
-
 
     ?>
 
-
-
-
-
-
-
       <style type="text/css">
-
-
-
-
-
-
-
 	#quicktags, #post-status-info, #editor-toolbar, #newcontent, .ace_print_margin { display: none; }
-
-
-
-
-
-
-
-        #fancyeditordiv {
-
-
-
-
-
-
-
+    #fancyeditordiv {
 	  position: relative;
-
-
-
-
-
-
-
 	  width: 500px;
-
-
-
-
-
-
-
 	  height: 400px;
-
-
-
-
-
-
-
 	}
-
-
-
-
-
-
-
 	#template div{margin-right:0 !important;}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      </style>
-
-
-
-
-
-
+    </style>
 
     <?php
-
-
-
-
-
-
 
     }
 
@@ -214,21 +64,7 @@ class WPide
 
 
     public static function load_editor()
-
-
-
-
-
-
-
     {
-
-
-
-
-
-
-
     ?>
 
 
@@ -238,28 +74,9 @@ class WPide
 
 
        <script>
-
-
-
-
-
-
-
 		var autocompleting = false;
-
-
-
 		var autocompletelength = 2;
-
-
-
 		var editor = '';
-
-
-
-
-
-
 
 var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct() __get_option() " +
 
@@ -1641,184 +1458,54 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 		jQuery(document).ready(function($) {
 
-
-
-
-
-
-
 			//quit if editing this plugin since it will spaz out!!
-
-
-
 			if ( $('input[name=file]').val() == 'ace/ace.php' ){
-
-
-
 				$('#newcontent').css({'display': 'inline', 'width': '70%'}); //unhide the usual textarea
-
-
-
 				return;
-
-
-
 			}
-
-
-
-
-
-
-
+			
+			//add div for ace editor to latch on to
 			$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
-
-
-
-
-
-
-
+			//create the editor instance
   			editor = ace.edit("fancyeditordiv");
-
-
-
-
-
-
-
+			//set the editor theme
 			editor.setTheme("ace/theme/dawn"); 
-
-
-
+			//get a copy of the initial file contents (the file being edited)
 			var intialData = $('#newcontent').val()
-
-
-
+			//add the file contents to our new editor instance
 			editor.getSession().setValue( intialData );
 
 
-
-
-
-
-
-
-
-
-
+			//are we editing a theme or plugin?
 			<?php if($_SERVER['PHP_SELF'] === '/wp-admin/plugin-editor.php'){ ?>
-
-
-
 			  var aceedittype = 'plugin';
-
-
-
 			<?php }elseif($_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php'){?>
-
-
-
 			  var aceedittype = 'theme';
-
-
-
 			<?php }//end ?>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 			//ajax call to generate a backup of this file we are about to edit
-
-
-
   			var data = { action: 'ace_backup_call', filename: $('input[name=file]').val(), edittype: aceedittype };
-
-
-
 	                jQuery.post(ajaxurl, data, function(response) { 
-
-
-
-				//alert('Got this from the server: ' + response); 
-
-
-
+					if (response === 'success'){
+						alert("A backup copy of this file has been generated.");
+					}
 			});
 
-
-
-
-
-
-
-
-
-
-
+			//use editors php mode
 			var phpMode = require("ace/mode/php").Mode;
-
-
-
-
-
-
-
 			editor.getSession().setMode(new phpMode());
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-			$('#submit, #publish, #save-post, #post-preview').click(function(event){
-
-
-
-		            var sumink = editor.getSession().getValue();
-
-
-
-			    $('textarea#newcontent').text( sumink ); //.html does some dodgy things with certain php files
-
-
-
+			$('#submit').click(function(event){
+		        var use_val = editor.getSession().getValue();
+			    $('textarea#newcontent').text( use_val ); //.html does some dodgy things with certain php files
 			})
+			
 
-
-
-
-
-
-
-	
-
-
-
-		//START WP AUTOCOMPLETE
+	//START WP AUTOCOMPLETE
 
 					//create the autocomplete dropdown
-
 					ac = document.createElement('select');
 
 					ac.id = 'ac';
@@ -1842,705 +1529,244 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
 
 
-
+		//hook onto any change in editor contents
 		editor.getSession().on('change', function(e) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-				var range = editor.getSelectionRange();
-
-
-
-
-
-
+			
+			//don't continue with autocomplete if /n entered
+			try{
+				if ( e.data.text.charCodeAt(0) == 10 ){
+					return;
+				}
+			}catch(e){}
+			
+			//get cursor/selection
+			var range = editor.getSelectionRange();
+				
+			//do we need to extend the length of the autocomplete string
+			if (autocompleting){
+				autocompletelength = autocompletelength + 1;
+			}else{
+				autocompletelength = 2;
+			}
 
 			
-
-
-
-			if (autocompleting){
-
-
-
-				autocompletelength = autocompletelength + 1;
-
-
-
-			}else{
-
-
-
-				autocompletelength = 2;
-
-
-
+			//modify the cursor/selection data we have to get text from the editor to check for matching function/method
+			//set start column
+			range.start.column = range.start.column - autocompletelength;
+			//no column lower than 1 thanks
+			if (range.start.column < 1) range.start.column = 0; 
+			//set end column
+			range.end.column = range.end.column + 1;
+			//get the editor text based on that range
+			var text = editor.getSession().doc.getTextRange(range);
+			
+			//dont show if no text passed
+			$quit_onchange = false;
+			try{
+				if (text==="") {
+				   ac.style.display='none';
+				}
+			}catch(e){ }//catch end
+			// if string length less than 3 then quit this
+			if (text.length < 3){
+				return;
 			}
 
 
-
-			
-
-
-
-			range.start.column = range.start.column - autocompletelength;
-
-
-
-			if (range.start.column < 1) range.start.column = 0;
-
-
-
-			range.end.column = range.end.column + 1;
-
-
-
-			//console.log( '"' + editor.getSession().doc.getTextRange(range) + '"' );
-
-
-
-
-
-
-
-			var text = editor.getSession().doc.getTextRange(range);
-
-
-
-
-
-
-
-			//dont show if no text passed
-
-			try{
-
-				if (text==="") ac.style.display='none';
-
-			}catch(e){ }
-
-
-
-
-
-
-
 			//create the dropdown for autocomplete
-
-
-
 				var sel = editor.getSelection();
-
-
-
-
-
-
-
 				var session = editor.getSession();
-
-
-
-
-
-
-
-				
-
-
-
-
-
-
-
 				var lead = sel.getSelectionLead();
 
-
-
-
-
-
-
 				var pos = editor.renderer.textToScreenCoordinates(lead.row, lead.column);
-
-
-
-
-
-
-
 				var ac;
 
 
 
 				if( document.getElementById('ac') ){
-
-
-
 					ac=document.getElementById('ac');
 
-
-
-				
-
-				
-
 					//editor clicks should hide the autocomplete dropdown
-
 					editor.container.addEventListener('click',function(e){
-
 						ac.style.display='none';
-
 					})
-
-
-
-
-
-
-
-					//START CANNON COMMANDS
-
-				
-
-						var canon = require('pilot/canon')
-
-				
-
-						canon.addCommand({		
-
-				
-
-							name: "up",
-
-				
-
-							bindKey: {
-
-				
-
-								win: "Up",
-
-								mac: "Up",
-
-								sender: "editor"
-
-				
-
-							},			
-
-				
-
-							exec: function(env, args, request) {
-
-				
-
-								if( document.getElementById('ac').style.display === 'block'  ){
-
-				
-
-									var select=document.getElementById('ac');
-
-				
-
-									if( select.selectedIndex==0 ){
-
-				
-
-										select.selectedIndex=select.options.length-1;
-
-				
-
-									}else{
-
-				
-
-										select.selectedIndex=select.selectedIndex-1;
-
-				
-
-									}
-
-				
-
-								}else{
-
-				
-
-				
-
-				
-
-									var range = editor.getSelectionRange();
-
-									editor.clearSelection();
-
-									editor.moveCursorTo(range.end.row -1, range.end.column);
-
-				
-
-								}
-
-				
-
-							}
-
-				
-
-						});
-
-				
-
-				
-
-				
-
-				
-
-				
-
-						canon.addCommand({
-
-				
-
-							name: "down",
-
-				
-
-							bindKey: {
-
-				
-
-								win: "Down",				
-
-								mac: "Down",
-
-								sender: "editor"
-
-				
-
-							},
-
-				
-
-							exec: function(env, args, request) {
-
-				
-
-								if( document.getElementById('ac').style.display === 'block' ){
-
-				
-
-									var select=document.getElementById('ac');
-
-				
-
-				
-
-									if( select.selectedIndex==select.options.length-1 ){
-
-				
-
-										select.selectedIndex=0;
-
-				
-
-									}else{
-
-										select.selectedIndex=select.selectedIndex+1;
-
-									}
-
-				
-
-								}else{
-
-									var range = editor.getSelectionRange();
-
-									editor.clearSelection();
-
-									editor.moveCursorTo(range.end.row +1, range.end.column);
-
-								}
-
-				
-
-							}
-
-				
-
-				
-
-				
-
-						});
-
-						
-
-						canon.addCommand({
-
-				
-
-							name: "enter",
-
-				
-
-							bindKey: {
-
-				
-
-								win: "Return",
-
-				
-
-								mac: "Return",
-
-				
-
-								sender: "editor"
-
-				
-
-							},
-
-				
-
-							exec: function(env, args, request) {
-
-				
-
-								if( document.getElementById('ac').style.display === 'block'  ){
-
-				
-
-									var select=document.getElementById('ac');
-
-				
-
-									var tag=select.options[select.selectedIndex].value;
-
-				
-
-									var sel=editor.selection.getRange();
-
-				
-
-									var line=editor.getSession().getLine(sel.start.row);										
-
-								
-
-									sel.start.column=sel.start.column-(autocompletelength+1);
-
-				
-
-									editor.selection.setSelectionRange(sel);				
-
-				
-
-									editor.insert(tag);
-
-				
-
-									
-
-				
-
-									autocompleting=false;
-
-				
-
-								}else{
-
-				
-
-									editor.insert('\n');
-
-				
-
-								}
-
-				
-
-							}
-
-				
-
-						});
-
-						//END CANNON COMMANDS
-
-
-
-
 
 				} //end - create initial autocomplete dropdown and related actions
 
 
-
-
-
-
-
-				//calulate the container offset
-
-
-
+				//calulate the editor container offset
 				var obj=editor.container;
 
-
-
-				
-
-
-
 				var curleft = 0;
-
-
-
 				var curtop = 0;
-
-
 
 				if (obj.offsetParent) {
 
-
-
 					do {
-
-
-
 						curleft += obj.offsetLeft;
-
-
-
 						curtop += obj.offsetTop;
-
-
-
 					} while (obj = obj.offsetParent);
-
-
 
 				}						
 
 
-
-
-
-
-
-
-
-
-
 				//position autocomplete
-
-
-
-				ac.style.top=pos.pageY - curtop + 20 + "px";
-
-
-
-				ac.style.left=pos.pageX - curleft + "px";
-
-
-
+				ac.style.top=pos.pageY - curtop + 40 + "px";
+				ac.style.left=pos.pageX - curleft + 20 + "px";
 				ac.style.display='block';
-
-
-
 				ac.style.background='white';
 
 
-
-
-
-
-
 				//remove all options, starting a fresh list
-
-
-
 				ac.options.length = 0
 
-
-
-
-
-
-
 				//loop through tags and check for a match
-
-				//console.log(text);
-
 				var tag;
-
-
-
 				for(i in html_tags){
-
-
-
 					if(!html_tags.hasOwnProperty(i) ){
-
-
-
 						continue;
-
-
-
 					}
-
-
-
-					
-
-
 
 					tag=html_tags[i];					
-
-
-
-				
-
-
-
 					if( text ){
-
-
-
 						if( text!=tag.substr(0,text.length) ){
-
-
-
 							continue;
-
-
-
 						}
-
-
-
 					}
-
-
-
-				
-
-
 
 					var option = document.createElement('option');
-
-
-
 					option.text = tag;
-
-
-
 					option.value = tag;
 
-
-
-					
-
-
-
 					try {
-
-
-
 						ac.add(option, null); // standards compliant; doesn't work in IE
-
-
-
 					}
-
-
-
 					catch(ex) {
-
-
-
 						ac.add(option); // IE only
-
-
-
 					}
 
-
-
-				};
+				};//end for
 
 
 
 				//if the return list contains everything then don't display it
-
 				if (html_tags.length == ac.options.length){
-
 					ac.options.length =0;
-
 				}
-
-				//console.log(html_tags.length + " = " + ac.options.length);
-
-
 
 				//check for matches
-
-
-
 				if( ac.length==0 ){
-
-
-
 						ac.style.display='none';
-
 						autocompleting=false;
-
-
-
 				}else{
-
-
-
-					//console.log('match');
-
 					ac.selectedIndex=0;			
-
 					autocompleting=true;
-
-
-
 				}
 
+			});//end editor change event
 
-			});
 
 
-		});
+		//START COMMANDS
+						var canon = require('pilot/canon')
+			
+						//Key up command
+						canon.addCommand({		
+							name: "up",
+							bindKey: {
+								win: "Up",
+								mac: "Up",
+								sender: "editor"
+							},			
+
+							exec: function(env, args, request) {
+								if( document.getElementById('ac').style.display === 'block'  ){
+
+									var select=document.getElementById('ac');
+
+									if( select.selectedIndex==0 ){
+										select.selectedIndex=select.options.length-1;
+									}else{
+										select.selectedIndex=select.selectedIndex-1;
+									}
+
+								}else{
+									var range = editor.getSelectionRange();
+									editor.clearSelection();
+									editor.moveCursorTo(range.end.row -1, range.end.column);
+								}
+							}
+						});
+
+				
+						//key down command
+						canon.addCommand({
+
+							name: "down",
+
+							bindKey: {
+								win: "Down",
+								mac: "Down",
+								sender: "editor"
+							},
+
+							exec: function(env, args, request) {
+								if( document.getElementById('ac').style.display === 'block' ){
+
+									var select=document.getElementById('ac');
+									
+									if( select.selectedIndex==select.options.length-1 ){
+										select.selectedIndex=0;
+									}else{
+										select.selectedIndex=select.selectedIndex+1;
+									}
+								}else{
+									var range = editor.getSelectionRange();
+									editor.clearSelection();
+									editor.moveCursorTo(range.end.row +1, range.end.column);
+								}
+							}
+						});
+
+						
+						//enter/return command
+						function trythis () {
+
+								if( document.getElementById('ac').style.display === 'block'  ){
+								
+									var ac_dropdwn =document.getElementById('ac');
+									var tag=ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
+									var sel=editor.selection.getRange();
+									var line=editor.getSession().getLine(sel.start.row);										
+									sel.start.column=sel.start.column-(autocompletelength+1);
+									editor.selection.setSelectionRange(sel);				
+									editor.insert(tag);
+									autocompleting=false;
+									
+								}else{
+									editor.insert('\n');
+								}
+						}
+						canon.addCommand({
+							name: "enter",
+							bindKey: {
+								win: "Return",
+								mac: "Return",
+								sender: "editor"
+							},
+							exec: trythis
+						});
+
+
+			//END COMMANDS
+
+
+		});//end jquery load
 
 
 
 	</script>
-
-
-
-
-
-    <?php
-    
+    <?php   
     }
 
 
@@ -2548,239 +1774,87 @@ var html_tags = ("_() __() __checked_selected_helper() __construct() __destruct(
 
     public static function add_admin_js()
     {
-
-
-
-
-
-
-
         $plugin_path =  get_bloginfo('url').'/wp-content/plugins/' . basename(dirname(__FILE__)) .'/';
-
-
-
-
-
-
-
+		//include ace
         wp_enqueue_script('ace', $plugin_path . 'ace-0.2.0/src/ace.js');
-
-
-
-
-
-
-
+		//include ace mode
         wp_enqueue_script('ace-mode', $plugin_path . 'ace-0.2.0/src/mode-php.js');
-
-
-
-
-
-
-
-	wp_enqueue_script('ace-theme', $plugin_path . 'ace-0.2.0/src/theme-dawn.js');//monokai is nice
-
-
+		//include ace theme
+		wp_enqueue_script('ace-theme', $plugin_path . 'ace-0.2.0/src/theme-dawn.js');//monokai is nice
     }
-
-
-
-
-
-
-
 
 
 	public static function ace_backup_call() {
 
-
-
-		 $backup_path =  get_bloginfo('url').'/wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/';
-
-
-
+		$backup_path =  get_bloginfo('url').'/wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/';
 		$file_name = $_POST['filename'];
-
-
-
 		$edit_type = $_POST['edittype'];
 
-
-
 		if ($edit_type==='theme'){
-
-
-			$theme_root = get_theme_root();
-
-
+				$theme_root = get_theme_root();
 				$short_path = str_replace($theme_root, '', $file_name);
 
-
-
 				$new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("Ymd");
-
-
-
 				$new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("YmdH");
-
-
 
 				$new_file_info = pathinfo($new_file_path_daily);
 
-
-
 				if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
 
-
-
-
-
-
-
 				//check for todays backup if non existant then create
-
-
-
 				if (!file_exists($new_file_path_daily)){
-
-
-
-					copy($file_name, $new_file_path_daily); //make a copy of the file
-
-
+					$backup_result = copy($file_name, $new_file_path_daily); //make a copy of the file
 
 				//check for a backup this hour if doesn't exist then create
-
-
-
 				}else if(!file_exists($new_file_path_hourly)){
-
-
-
-                                        copy($file_name, $new_file_path_hourly); //make a copy of the file
-
-
-
+                    $backup_result = copy($file_name, $new_file_path_hourly); //make a copy of the file
 				}
-
-
 
 				//do no further backups since one intial backup for today and an hourly one is plenty!
 
-
-
-		
-
-
-
 		}else if ($edit_type==='plugin'){
 
-
-
-                                
-
-
-
 				$plugin_root = WP_PLUGIN_DIR;
-
-
-
 				$short_path = str_replace($plugin_root, '', $file_name);
 
+				$new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("Ymd");
+				$new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("YmdH");
 
+				$new_file_info = pathinfo($new_file_path_daily);
 
-                                $new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("Ymd");
+				if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
 
+				//check for todays backup if non existant then create
+				if (!file_exists($new_file_path_daily)){
+					$backup_result = copy($plugin_root.'/'.$file_name, $new_file_path_daily); //make a copy of the file
+						
+				//check for a backup this hour if doesn't exist then create
+				}else if(!file_exists($new_file_path_hourly)){
+					$backup_result = copy($plugin_root.'/'.$file_name, $new_file_path_hourly); //make a copy of the file
 
+				}
 
-                                $new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("YmdH");
-
-
-
-                                $new_file_info = pathinfo($new_file_path_daily);
-
-
-
-                                if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
-
-
-
-
-
-
-
-                                //check for todays backup if non existant then create
-
-
-
-                                if (!file_exists($new_file_path_daily)){
-
-
-
-                                        copy($plugin_root.'/'.$file_name, $new_file_path_daily); //make a copy of the file
-
-
-
-                                //check for a backup this hour if doesn't exist then create
-
-
-
-                                }else if(!file_exists($new_file_path_hourly)){
-
-
-
-                                        copy($plugin_root.'/'.$file_name, $new_file_path_hourly); //make a copy of the file
-
-
-
-                                }
-
-
-
-                                //do no further backups since one intial backup for today and an hourly one is plenty!
-
-
-
-			
-
-
+				//do no further backups since one intial backup for today and an hourly one is plenty!
 
 		}
 
-
-
-
-
-
+		if ($backup_result){
+			echo "success";
+		}
 
 		//echo "final debug info : " . WP_PLUGIN_DIR.'/wpide/backups/'.$short_path.'.backup';
-
-
-
 		die(); // this is required to return a proper result
 
 	}
 
 }
 
-
-
-
-
-
-
-//only include this plugin if on theme editor or plugin editor
-
+//only include this plugin if on theme editor, plugin editor or an ajax call
 if ( $_SERVER['PHP_SELF'] === '/wp-admin/plugin-editor.php' || 
-	$_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php' ||
-		$_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ){
-
+		$_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php' ||
+			$_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ){
 
 	add_action("init", create_function('', 'new WPide();'));
 
 }
-
-
-
 ?>

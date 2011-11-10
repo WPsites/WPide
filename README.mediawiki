@@ -66,3 +66,9 @@ No support for Internet Explorer right now
 
 = 1.0 =
 * Initial release.
+
+
+== NOTES ==
+
+Maybe some interesting things here we could impliment to help with following the WordPress standard and more advanced code styntax checking
+http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-on-coda-and-textwrangler/

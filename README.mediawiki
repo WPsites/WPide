@@ -72,3 +72,5 @@ No support for Internet Explorer right now
 
 Maybe some interesting things here we could impliment to help with following the WordPress standard and more advanced code styntax checking
 http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-on-coda-and-textwrangler/
+
+Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.

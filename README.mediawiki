@@ -74,3 +74,6 @@ Maybe some interesting things here we could impliment to help with following the
 http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-on-coda-and-textwrangler/
 
 Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.
+
+To give finer control over what files are editable in the plugin/theme editor and to remove the reliance of the built in plugin/theme editor functionality move the plugin to a dedicated admin page with it's own navigation menu and it's own file manager. Use http://abeautifulsite.net/blog/2008/03/jquery-file-tree/ as the file manager component.
+

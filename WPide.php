@@ -53,8 +53,10 @@ class WPide
         $plugin_path =  get_bloginfo('url').'/wp-content/plugins/' . basename(dirname(__FILE__)) .'/';
 		//include ace
         wp_enqueue_script('ace', $plugin_path . 'ace-0.2.0/src/ace.js');
-		//include ace mode
-        wp_enqueue_script('ace-mode', $plugin_path . 'ace-0.2.0/src/mode-php.js');
+		//include ace modes for css, javascript & php
+		wp_enqueue_script('ace-mode-css', $plugin_path . 'ace-0.2.0/src/mode-css.js');
+		wp_enqueue_script('ace-mode-javascript', $plugin_path . 'ace-0.2.0/src/mode-javascript.js');
+        wp_enqueue_script('ace-mode-php', $plugin_path . 'ace-0.2.0/src/mode-php.js');
 		//include ace theme
 		wp_enqueue_script('ace-theme', $plugin_path . 'ace-0.2.0/src/theme-dawn.js');//monokai is nice
 		// html tags for completion

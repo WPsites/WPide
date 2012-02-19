@@ -40,8 +40,17 @@ jQuery(document).ready(function($) {
 	});
 
 	//use editors php mode
-	var phpMode = require("ace/mode/php").Mode;
-	editor.getSession().setMode(new phpMode());
+	// var phpMode = require("ace/mode/php").Mode;
+	// editor.getSession().setMode(new phpMode());
+	var currentFilename = $('input[name=file]').val();
+	var mode; 
+	if (/\.css$/.test(currentFilename))
+		mode = require("ace/mode/css").Mode;
+	else if (/\.js$/.test(currentFilename))
+		mode = require("ace/mode/javascript").Mode;
+	else
+		mode = require("ace/mode/php").Mode;	
+	editor.getSession().setMode(new mode());
 
 
 	$('#submit').click(function(event){

@@ -2,26 +2,17 @@ var autocompleting = false;
 var autocompletelength = 2;
 var editor = '';
 
-
-
-
 var saved_editor_sessions = [];
 var saved_undo_manager = [];
 var last_added_editor_session = 0;
 var current_editor_session = 0;
 
-	
-			
-
 var EditSession = require('ace/edit_session').EditSession; 
 var UndoManager = require('ace/undomanager').UndoManager; 
-//add the file contents to our new editor instance
-
-
 
 //are we editing a theme or plugin?
 var aceedittype;
-if (/wp\-admin\/plugin-editor\.php/.test(document.URL))
+if (/wp\-admin\/plugin-editor\.php/.test(document.URL)) 
 	aceedittype = 'plugin';
 else if (/wp\-admin\/theme-editor\.php/.test(document.URL))
 	aceedittype = 'theme';
@@ -57,9 +48,18 @@ function wpide_set_file_contents(file){
 			editor.setSession( saved_editor_sessions[ clicksesh ] );
 		
 			//use editors php mode
-			var phpMode = require("ace/mode/php").Mode;
-			editor.getSession().setMode(new phpMode());
-		
+			var currentFilename = jQuery(this).attr('rel');
+			var mode;
+			// var phpMode = require("ace/mode/php").Mode;
+			// editor.getSession().setMode(new phpMode());
+			if (/\.css$/.test(currentFilename))
+				mode = require("ace/mode/css").Mode;
+			else if (/\.js$/.test(currentFilename))
+				mode = require("ace/mode/javascript").Mode;
+			else
+				mode = require("ace/mode/php").Mode;	
+			editor.getSession().setMode(new mode());
+			
 			editor.resize(); 
 			editor.focus(); 
 			//make a not of current editor

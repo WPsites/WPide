@@ -35,16 +35,9 @@ function wpide_set_file_contents(file){
 	//ajax call to get file contents we are about to edit
 	var data = { action: 'wpide_get_file', filename: file };
 	jQuery.post(ajaxurl, data, function(response) { 
-	
-		//editor.sessions.push
-		//saved_editor_sessions.push( file );
-		the_path = file.replace(/^.*[\\\/]/, ''); 
-		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="wpide_tab_'+last_added_editor_session+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');
-
-		editor.gotoLine(1);
-		editor.getSession().setValue( response );
-		editor.resize(); 
-		editor.focus(); 		
+		var the_path = file.replace(/^.*[\\\/]/, ''); 
+		var the_id = "wpide_tab_" + last_added_editor_session;
+		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
 		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());
@@ -54,12 +47,12 @@ function wpide_set_file_contents(file){
 			
 		jQuery(".wpide_tab").off('click').on("click", function(event){
 			event.preventDefault();
-			console.log( jQuery(this).attr('rel') + " opened, id: "  + jQuery(this).attr('sessionrel'));
+			console.log( jQuery(this).attr('rel') + " opened");
 			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
 			//save current editor into session
 			//saved_editor_sessions[current_editor_session] = editor.getSession(); 
 			//get old editor out of session and apply to editor
-			clicksesh = jQuery(this).attr('sessionrel');
+			var clicksesh = jQuery(this).attr('sessionrel');
 			saved_editor_sessions[ clicksesh ].setUndoManager(saved_undo_manager[ clicksesh ]);
 			editor.setSession( saved_editor_sessions[ clicksesh ] );
 		
@@ -73,7 +66,7 @@ function wpide_set_file_contents(file){
 			current_editor_session = clicksesh;
 		
 		});
-
+		jQuery("#"+the_id).click();
 		return response;
 			
 	});
@@ -115,7 +108,7 @@ function wpide_set_file_contents(file){
 
 
 			//ajax call to generate a backup of this file we are about to edit
-  			var data = { action: 'ace_backup_call', filename: $('input[name=file]').val(), edittype: aceedittype };
+			var data = { action: 'ace_backup_call', filename: $('input[name=file]').val(), edittype: aceedittype };
 	                jQuery.post(ajaxurl, data, function(response) { 
 					if (response === 'success'){
 						alert("A backup copy of this file has been generated.");

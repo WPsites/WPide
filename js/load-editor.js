@@ -32,44 +32,44 @@ else
 function wpide_set_file_contents(file){
 	//ajax call to get file contents we are about to edit
 	var data = { action: 'wpide_get_file', filename: file };
-			jQuery.post(ajaxurl, data, function(response) { 
-			
-			//editor.sessions.push
-			//saved_editor_sessions.push( file );
-			the_path = file.replace(/^.*[\\\/]/, ''); 
-			jQuery("#wpide_toolbar_tabs").append('<a href="#" id="wpide_tab_'+last_added_editor_session+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');
+	jQuery.post(ajaxurl, data, function(response) { 
 	
-			editor.gotoLine(1);
-			editor.getSession().setValue( response );
+		//editor.sessions.push
+		//saved_editor_sessions.push( file );
+		the_path = file.replace(/^.*[\\\/]/, ''); 
+		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="wpide_tab_'+last_added_editor_session+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');
+
+		editor.gotoLine(1);
+		editor.getSession().setValue( response );
+		editor.resize(); 
+		editor.focus(); 		
+			
+		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
+		last_added_editor_session++; //increment session counter
+			
+			
+		jQuery(".wpide_tab").off('click').on("click", function(event){
+			event.preventDefault();
+			console.log( jQuery(this).attr('rel') + " opened" );
+			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
+			//save current editor into session
+			//saved_editor_sessions[current_editor_session] = editor.getSession(); 
+			//get old editor out of session and apply to editor
+			clicksesh = jQuery(this).attr('sessionrel');
+			editor.setSession( saved_editor_sessions[ clicksesh ] );
+		
+			//use editors php mode
+			var phpMode = require("ace/mode/php").Mode;
+			editor.getSession().setMode(new phpMode());
+		
 			editor.resize(); 
-			editor.focus(); 		
-			
-			saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
-			last_added_editor_session++; //increment session counter
-			
-			
-				jQuery(".wpide_tab").off('click').on("click", function(event){
-					event.preventDefault();
-					console.log( jQuery(this).attr('rel') + " opened" );
-					jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
-					//save current editor into session
-					//saved_editor_sessions[current_editor_session] = editor.getSession(); 
-					//get old editor out of session and apply to editor
-					clicksesh = jQuery(this).attr('sessionrel');
-					editor.setSession( saved_editor_sessions[ clicksesh ] );
-					
-					//use editors php mode
-					var phpMode = require("ace/mode/php").Mode;
-					editor.getSession().setMode(new phpMode());
-					
-					editor.resize(); 
-					editor.focus(); 
-					//make a not of current editor
-					current_editor_session = clicksesh;
-					
-				});
-			
-				return response;
+			editor.focus(); 
+			//make a not of current editor
+			current_editor_session = clicksesh;
+		
+		});
+
+		return response;
 			
 	});
 }

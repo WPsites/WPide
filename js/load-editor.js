@@ -6,6 +6,7 @@ var editor = '';
 
 
 var saved_editor_sessions = [];
+var saved_undo_manager = [];
 var last_added_editor_session = 0;
 var current_editor_session = 0;
 
@@ -13,6 +14,7 @@ var current_editor_session = 0;
 			
 
 var EditSession = require('ace/edit_session').EditSession; 
+var UndoManager = require('ace/undomanager').UndoManager; 
 //add the file contents to our new editor instance
 
 
@@ -45,17 +47,20 @@ function wpide_set_file_contents(file){
 		editor.focus(); 		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
+		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());
+		
 		last_added_editor_session++; //increment session counter
 			
 			
 		jQuery(".wpide_tab").off('click').on("click", function(event){
 			event.preventDefault();
-			console.log( jQuery(this).attr('rel') + " opened" );
+			console.log( jQuery(this).attr('rel') + " opened, id: "  + jQuery(this).attr('sessionrel'));
 			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
 			//save current editor into session
 			//saved_editor_sessions[current_editor_session] = editor.getSession(); 
 			//get old editor out of session and apply to editor
 			clicksesh = jQuery(this).attr('sessionrel');
+			saved_editor_sessions[ clicksesh ].setUndoManager(saved_undo_manager[ clicksesh ]);
 			editor.setSession( saved_editor_sessions[ clicksesh ] );
 		
 			//use editors php mode

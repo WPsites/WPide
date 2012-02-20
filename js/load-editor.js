@@ -26,6 +26,7 @@ else {
 
 //open another file and add to editor
 function wpide_set_file_contents(file){
+	"use strict";
 	//ajax call to get file contents we are about to edit
 	var data = { action: 'wpide_get_file', filename: file };
 	jQuery.post(ajaxurl, data, function(response) { 
@@ -78,12 +79,7 @@ function wpide_set_file_contents(file){
 	});
 }
 
-
-
-
-
 jQuery(document).ready(function($) {
-
 	$("#wpide_save").click(function(){
 		//ajax call to generate a backup of this file we are about to edit
 		var data = { action: 'wpide_save_file', filename: $('input[name=filename]').val(), content: editor.getSession().getValue() };
@@ -147,7 +143,7 @@ jQuery(document).ready(function($) {
 	editor.getSession().on('change', function(e) {
 		//don't continue with autocomplete if /n entered
 		try {
-			if ( e.data.text.charCodeAt(0) == 10 ){
+			if ( e.data.text.charCodeAt(0) === 10 ){
 				return;
 			}
 		}catch(e){}
@@ -236,14 +232,14 @@ jQuery(document).ready(function($) {
 
 		//loop through tags and check for a match
 		var tag;
-		for(i in html_tags){
+		for(i in html_tags) {
 			if(!html_tags.hasOwnProperty(i) ){
 				continue;
 			}
 
 			tag=html_tags[i];					
 			if( text ){
-				if( text!=tag.substr(0,text.length) ){
+				if( text !== tag.substr(0,text.length) ){
 					continue;
 				}
 			}
@@ -264,15 +260,15 @@ jQuery(document).ready(function($) {
 
 
 		//if the return list contains everything then don't display it
-		if (html_tags.length == ac.options.length){
-			ac.options.length =0;
+		if (html_tags.length === ac.options.length){
+			ac.options.length = 0;
 		}
 
 		//check for matches
-		if( ac.length==0 ){
+		if ( ac.length === 0 ) {
 			ac.style.display='none';
 			autocompleting=false;
-		}else{
+		} else {
 			ac.selectedIndex=0;			
 			autocompleting=true;
 		}
@@ -295,7 +291,7 @@ jQuery(document).ready(function($) {
 		exec: function(env, args, request) {
 			if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
-				if( select.selectedIndex == 0 ) {
+				if( select.selectedIndex === 0 ) {
 					select.selectedIndex = select.options.length-1;
 				} else {
 					select.selectedIndex = select.selectedIndex-1;
@@ -320,7 +316,7 @@ jQuery(document).ready(function($) {
 		exec: function(env, args, request) {
 			if ( document.getElementById('ac').style.display === 'block' ) {
 				var select=document.getElementById('ac');
-				if ( select.selectedIndex==select.options.length-1 ) {
+				if ( select.selectedIndex === select.options.length-1 ) {
 					select.selectedIndex=0;
 				} else {
 					select.selectedIndex=select.selectedIndex+1;

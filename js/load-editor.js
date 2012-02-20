@@ -168,6 +168,7 @@ function wpide_set_file_contents(file){
 		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
+		saved_editor_sessions[last_added_editor_session].on('change', onSessionChange);
 		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());
 		
 		last_added_editor_session++; //increment session counter
@@ -200,12 +201,14 @@ function wpide_set_file_contents(file){
 			}
 			editor.getSession().setMode(new mode());
 			
+			editor.getSession().on('change', onSessionChange);
 			editor.resize(); 
 			editor.focus(); 
 			//make a not of current editor
 			current_editor_session = clicksesh;
 		
 		});
+		
 		jQuery("#"+the_id).click();
 		return response;
 			
@@ -341,6 +344,7 @@ jQuery(document).ready(function($) {
 			editor.selection.setSelectionRange(sel);				
 			editor.insert(tag);
 			autocompleting = false;
+			ac_dropdwn.style.display='none';
 		} else {
 			editor.insert('\n');
 		}

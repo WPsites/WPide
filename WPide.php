@@ -24,22 +24,20 @@ class WPide
 		add_action( 'admin_menu',  array( &$this, 'add_my_menu_page' ) );
 		
 		//only include this plugin if on theme editor, plugin editor or an ajax call
-		if ( $_SERVER['PHP_SELF'] === '/wp-admin/plugin-editor.php' || 
-				$_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php' ||
-					$_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ||
-					$_GET['page'] === 'wpide' ){
-		
-					// Uncomment any of these calls to add the functionality that you need.
-					add_action('admin_head', 'WPide::add_admin_head');
-					add_action('admin_init', 'WPide::add_admin_js');
-					//add_action('admin_head', 'WPide::add_admin_styles');
-					
-					//setup ajax function to save a backup
-					add_action('wp_ajax_ace_backup_call', 'WPide::ace_backup_call');
-					//setup ajax function to get file contents for editing 
-					add_action('wp_ajax_wpide_get_file', 'WPide::wpide_get_file' );
-					//setup ajax function to save file contents
-					add_action('wp_ajax_wpide_save_file', 'WPide::wpide_save_file' );
+		if ( $_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ||
+			$_GET['page'] === 'wpide' ){
+
+			// Uncomment any of these calls to add the functionality that you need.
+			add_action('admin_head', 'WPide::add_admin_head');
+			add_action('admin_init', 'WPide::add_admin_js');
+			//add_action('admin_head', 'WPide::add_admin_styles');
+			
+			//setup ajax function to save a backup
+			add_action('wp_ajax_ace_backup_call', 'WPide::ace_backup_call');
+			//setup ajax function to get file contents for editing 
+			add_action('wp_ajax_wpide_get_file', 'WPide::wpide_get_file' );
+			//setup ajax function to save file contents
+			add_action('wp_ajax_wpide_save_file', 'WPide::wpide_save_file' );
 		
 		}
 		

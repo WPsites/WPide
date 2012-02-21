@@ -215,20 +215,23 @@ function wpide_set_file_contents(file){
 	});
 }
 
+function saveDocument() {
+	//ajax call to generate a backup of this file we are about to edit
+	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(), content: editor.getSession().getValue() };
+	jQuery.post(ajaxurl, data, function(response) { 
+		if (response === 'success') {
+			jQuery("#wpide_message").html('<span>File saved.</span>');
+			jQuery("#wpide_message").show();
+			jQuery("#wpide_message").fadeOut(5000); 
+		} else {
+			alert(response);
+		}
+	});	
+}
+
 jQuery(document).ready(function($) {
-	$("#wpide_save").click(function(){
-		//ajax call to generate a backup of this file we are about to edit
-		var data = { action: 'wpide_save_file', filename: $('input[name=filename]').val(), content: editor.getSession().getValue() };
-		jQuery.post(ajaxurl, data, function(response) { 
-			if (response === 'success'){
-				$("#wpide_message").html('<span>File saved.</span>');
-				$("#wpide_message").show();
-				$("#wpide_message").fadeOut(5000); 
-			}else{
-				alert(response);
-			}
-		});
-	});
+	$("#wpide_save").click(saveDocument);
+
 	
 	//add div for ace editor to latch on to
 	//$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
@@ -360,6 +363,16 @@ jQuery(document).ready(function($) {
 		exec: trythis
 	});
 
+	// save command: 
+	canon.addCommand({
+		name: "save",
+		bindKey: {
+			win: "Ctrl-S",
+			mac: "Command-S",
+			sender: "editor"
+		},
+		exec: saveDocument
+	});
 
 	//END COMMANDS
 

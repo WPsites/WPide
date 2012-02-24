@@ -4,7 +4,7 @@
 Plugin Name: WPide
 Plugin URI: https://github.com/WPsites/WPide
 Description: Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing.
-Version: 1.0.2
+Version: 1.0.4
 Author: Simon Dunton
 Author URI: http://www.wpsites.co.uk
 

@@ -1,11 +1,11 @@
 === WPide ===
-Contributors: WPsites
+Contributors: Simon Dunton - http://www.wpsites.co.uk, Thomas Wieczorek - http://www.wieczo.net
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
-Tested up to: 3.3
-Stable tag: 1.0.2
+Tested up to: 3.3.1
+Stable tag: 1.0.4
 
-Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing.
+Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, auto complete of WordPress functions + PHP, line numbers, auto backup of files before editing.
 
 == Description ==
 
@@ -17,7 +17,7 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 
 *   Syntax highlighting
 *   Line numbers
-*   Autocomplete of WordPress functions and PHP
+*   Auto complete of WordPress functions and PHP
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups)
 *   Highlight matching parentheses
 *   Auto indentation
@@ -37,7 +37,6 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 As with most plugins this one is open source. For issue tracking, further information and anyone wishing to get involved and help contribute to this project can do so over on github https://github.com/WPsites/WPide
 
 
-
 == Installation ==
 
 1. Upload the WPide folder to the `/wp-content/plugins/` directory
@@ -54,6 +53,10 @@ No support for Internet Explorer right now
 1. Editor view, showing line numbers and syntax highlighting.
 
 == Changelog ==
+
+= 1.0.4 =
+* Implemented JavaScript and CSS mode for better syntax highlighing and checking  (Thanks to Thomas Wieczorek)
+* Organise and format source code
 
 = 1.0.2 =
 * Tidy and comment code

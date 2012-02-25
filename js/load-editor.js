@@ -165,7 +165,7 @@ function wpide_set_file_contents(file){
 		var the_path = file.replace(/^.*[\\\/]/, ''); 
 		var the_id = "wpide_tab_" + last_added_editor_session;
         
-		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');		
+		jQuery("#wpide_toolbar_tabs").append('<span id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a> <a class="close_tab" href="#">x</a> ');		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
 		saved_editor_sessions[last_added_editor_session].on('change', onSessionChange);
@@ -182,9 +182,13 @@ function wpide_set_file_contents(file){
             
 			//save current editor into session
 			//get old editor out of session and apply to editor
-			var clicksesh = jQuery(this).attr('sessionrel');
+			var clicksesh = jQuery(this).attr('sessionrel'); //editor id number
 			saved_editor_sessions[ clicksesh ].setUndoManager(saved_undo_manager[ clicksesh ]);
 			editor.setSession( saved_editor_sessions[ clicksesh ] );
+            
+            //set this tab as active
+            jQuery(".wpide_tab").removeClass('active');
+            jQuery(this).addClass('active');
 		
 			var currentFilename = jQuery(this).attr('rel');
 			var mode;
@@ -211,8 +215,40 @@ function wpide_set_file_contents(file){
 			current_editor_session = clicksesh;
 		
 		});
+        
+            //add click event for tab close. 
+        //We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
+		jQuery(".close_tab").off('click').on("click", function(event){
+            event.preventDefault();
+		    var clicksesh = jQuery(this).parent().attr('sessionrel');
+            var activeFallback;
+            
+            //if the currently selected tab is being removed then remember to make the first tab active
+            if ( jQuery("#wpide_tab_"+clicksesh).hasClass('active') ) {
+                activeFallback = true;
+            }else{
+                activeFallback = false;
+            }
+            
+            //remove tab
+            jQuery(this).parent().remove();
+            
+            //clear session and undo
+    	   saved_undo_manager[clicksesh] = undefined;
+		   saved_editor_sessions[clicksesh] = undefined;
+           console.log(saved_editor_sessions);
+           
+           //Clear the active editor if all tabs closed or activate first tab if required since the active tab may have been deleted
+           if (jQuery(".wpide_tab").length == 0){
+               editor.getSession().setValue( "" );
+           }else if ( activeFallback ){
+               jQuery(".wpide_tab")[0].click();
+           }
+   
+		});
 		
-		jQuery("#"+the_id).click();
+    		jQuery("#"+the_id).click();
+		
 		return response;
 			
 	});

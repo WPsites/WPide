@@ -71,15 +71,17 @@ class WPide
 		left: 104%;
 	}
 	#wpide_toolbar_tabs{
-		width:75%;
+		width:100%;
 	}
 	
 	#wpide_toolbar .wpide_tab {
+        position:relative;
 		height: 18px;
 		font: 13px/18px Arial,Helvetica,sans-serif normal;
 		margin-top: -2px;
 		margin-right: 2px;
 		padding: 6px;
+        padding-right:20px;
 		float: left;
 		cursor: pointer;
 		border-width: 1px;
@@ -90,11 +92,39 @@ class WPide
 		border-top-left-radius: 3px;
 		background-color: #E8E8E8;
 		border-color: #DFDFDF #DFDFDF #CCC;
-		color: #21759B;
+		color: #B00001;
 		text-decoration: none;
 		font-style: italic;
+        
+        -moz-opacity:.60; 
+        filter:alpha(opacity=60); 
+        opacity:.60;
 	}
+    #wpide_toolbar .wpide_tab.active {
+        -moz-opacity:1; 
+        filter:alpha(opacity=1); 
+        opacity:1;
+        border-left-color:#bbb;
+        border-right-color:#bbb;
+        border-top-color:#bbb;
+        border-bottom-color:#dedede;
+    }
 	
+    #wpide_toolbar .close_tab {
+        color: #575757;
+        font-style: normal;
+        padding-bottom: 7px;
+        padding-left: 7px;
+        position: absolute;
+        right: 3px;
+        text-decoration: none;
+        top: -2px;
+    }
+    #wpide_toolbar .close_tab:hover{
+        color:#B00001;
+        font-weight:bold;
+    }
+    
 	#wpide_file_browser{
 		margin-right:2%;
 		text-align:left;
@@ -118,6 +148,7 @@ class WPide
 	 	min-height:30px;
 		width:75%;
 		float:left;
+        clear:left;
 		text-align:left;
 		overflow:hidden;
 		border-bottom: 1px solid #CCC;

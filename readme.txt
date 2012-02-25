@@ -1,5 +1,5 @@
 === WPide ===
-Contributors: Simon Dunton - http://www.wpsites.co.uk, Thomas Wieczorek - http://www.wieczo.net
+Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.1
@@ -9,7 +9,7 @@ Replace the default WordPress code editor for plugins and themes. Adding syntax 
 
 == Description ==
 
-Out of frustration of unsatisfactory experiences with desktop based IDE's and code editors we (WPsites) decided to make use of the Ajax.org Cloud9 Editor (http://ace.ajax.org/) and embed it in place of the default WordPress file editor.
+Out of frustration of unsatisfactory experiences with desktop based IDE's and code editors we decided to make use of the Ajax.org Cloud9 Editor (http://ace.ajax.org/) and embed it in place of the default WordPress file editor.
 
 = This plugin does not currently work on Internet Explorer! =
 
@@ -35,6 +35,11 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 
 
 As with most plugins this one is open source. For issue tracking, further information and anyone wishing to get involved and help contribute to this project can do so over on github https://github.com/WPsites/WPide
+
+== Contributors ==
+
+Simon Dunton - http://www.wpsites.co.uk
+Thomas Wieczorek - http://www.wieczo.net
 
 
 == Installation ==
@@ -69,3 +74,14 @@ No support for Internet Explorer right now
 
 = 1.0 =
 * Initial release.
+
+== DEV NOTES ==
+
+Maybe some interesting things here we could impliment to help with following the WordPress standard and more advanced code styntax checking
+http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-on-coda-and-textwrangler/
+
+Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.
+
+To give finer control over what files are editable in the plugin/theme editor and to remove the reliance of the built in plugin/theme editor functionality move the plugin to a dedicated admin page with it's own navigation menu and it's own file manager. Use http://abeautifulsite.net/blog/2008/03/jquery-file-tree/ as the file manager component.
+
+

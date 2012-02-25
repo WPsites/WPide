@@ -1,13 +1,11 @@
 <?php
 /*
-
 Plugin Name: WPide
 Plugin URI: https://github.com/WPsites/WPide
 Description: WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing, tabbed editor.
 Version: 2.0
 Author: Simon Dunton
 Author URI: http://www.wpsites.co.uk
-
 */
 
 
@@ -32,11 +30,9 @@ class WPide
 			add_action('admin_init', 'WPide::add_admin_js');
 			//add_action('admin_head', 'WPide::add_admin_styles');
 			
-			//setup ajax function to save a backup
-			add_action('wp_ajax_ace_backup_call', 'WPide::ace_backup_call');
 			//setup ajax function to get file contents for editing 
 			add_action('wp_ajax_wpide_get_file', 'WPide::wpide_get_file' );
-			//setup ajax function to save file contents
+			//setup ajax function to save file contents and do automatic backup if needed
 			add_action('wp_ajax_wpide_save_file', 'WPide::wpide_save_file' );
 		
 		}
@@ -192,72 +188,6 @@ class WPide
 		// load editor
 		wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
     }
-
-
-	public static function ace_backup_call() {
-
-		$backup_path =  $WPide->site_url .'/wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/';
-		$file_name = stripslashes($_POST['filename']);
-		$edit_type = $_POST['edittype'];
-
-		if ($edit_type==='theme'){
-				$theme_root = get_theme_root();
-				$short_path = str_replace($theme_root, '', $file_name);
-
-				$new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("Ymd");
-				$new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/themes'.$short_path.'.'.date("YmdH");
-
-				$new_file_info = pathinfo($new_file_path_daily);
-
-				if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
-
-				//check for todays backup if non existant then create
-				if (!file_exists($new_file_path_daily)){
-					$backup_result = copy($file_name, $new_file_path_daily); //make a copy of the file
-
-				//check for a backup this hour if doesn't exist then create
-				}else if(!file_exists($new_file_path_hourly)){
-                    $backup_result = copy($file_name, $new_file_path_hourly); //make a copy of the file
-				}
-				
-				
-
-				//do no further backups since one intial backup for today and an hourly one is plenty!
-
-		}else if ($edit_type==='plugin'){
-
-				$plugin_root = WP_PLUGIN_DIR;
-				$short_path = str_replace($plugin_root, '', $file_name);
-
-				$new_file_path_daily = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("Ymd");
-				$new_file_path_hourly = WP_PLUGIN_DIR.'/wpide/backups/plugins/'.$short_path.'.'.date("YmdH");
-
-				$new_file_info = pathinfo($new_file_path_daily);
-
-				if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
-
-				//check for todays backup if non existant then create
-				if (!file_exists($new_file_path_daily)){
-					$backup_result = copy($plugin_root.'/'.$file_name, $new_file_path_daily); //make a copy of the file
-						
-				//check for a backup this hour if doesn't exist then create
-				}else if(!file_exists($new_file_path_hourly)){
-					$backup_result = copy($plugin_root.'/'.$file_name, $new_file_path_hourly); //make a copy of the file
-
-				}
-
-				//do no further backups since one intial backup for today and an hourly one is plenty!
-
-		}
-
-		if ($backup_result){
-			echo "success";
-		}
-
-		//echo "final debug info : " . WP_PLUGIN_DIR.'/wpide/backups/'.$short_path.'.backup';
-		die(); // this is required to return a proper result
-
-	}
 	
 	public static function wpide_get_file() {
 
@@ -267,17 +197,19 @@ class WPide
 	}
 	
 	public static function wpide_save_file() {
-
+        //save a copy of the file and create a backup just in case
 		$file_name = stripslashes($_POST['filename']);
 		
 		//set backup filename
 		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
 		//create backup directory if not there
 		$new_file_info = pathinfo($backup_path);
-		if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true); //make directory if not exist
-		//do backup
+		if (!is_dir($new_file_info['dirname'])) mkdir($new_file_info['dirname'], 0777, true);
+		
+        //do backup
 		file_put_contents($backup_path,  file_get_contents($file_name) );
 		
+        //save file
 		if( file_put_contents($file_name, stripslashes($_POST['content'])  ) ) echo "success";
 		die(); // this is required to return a proper result
 	}

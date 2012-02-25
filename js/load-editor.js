@@ -10,25 +10,22 @@ var current_editor_session = 0;
 var EditSession = require('ace/edit_session').EditSession; 
 var UndoManager = require('ace/undomanager').UndoManager; 
 
-//are we editing a theme or plugin?
-var aceedittype;
-if (/wp\-admin\/plugin-editor\.php/.test(document.URL)) {
-	aceedittype = 'plugin';
-}
-else if (/wp\-admin\/theme-editor\.php/.test(document.URL)) {
-	aceedittype = 'theme';
-}
-else {
-	aceedittype = 'theme';
-}	
-
 function onSessionChange(e)  {
 	//don't continue with autocomplete if /n entered
 	try {
 		if ( e.data.text.charCodeAt(0) === 10 ){
 			return;
 		}
-	}catch(e){}
+	}catch(error){}
+
+    //don't continue with autocomplete if backspace entered
+    try {
+            if ( e.data.text.charCodeAt(0) === 8 ){
+                    alert('backspace');
+                    return;
+            }
+    }catch(error){}
+
 
 	//get cursor/selection
 	var range = editor.getSelectionRange();
@@ -71,18 +68,18 @@ function onSessionChange(e)  {
 	var lead = sel.getSelectionLead();
 
 	var pos = editor.renderer.textToScreenCoordinates(lead.row, lead.column);
-	var ac;
+	var ac; // #ac is auto complete html select element
 
 
 
 	if( document.getElementById('ac') ){
 		ac=document.getElementById('ac');
 
-		//editor clicks should hide the autocomplete dropdown
-		editor.container.addEventListener('click',function(e){
-			ac.style.display='none';
-		});
-
+        //editor clicks should hide the autocomplete dropdown
+        editor.container.addEventListener('click', function(e){
+               ac.style.display='none';
+        }, false);
+	
 	} //end - create initial autocomplete dropdown and related actions
 
 
@@ -160,51 +157,57 @@ function onSessionChange(e)  {
 //open another file and add to editor
 function wpide_set_file_contents(file){
 	"use strict";
+    
 	//ajax call to get file contents we are about to edit
 	var data = { action: 'wpide_get_file', filename: file };
+
 	jQuery.post(ajaxurl, data, function(response) { 
 		var the_path = file.replace(/^.*[\\\/]/, ''); 
 		var the_id = "wpide_tab_" + last_added_editor_session;
+        
 		jQuery("#wpide_toolbar_tabs").append('<a href="#" id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a>');		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
 		saved_editor_sessions[last_added_editor_session].on('change', onSessionChange);
-		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());
+		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());//new undo manager for this session
 		
 		last_added_editor_session++; //increment session counter
 			
-			
+		//add click event for the new tab. 
+        //We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
 		jQuery(".wpide_tab").off('click').on("click", function(event){
 			event.preventDefault();
 			console.log( jQuery(this).attr('rel') + " opened");
 			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
+            
 			//save current editor into session
-			//saved_editor_sessions[current_editor_session] = editor.getSession(); 
 			//get old editor out of session and apply to editor
 			var clicksesh = jQuery(this).attr('sessionrel');
 			saved_editor_sessions[ clicksesh ].setUndoManager(saved_undo_manager[ clicksesh ]);
 			editor.setSession( saved_editor_sessions[ clicksesh ] );
 		
-			//use editors php mode
 			var currentFilename = jQuery(this).attr('rel');
 			var mode;
-			// var phpMode = require("ace/mode/php").Mode;
-			// editor.getSession().setMode(new phpMode());
+
+            //set the editor mode based on file name
 			if (/\.css$/.test(currentFilename)) {
+				mode = require("ace/mode/css").Mode;
+			}
+            else if (/\.less$/.test(currentFilename)) {
 				mode = require("ace/mode/css").Mode;
 			}
 			else if (/\.js$/.test(currentFilename)) {
 				mode = require("ace/mode/javascript").Mode;
 			}
 			else {
-				mode = require("ace/mode/php").Mode;	
+				mode = require("ace/mode/php").Mode; //default to php	
 			}
 			editor.getSession().setMode(new mode());
 			
 			editor.getSession().on('change', onSessionChange);
 			editor.resize(); 
 			editor.focus(); 
-			//make a not of current editor
+			//make a note of current editor
 			current_editor_session = clicksesh;
 		
 		});
@@ -216,7 +219,7 @@ function wpide_set_file_contents(file){
 }
 
 function saveDocument() {
-	//ajax call to generate a backup of this file we are about to edit
+	//ajax call to save the file and generate a backup if needed
 	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
 		if (response === 'success') {
@@ -224,7 +227,7 @@ function saveDocument() {
 			jQuery("#wpide_message").show();
 			jQuery("#wpide_message").fadeOut(5000); 
 		} else {
-			alert(response);
+			alert("error: " + response);
 		}
 	});	
 }
@@ -244,28 +247,11 @@ jQuery(document).ready(function($) {
 	var intialData = "Use the file manager to find a file you wish edit, click the file name to edit. \n\n";
 	editor.getSession().setValue( intialData );
 
-
-
-	//ajax call to generate a backup of this file we are about to edit
-	var data = { action: 'ace_backup_call', filename: $('input[name=file]').val(), edittype: aceedittype };
-	jQuery.post(ajaxurl, data, function(response) { 
-		if (response === 'success'){
-			alert("A backup copy of this file has been generated.");
-		}
-	});
-
 	//use editors php mode
 	var phpMode = require("ace/mode/php").Mode;
 	editor.getSession().setMode(new phpMode());
-
-
-	$('#submit').click(function(event){
-        var use_val = editor.getSession().getValue();
-		$('textarea#newcontent').text( use_val ); //.html does some dodgy things with certain php files
-	});
 	
-
-	//START WP AUTOCOMPLETE
+	//START AUTOCOMPLETE
 	//create the autocomplete dropdown
 	var ac = document.createElement('select');
 	ac.id = 'ac';
@@ -337,7 +323,7 @@ jQuery(document).ready(function($) {
 
 	
 	//enter/return command
-	function trythis () {
+	function selectACitem () {
 		if( document.getElementById('ac').style.display === 'block'  ){
 			var ac_dropdwn = document.getElementById('ac');
 			var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
@@ -360,7 +346,7 @@ jQuery(document).ready(function($) {
 			mac: "Return",
 			sender: "editor"
 		},
-		exec: trythis
+		exec: selectACitem
 	});
 
 	// save command: 

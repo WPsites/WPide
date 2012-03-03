@@ -131,12 +131,15 @@ class WPide
 
 }
 
-//only include this plugin if on theme editor, plugin editor or an ajax call
-if ( $_SERVER['PHP_SELF'] === '/wp-admin/plugin-editor.php' || 
-		$_SERVER['PHP_SELF'] === '/wp-admin/theme-editor.php' ||
+//only include this plugin if on theme or plugin editors (Or Multisite network equivalents) or an ajax call
+$is_ms = '';
+if ( is_multisite() ) 
+	$is_ms = 'network/';
+
+if ( $_SERVER['PHP_SELF'] === '/wp-admin/' . $is_ms . 'plugin-editor.php' || 
+		$_SERVER['PHP_SELF'] === '/wp-admin/' . $is_ms . 'theme-editor.php' ||
 			$_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ){
 
-	add_action("init", create_function('', 'new WPide();'));
-
+	add_action( 'init', create_function( '', 'new WPide();' ) );
 }
 ?>

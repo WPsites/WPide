@@ -21,13 +21,11 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups)
 *   Highlight matching parentheses
 *   Auto indentation
+*   Tabbed interface for editing multiple files
 
 = Planned Features: =
 
-*   Tabbed document interface for editing multiple files
-*   Ajax Save
 *   Create and edit directories and files
-*   ctrl + s saving
 *   Improve the code auto complete so that it shows command arguments rather than just commands, possibly with links through to the WordPress codex for further info
 *   Create an admin panel to choose between syntax highlighting themes and turn on/off other Ajax.org Cloud9 functionality
 *   Better automated file backup process 

@@ -258,8 +258,12 @@ class WPide
 		<script>
 		jQuery(document).ready( function($) {
 			$('#wpide_file_browser').fileTree({ root: '<?php echo str_replace('\\', "/", WP_CONTENT_DIR);?>/', script: '<?php echo plugins_url("jqueryFileTree.php", __FILE__ );?>' }, function(file) {
-				wpide_set_file_contents(file);
-				$('#filename').val(file);
+			    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
+                    		$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
+			    }else{
+    		        	wpide_set_file_contents(file);
+    			    	$('#filename').val(file);     
+			    }
 			});
 		});
 		</script>

@@ -257,15 +257,18 @@ class WPide
 	
 	public static function wpide_get_file() {
 		//todo: need to check user is able to edit this file
+		//root variable needs to be dynamic, needs to be dynamic in jqueryFileTree_get_list also, needs to be in the wpide_sae_file function also!
 		
-		$file_name = stripslashes($_POST['filename']);
+		$root = '/var/www/wordpress/wp-content';
+		$file_name = $root . stripslashes($_POST['filename']);
 		echo file_get_contents($file_name);
 		die(); // this is required to return a proper result
 	}
 	
 	public static function wpide_save_file() {
         //save a copy of the file and create a backup just in case
-		$file_name = stripslashes($_POST['filename']);
+		$root = '/var/www/wordpress/wp-content';
+		$file_name = $root . stripslashes($_POST['filename']);
 		
 		//todo: need to check user is able to edit this file
 		

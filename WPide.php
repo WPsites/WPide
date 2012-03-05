@@ -30,6 +30,8 @@ class WPide
 			add_action('admin_init', 'WPide::add_admin_js');
 			//add_action('admin_head', 'WPide::add_admin_styles');
 			
+			//setup jqueryFiletree list callback
+			add_action('wp_ajax_jqueryFileTree', 'WPide::jqueryFileTree_get_list');
 			//setup ajax function to get file contents for editing 
 			add_action('wp_ajax_wpide_get_file', 'WPide::wpide_get_file' );
 			//setup ajax function to save file contents and do automatic backup if needed
@@ -219,9 +221,43 @@ class WPide
 		// load editor
 		wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
     }
+    
+	
+	
+	public static function jqueryFileTree_get_list() {
+
+		$_POST['dir'] = urldecode($_POST['dir']);
+		$root = '/var/www/wordpress/wp-content';
+		
+		if( file_exists($root . $_POST['dir']) ) {
+			$files = scandir($root . $_POST['dir']);
+			natcasesort($files);
+			if( count($files) > 2 ) { /* The 2 accounts for . and .. */
+				echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+				// All dirs
+				foreach( $files as $file ) {
+					if( file_exists($root . $_POST['dir'] . $file) && $file != '.' && $file != '..' && is_dir($root . $_POST['dir'] . $file) ) {
+						echo "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "/\">" . htmlentities($file) . "</a></li>";
+					}
+				}
+				// All files
+				foreach( $files as $file ) {
+					if( file_exists($root . $_POST['dir'] . $file) && $file != '.' && $file != '..' && !is_dir($root . $_POST['dir'] . $file) ) {
+						$ext = preg_replace('/^.*\./', '', $file);
+						echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "\">" . htmlentities($file) . "</a></li>";
+					}
+				}
+				echo "</ul>";	
+			}
+		}
+	
+		die(); // this is required to return a proper result
+	}
+
 	
 	public static function wpide_get_file() {
-
+		//todo: need to check user is able to edit this file
+		
 		$file_name = stripslashes($_POST['filename']);
 		echo file_get_contents($file_name);
 		die(); // this is required to return a proper result
@@ -230,6 +266,8 @@ class WPide
 	public static function wpide_save_file() {
         //save a copy of the file and create a backup just in case
 		$file_name = stripslashes($_POST['filename']);
+		
+		//todo: need to check user is able to edit this file
 		
 		//set backup filename
 		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
@@ -257,7 +295,7 @@ class WPide
 		?>
 		<script>
 		jQuery(document).ready( function($) {
-			$('#wpide_file_browser').fileTree({ root: '<?php echo str_replace('\\', "/", WP_CONTENT_DIR);?>/', script: '<?php echo plugins_url("jqueryFileTree.php", __FILE__ );?>' }, function(file) {
+			$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(file) {
 			    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
                     		$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
 			    }else{

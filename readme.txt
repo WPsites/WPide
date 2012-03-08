@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.1
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 
 Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, auto complete of WordPress functions + PHP, line numbers, auto backup of files before editing.
 
@@ -60,6 +60,9 @@ No support for Internet Explorer right now
 1. Editor view, showing line numbers and syntax highlighting.
 
 == Changelog ==
+
+= 1.0.6 =
+* Added link to meta section of plugin list for easy install of V2 Dev version if you have dismissed the alert.
 
 = 1.0.5 =
 * Added the facility to download and run the cutting edge development version of WPide from the Github repository

@@ -10,7 +10,7 @@ Author URI: http://www.wpsites.co.uk
 
 
 
-class WPide
+class WPide2
 
 {
 
@@ -26,16 +26,16 @@ class WPide
 			$_GET['page'] === 'wpide' ){
 
 			// Uncomment any of these calls to add the functionality that you need.
-			add_action('admin_head', 'WPide::add_admin_head');
-			add_action('admin_init', 'WPide::add_admin_js');
-			//add_action('admin_head', 'WPide::add_admin_styles');
+			add_action('admin_head', 'WPide2::add_admin_head');
+			add_action('admin_init', 'WPide2::add_admin_js');
+			//add_action('admin_head', 'WPide2::add_admin_styles');
 			
 			//setup jqueryFiletree list callback
-			add_action('wp_ajax_jqueryFileTree', 'WPide::jqueryFileTree_get_list');
+			add_action('wp_ajax_jqueryFileTree', 'WPide2::jqueryFileTree_get_list');
 			//setup ajax function to get file contents for editing 
-			add_action('wp_ajax_wpide_get_file', 'WPide::wpide_get_file' );
+			add_action('wp_ajax_wpide_get_file', 'WPide2::wpide_get_file' );
 			//setup ajax function to save file contents and do automatic backup if needed
-			add_action('wp_ajax_wpide_save_file', 'WPide::wpide_save_file' );
+			add_action('wp_ajax_wpide_save_file', 'WPide2::wpide_save_file' );
 		
 		}
 		
@@ -356,5 +356,5 @@ class WPide
 }
 
 
-add_action("init", create_function('', 'new WPide();'));
+add_action("init", create_function('', 'new WPide2();'));
 ?>

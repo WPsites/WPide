@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: WPide
+Plugin Name: WPide V2 Dev
 Plugin URI: https://github.com/WPsites/WPide
 Description: WordPress code editor for plugins and themes. Adding syntax highlighting, autocomplete of WordPress functions + PHP, line numbers, auto backup of files before editing, tabbed editor.
 Version: 2.0
@@ -227,7 +227,7 @@ class WPide
 	public static function jqueryFileTree_get_list() {
 
 		$_POST['dir'] = urldecode($_POST['dir']);
-		$root = '/var/www/wordpress/wp-content';
+		$root = WP_CONTENT_DIR;
 		
 		if( file_exists($root . $_POST['dir']) ) {
 			$files = scandir($root . $_POST['dir']);
@@ -259,7 +259,7 @@ class WPide
 		//todo: need to check user is able to edit this file
 		//root variable needs to be dynamic, needs to be dynamic in jqueryFileTree_get_list also, needs to be in the wpide_sae_file function also!
 		
-		$root = '/var/www/wordpress/wp-content';
+		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
 		echo file_get_contents($file_name);
 		die(); // this is required to return a proper result
@@ -267,7 +267,7 @@ class WPide
 	
 	public static function wpide_save_file() {
         //save a copy of the file and create a backup just in case
-		$root = '/var/www/wordpress/wp-content';
+		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
 		
 		//todo: need to check user is able to edit this file

@@ -28,8 +28,7 @@ class WPide
 		
 
 	}
-
-
+	
     public static function add_admin_head()
     {
 
@@ -143,6 +142,26 @@ if ( $_SERVER['PHP_SELF'] === '/wp-admin/' . $is_ms . 'plugin-editor.php' ||
 
 	add_action( 'init', create_function( '', 'new WPide();' ) );
 }
+
+		
+	add_filter("plugin_row_meta", 'wpide_dev_links', 10, 2);
+
+	function wpide_dev_links($links, $file) {
+	    static $this_plugin;
+	 
+	    if (!$this_plugin) {
+		$this_plugin = plugin_basename(__FILE__);
+	    }
+	 
+	    // check to make sure we are on the correct plugin
+	   if ($file === $this_plugin) {
+		// the anchor tag and href to the URL we want. For a "Settings" link, this needs to be the url of your settings page
+		$settings_link = '<a href="' . get_bloginfo('wpurl') . '/wp-admin/plugins.php?page=install-required-plugins" style="font-weight:bold;">Download and install V2 Development version</a>';
+		// add the link to the list
+		array_push($links, $settings_link);
+	   }
+	    return $links;
+	}
 
 
 

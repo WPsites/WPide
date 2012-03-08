@@ -3,13 +3,15 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.1
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 
 Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, auto complete of WordPress functions + PHP, line numbers, auto backup of files before editing.
 
 == Description ==
 
 Out of frustration of unsatisfactory experiences with desktop based IDE's and code editors we decided to make use of the Ajax.org Cloud9 Editor (http://ace.ajax.org/) and embed it in place of the default WordPress file editor.
+
+The V2 Development version of this plugin can now be downloaded/installed automatically from the Github repository. You will be given this option when this plugin is first activated. The development version may contain bugs so use with caution.
 
 = This plugin does not currently work on Internet Explorer! =
 
@@ -58,6 +60,9 @@ No support for Internet Explorer right now
 1. Editor view, showing line numbers and syntax highlighting.
 
 == Changelog ==
+
+= 1.0.5 =
+* Added the facility to download and run the cutting edge development version of WPide from the Github repository
 
 = 1.0.4 =
 * Implemented JavaScript and CSS mode for better syntax highlighing and checking  (Thanks to Thomas Wieczorek)

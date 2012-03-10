@@ -22,6 +22,7 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 *   Highlight matching parentheses
 *   Auto indentation
 *   Tabbed interface for editing multiple files
+*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour)
 
 = Planned Features: =
 

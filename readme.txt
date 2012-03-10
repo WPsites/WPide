@@ -22,7 +22,7 @@ Out of frustration of unsatisfactory experiences with desktop based IDE's and co
 *   Highlight matching parentheses
 *   Auto indentation
 *   Tabbed interface for editing multiple files
-*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour)
+*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour) ftp/ssh connections aren't setup yet, since WP will not remember a password need to work out how that will work. Maybe use modal to request password when you save but be able to click save all and save a batch with that password. Passwords defined in wp-config.php are persistent and would fix this problem but people don't generaly add those details.
 
 = Planned Features: =
 

@@ -159,7 +159,7 @@ function wpide_set_file_contents(file){
 	"use strict";
     
 	//ajax call to get file contents we are about to edit
-	var data = { action: 'wpide_get_file', filename: file };
+	var data = { action: 'wpide_get_file', filename: file, _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val() };
 
 	jQuery.post(ajaxurl, data, function(response) { 
 		var the_path = file.replace(/^.*[\\\/]/, ''); 
@@ -256,7 +256,7 @@ function wpide_set_file_contents(file){
 
 function saveDocument() {
 	//ajax call to save the file and generate a backup if needed
-	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(), content: editor.getSession().getValue() };
+	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
 		if (response === 'success') {
 			jQuery("#wpide_message").html('<span>File saved.</span>');

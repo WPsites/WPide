@@ -225,7 +225,11 @@ class WPide2
 	
 	
 	public static function jqueryFileTree_get_list() {
-
+    	//check the user has the permissions
+        check_admin_referer('plugin-name-action_wpidenonce'); 
+        if ( !current_user_can('edit_themes') )
+		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+        
 		$_POST['dir'] = urldecode($_POST['dir']);
 		$root = WP_CONTENT_DIR;
 		
@@ -256,9 +260,11 @@ class WPide2
 
 	
 	public static function wpide_get_file() {
-		//todo: need to check user is able to edit this file
-		//root variable needs to be dynamic, needs to be dynamic in jqueryFileTree_get_list also, needs to be in the wpide_sae_file function also!
-		
+		//check the user has the permissions
+        check_admin_referer('plugin-name-action_wpidenonce'); 
+        if ( !current_user_can('edit_themes') )
+		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+         
 		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
 		echo file_get_contents($file_name);
@@ -266,6 +272,11 @@ class WPide2
 	}
 	
 	public static function wpide_save_file() {
+        //check the user has the permissions
+        check_admin_referer('plugin-name-action_wpidenonce'); 
+        if ( !current_user_can('edit_themes') )
+		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+        
         //save a copy of the file and create a backup just in case
 		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
@@ -317,6 +328,10 @@ class WPide2
     <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
     FILE</a> 
     <input type="hidden" id="filename" name="filename" value="" />
+        <?php
+        if ( function_exists('wp_nonce_field') )
+            wp_nonce_field('plugin-name-action_wpidenonce');
+        ?>
   </form>
 </div>
 			

@@ -56,9 +56,15 @@ function onSessionChange(e)  {
 			ac.style.display='none';
 		}
 	} catch(e) { }//catch end
+	
 	// if string length less than 3 then quit this
-	if (text.length < 3){
-		return;
+	if (text.length < 3) return;
+	
+	//we don't want to autocomplete the <?php tag
+	if (text == 'php'){
+		range.start.column = range.start.column - 1;
+		var text4 = editor.getSession().doc.getTextRange(range);
+		if (text4 == "?php") return;
 	}
 
 

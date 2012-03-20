@@ -270,6 +270,7 @@ function saveDocument() {
 
 jQuery(document).ready(function($) {
 	$("#wpide_save").click(saveDocument);
+	
 
 	
 	//add div for ace editor to latch on to

@@ -155,7 +155,7 @@ function onSessionChange(e)  {
 }
 
 //open another file and add to editor
-function wpide_set_file_contents(file){
+function wpide_set_file_contents(file, callback_func){
 	"use strict";
     
 	//ajax call to get file contents we are about to edit
@@ -216,12 +216,12 @@ function wpide_set_file_contents(file){
 		
 		});
         
-            //add click event for tab close. 
-        //We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
+		//add click event for tab close. 
+		//We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
 		jQuery(".close_tab").off('click').on("click", function(event){
-            event.preventDefault();
-		    var clicksesh = jQuery(this).parent().attr('sessionrel');
-            var activeFallback;
+		event.preventDefault();
+		var clicksesh = jQuery(this).parent().attr('sessionrel');
+		var activeFallback;
             
             //if the currently selected tab is being removed then remember to make the first tab active
             if ( jQuery("#wpide_tab_"+clicksesh).hasClass('active') ) {
@@ -248,10 +248,14 @@ function wpide_set_file_contents(file){
 		});
 		
     		jQuery("#"+the_id).click();
-		
-		return response;
-			
+	
+	if (callback_func != null) {
+		callback_func(response);
+	}
+	
 	});
+	
+	
 }
 
 function saveDocument() {

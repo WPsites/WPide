@@ -183,7 +183,7 @@ function wpide_set_file_contents(file, callback_func){
         //We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
 		jQuery(".wpide_tab").off('click').on("click", function(event){
 			event.preventDefault();
-			console.log( jQuery(this).attr('rel') + " opened");
+
 			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
             
 			//save current editor into session
@@ -242,7 +242,7 @@ function wpide_set_file_contents(file, callback_func){
             //clear session and undo
     	   saved_undo_manager[clicksesh] = undefined;
 		   saved_editor_sessions[clicksesh] = undefined;
-           console.log(saved_editor_sessions);
+          
            
            //Clear the active editor if all tabs closed or activate first tab if required since the active tab may have been deleted
            if (jQuery(".wpide_tab").length == 0){

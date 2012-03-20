@@ -106,7 +106,7 @@ function onSessionChange(e)  {
 
 
 	//position autocomplete
-	ac.style.top= ((pos.pageY - curtop)+15) + "px";
+	ac.style.top= ((pos.pageY - curtop)+20) + "px";
 	ac.style.left= (pos.pageX - curleft) + "px";
 	ac.style.display='block';
 	ac.style.background='white';

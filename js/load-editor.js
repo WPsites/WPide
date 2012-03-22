@@ -8,7 +8,10 @@ var last_added_editor_session = 0;
 var current_editor_session = 0;
 
 var EditSession = require('ace/edit_session').EditSession; 
-var UndoManager = require('ace/undomanager').UndoManager; 
+var UndoManager = require('ace/undomanager').UndoManager;
+var Search = require("ace/search").Search;
+
+var oHandler;
 
 function onSessionChange(e)  {
 	//don't continue with autocomplete if /n entered
@@ -18,55 +21,57 @@ function onSessionChange(e)  {
 		}
 	}catch(error){}
 
-    //don't continue with autocomplete if backspace entered
-    try {
-            if ( e.data.text.charCodeAt(0) === 8 ){
-                    alert('backspace');
-                    return;
-            }
-    }catch(error){}
-
-
 	//get cursor/selection
 	var range = editor.getSelectionRange();
 	
-	//do we need to extend the length of the autocomplete string
-	if (autocompleting) {
-		autocompletelength = autocompletelength + 1;
-	} else {
-		autocompletelength = 2;
-	}
-
-	//modify the cursor/selection data we have to get text from the editor to check for matching function/method
-	//set start column
-	range.start.column = range.start.column - autocompletelength;
+	try {
+		if ( e.data.action == 'removeText' ){
+			
+		       if (autocompleting) {
+				//console.log(e.data);
+				
+				autocompletelength = (autocompletelength - 1) ;
+				
+			}
+			//return;
+		}
+	}catch(error){}
+	
+	//search for command text user has entered that we need to try match functions against
+	var search = new Search().set({
+		needle: "[ \.\)\(]",
+		backwards: true,
+		wrap: false,
+		caseSensitive: false,
+		wholeWord: false,
+		regExp: true
+	      });
+	      //console.log(search.find(editor.getSession()));
+	      
+	range = search.find(editor.getSession());
+	range.end.column = editor.getSession().getSelection().getCursor().column +1;//set end column as cursor pos
+	range.start.column++;
+	//console.log("[ \.] based: " + editor.getSession().doc.getTextRange(range));
+	
 	//no column lower than 1 thanks
 	if (range.start.column < 1) {
 		range.start.column = 0;
 	}
-	//set end column
-	range.end.column = range.end.column + 1;
+
 	//get the editor text based on that range
 	var text = editor.getSession().doc.getTextRange(range);
-
-	//dont show if no text passed
 	$quit_onchange = false;
-	try {
-		if (text==="") {
-			ac.style.display='none';
-		}
-	} catch(e) { }//catch end
 	
-	// if string length less than 3 then quit this
-	if (text.length < 3) return;
 	
-	//we don't want to autocomplete the <?php tag
-	if (text == 'php'){
-		range.start.column = range.start.column - 1;
-		var text4 = editor.getSession().doc.getTextRange(range);
-		if (text4 == "?php") return;
+	//console.log("Searching for text \""+text+"\" length: "+ text.length);
+	if (text.length < 3){
+		
+		if (ac) ac.style.display='none';
+		if (oHandler) oHandler.close();
+		return;
 	}
-
+	
+	autocompletelength = text.length;
 
 	//create the dropdown for autocomplete
 	var sel = editor.getSelection();
@@ -83,7 +88,13 @@ function onSessionChange(e)  {
 
         //editor clicks should hide the autocomplete dropdown
         editor.container.addEventListener('click', function(e){
+		
                ac.style.display='none';
+	       oHandler.close();
+	       
+	       	autocompleting=false;
+		autocompletelength = 2;
+		
         }, false);
 	
 	} //end - create initial autocomplete dropdown and related actions
@@ -118,20 +129,23 @@ function onSessionChange(e)  {
 	//loop through tags and check for a match
 	var tag;
 	for(i in html_tags) {
-		if(!html_tags.hasOwnProperty(i) ){
-			continue;
-		}
+		//if(!html_tags.hasOwnProperty(i) ){
+		//	continue;
+		//}
 
 		tag=html_tags[i];					
-		if( text ){
+		if( text.length ){
 			if( text !== tag.substr(0,text.length) ){
+				//console.log('trying to match -' + text + '- against the string' + tag.substr(0,text.length) + ' its length is ' + text.length );
 				continue;
 			}
+			
 		}
 
 		var option = document.createElement('option');
 		option.text = tag;
 		option.value = tag;
+		option.setAttribute('title', '/wp-content/plugins/WPide/images/wpac.png');//path to icon image
 
 		try {
 			ac.add(option, null); // standards compliant; doesn't work in IE
@@ -141,7 +155,7 @@ function onSessionChange(e)  {
 		}
 
 	}//end for
-
+	
 
 
 	//if the return list contains everything then don't display it
@@ -152,10 +166,24 @@ function onSessionChange(e)  {
 	//check for matches
 	if ( ac.length === 0 ) {
 		ac.style.display='none';
-		autocompleting=false;
+		 if (oHandler) oHandler.close();
+		
+		//console.log("set auto complete false due to ac.length==0");
 	} else {
+
 		ac.selectedIndex=0;			
 		autocompleting=true;
+		oHandler = jQuery("#ac").msDropDown({visibleRows:10, rowHeight:20}).data("dd");
+		
+		
+		
+		jQuery("#ac_child").css("z-index", "9999");
+		jQuery("#ac_child").css("background-color", "#ffffff");
+		jQuery("#ac_msdd").css("z-index", "9999");
+		jQuery("#ac_msdd").css("position", "absolute");
+		jQuery("#ac_msdd").css("top", ac.style.top);
+		jQuery("#ac_msdd").css("left", ac.style.left);
+		
 	}
 
 }
@@ -328,7 +356,10 @@ jQuery(document).ready(function($) {
 			sender: "editor"
 		},			
 		exec: function(env, args, request) {
-			if( document.getElementById('ac').style.display === 'block'  ) {
+			if (oHandler.visible()){
+				oHandler.previous();
+				
+			}else if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
 				if( select.selectedIndex === 0 ) {
 					select.selectedIndex = select.options.length-1;
@@ -353,7 +384,11 @@ jQuery(document).ready(function($) {
 			sender: "editor"
 		},
 		exec: function(env, args, request) {
-			if ( document.getElementById('ac').style.display === 'block' ) {
+		
+			if (oHandler.visible()){
+				oHandler.next();
+				
+			}else if ( document.getElementById('ac').style.display === 'block' ) {
 				var select=document.getElementById('ac');
 				if ( select.selectedIndex === select.options.length-1 ) {
 					select.selectedIndex=0;
@@ -376,7 +411,10 @@ jQuery(document).ready(function($) {
 			var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
 			var sel = editor.selection.getRange();
 			var line = editor.getSession().getLine(sel.start.row);										
-			sel.start.column = sel.start.column-(autocompletelength+1);
+			sel.start.column = sel.start.column - autocompletelength;
+			
+			tag = jQuery("#ac_msdd a.selected").children("span.ddTitleText").text(); //get tag from new msdropdown
+			
 			editor.selection.setSelectionRange(sel);				
 			editor.insert(tag);
 			autocompleting = false;

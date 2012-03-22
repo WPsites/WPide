@@ -54,6 +54,9 @@ class WPide2
 
     ?>
 	<link rel='stylesheet' href='<?php echo plugins_url("jqueryFileTree.css", __FILE__ );?>' type='text/css' media='all' />
+	
+	<script src="<?php echo plugins_url("js/jquery.dd.js", __FILE__ );?>" type="text/javascript"></script>
+	<link rel='stylesheet' href='<?php echo plugins_url("dd.css", __FILE__ );?>' type='text/css' media='all' />
 		
       <style type="text/css">
 	#quicktags, #post-status-info, #editor-toolbar, #newcontent, .ace_print_margin { display: none; }

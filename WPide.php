@@ -331,10 +331,6 @@ class WPide2
 		
 		?>
 		<script>
-		function pausecomp(ms) {
-		ms += new Date().getTime();
-		while (new Date() < ms){}
-		}
 
 		jQuery(document).ready( function($) {
 			$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
@@ -342,17 +338,22 @@ class WPide2
 			    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
                     		$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
 			    }else{
-				$(parent).addClass('wait');
-				 
-				wpide_set_file_contents(file, function(){
-						
-						//once file loaded remove the wait class/indicator
-						$(parent).removeClass('wait');
-						
-					});
 				
-    			    	$('#filename').val(file);
-				
+				var image_patern =new RegExp("(\.jpg|\.gif|\.png|\.bmp)$");
+				if ( image_patern.test(file) ){
+					alert("Image editing is not currently available. It's a planned feature using http://pixlr.com/");
+				}else{
+					$(parent).addClass('wait');
+					 
+					wpide_set_file_contents(file, function(){
+							
+							//once file loaded remove the wait class/indicator
+							$(parent).removeClass('wait');
+							
+						});
+					
+					$('#filename').val(file);
+				}
 				 
 			    }
 			    

@@ -22,7 +22,7 @@
 	height:16px;
 }
 .dd .ddTitle span.arrow {
-	background:url(dd_arrow.gif) no-repeat 0 0; float:right; display:inline-block;width:16px; height:16px; cursor:pointer; 
+	background:none no-repeat 0 0; float:right; display:inline-block;width:16px; height:16px; cursor:pointer; 
 }
 
 .dd .ddTitle span.ddTitleText {text-indent:1px; overflow:hidden; line-height:16px;}
@@ -81,7 +81,7 @@
 	float:left;
 }
 .dd2 .ddTitle {
-	background:transparent url(../images/msDropDown.gif) no-repeat;
+	background:transparent none no-repeat;
 	padding:0 3px;
 	text-indent:0;
 	cursor:default;
@@ -89,7 +89,7 @@
 	height:36px;
 }
 .dd2 .ddTitle span.arrow {
-	background:transparent url(../images/icon-arrow.gif) no-repeat 0 0; float:right; display:inline-block;width:27px; height:27px; cursor:pointer; top:5px; position:relative; right:2px;
+	background:transparent none no-repeat 0 0; float:right; display:inline-block;width:27px; height:27px; cursor:pointer; top:5px; position:relative; right:2px;
 }
 
 .dd2 .ddTitle span.ddTitleText {text-indent:1px; overflow:hidden; line-height:33px; font-family:Georgia, "Times New Roman", Times, serif; font-size:16px; font-weight:bold; color:#fff; _position:relative; _top:4px}

@@ -175,6 +175,10 @@ function onSessionChange(e)  {
 		autocompleting=true;
 		oHandler = jQuery("#ac").msDropDown({visibleRows:10, rowHeight:20}).data("dd");
 		
+		jQuery("#ac_child").click(function(item){
+			//console.log(item.srcElement.textContent);
+			selectACitem(item.srcElement.textContent);
+		});
 		
 		
 		jQuery("#ac_child").css("z-index", "9999");
@@ -306,6 +310,33 @@ function saveDocument() {
 	});	
 }
 
+//enter/return command
+function selectACitem (item) {
+	if( document.getElementById('ac').style.display === 'block'  ){
+		var ac_dropdwn = document.getElementById('ac');
+		var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
+		var sel = editor.selection.getRange();
+		var line = editor.getSession().getLine(sel.start.row);										
+		sel.start.column = sel.start.column - autocompletelength;
+		
+		if (item.length){
+			tag = item; //get tag from new msdropdown passed as arg	
+		}else{
+			tag = jQuery("#ac_msdd a.selected").children("span.ddTitleText").text(); //get tag from new msdropdown
+		}
+		
+		
+		editor.selection.setSelectionRange(sel);				
+		editor.insert(tag);
+		autocompleting = false;
+		ac_dropdwn.style.display='none';
+		if (oHandler) oHandler.close();
+	} else {
+		editor.insert('\n');
+	}
+}
+	
+	
 jQuery(document).ready(function($) {
 	$("#wpide_save").click(saveDocument);
 	
@@ -404,26 +435,7 @@ jQuery(document).ready(function($) {
 	});
 
 	
-	//enter/return command
-	function selectACitem () {
-		if( document.getElementById('ac').style.display === 'block'  ){
-			var ac_dropdwn = document.getElementById('ac');
-			var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
-			var sel = editor.selection.getRange();
-			var line = editor.getSession().getLine(sel.start.row);										
-			sel.start.column = sel.start.column - autocompletelength;
-			
-			tag = jQuery("#ac_msdd a.selected").children("span.ddTitleText").text(); //get tag from new msdropdown
-			
-			editor.selection.setSelectionRange(sel);				
-			editor.insert(tag);
-			autocompleting = false;
-			ac_dropdwn.style.display='none';
-			if (oHandler) oHandler.close();
-		} else {
-			editor.insert('\n');
-		}
-	}
+
 	
 	canon.addCommand({
 		name: "enter",

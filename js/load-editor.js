@@ -89,8 +89,8 @@ function onSessionChange(e)  {
         //editor clicks should hide the autocomplete dropdown
         editor.container.addEventListener('click', function(e){
 		
-               ac.style.display='none';
-	       oHandler.close();
+		if (ac) ac.style.display='none';
+		if (oHandler) oHandler.close();
 	       
 	       	autocompleting=false;
 		autocompletelength = 2;
@@ -165,8 +165,8 @@ function onSessionChange(e)  {
 
 	//check for matches
 	if ( ac.length === 0 ) {
-		ac.style.display='none';
-		 if (oHandler) oHandler.close();
+		if (ac) ac.style.display='none';
+		if (oHandler) oHandler.close();
 		
 		//console.log("set auto complete false due to ac.length==0");
 	} else {
@@ -356,7 +356,7 @@ jQuery(document).ready(function($) {
 			sender: "editor"
 		},			
 		exec: function(env, args, request) {
-			if (oHandler.visible()){
+			if (oHandler.visible() === 'block'){
 				oHandler.previous();
 				
 			}else if( document.getElementById('ac').style.display === 'block'  ) {
@@ -385,7 +385,7 @@ jQuery(document).ready(function($) {
 		},
 		exec: function(env, args, request) {
 		
-			if (oHandler.visible()){
+			if (oHandler.visible() === 'block'){
 				oHandler.next();
 				
 			}else if ( document.getElementById('ac').style.display === 'block' ) {
@@ -419,6 +419,7 @@ jQuery(document).ready(function($) {
 			editor.insert(tag);
 			autocompleting = false;
 			ac_dropdwn.style.display='none';
+			if (oHandler) oHandler.close();
 		} else {
 			editor.insert('\n');
 		}

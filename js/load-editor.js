@@ -37,31 +37,59 @@ function onSessionChange(e)  {
 		}
 	}catch(error){}
 	
-	//search for command text user has entered that we need to try match functions against
-	var search = new Search().set({
-		needle: "[ \.\)\(]",
-		backwards: true,
-		wrap: false,
-		caseSensitive: false,
-		wholeWord: false,
-		regExp: true
-	      });
-	      //console.log(search.find(editor.getSession()));
-	      
-	range = search.find(editor.getSession());
+	
+	//get current cursor position
+	range = editor.getSelectionRange();
+	//take note of selection row to compare with search
+	cursor_row = range.start.row;
+	
+	if (range.start.column > 0){
+	
+		//search for command text user has entered that we need to try match functions against
+		var search = new Search().set({
+			needle: "[\\n \.\)\(]",
+			backwards: true,
+			wrap: false,
+			caseSensitive: false,
+			wholeWord: false,
+			regExp: true
+		      });
+		      //console.log(search.find(editor.getSession()));
+		      
+		range = search.find(editor.getSession());
+		
+		if (range) range.start.column++;
+	
+	}else{ //change this to look char position, if it's starting at 0 then do this
+		
+		range.start.column = 0;
+	}
+	
+	if (! range || range.start.row < cursor_row ){
+		//forse the autocomplete check on this row starting at column 0
+		range = editor.getSelectionRange();
+		range.start.column = 0;
+	}
+
+	
+	//console.log("search result - start row " + range.start.row + "-" + range.end.row + ", column " + range.start.column+ "-" + range.end.column);
+	//console.log(editor.getSelection().getRange());
+	
 	range.end.column = editor.getSession().getSelection().getCursor().column +1;//set end column as cursor pos
-	range.start.column++;
+	
 	//console.log("[ \.] based: " + editor.getSession().doc.getTextRange(range));
 	
 	//no column lower than 1 thanks
 	if (range.start.column < 1) {
 		range.start.column = 0;
 	}
-
+	
+	//console.log("after row " + range.start.row + "-" + range.end.row + ", column " + range.start.column+ "-" + range.end.column);
 	//get the editor text based on that range
 	var text = editor.getSession().doc.getTextRange(range);
 	$quit_onchange = false;
 	
+	//console.log(text);
 	
 	//console.log("Searching for text \""+text+"\" length: "+ text.length);
 	if (text.length < 3){
@@ -118,7 +146,7 @@ function onSessionChange(e)  {
 
 	//position autocomplete
 	ac.style.top= ((pos.pageY - curtop)+20) + "px";
-	ac.style.left= (pos.pageX - curleft) + "px";
+	ac.style.left= ((pos.pageX - curleft)+10) + "px";
 	ac.style.display='block';
 	ac.style.background='white';
 
@@ -387,7 +415,7 @@ jQuery(document).ready(function($) {
 			sender: "editor"
 		},			
 		exec: function(env, args, request) {
-			if (oHandler.visible() === 'block'){
+			if (oHandler && oHandler.visible() === 'block'){
 				oHandler.previous();
 				
 			}else if( document.getElementById('ac').style.display === 'block'  ) {
@@ -416,7 +444,7 @@ jQuery(document).ready(function($) {
 		},
 		exec: function(env, args, request) {
 		
-			if (oHandler.visible() === 'block'){
+			if (oHandler && oHandler.visible() === 'block'){
 				oHandler.next();
 				
 			}else if ( document.getElementById('ac').style.display === 'block' ) {

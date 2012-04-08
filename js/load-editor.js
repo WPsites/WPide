@@ -404,10 +404,9 @@ jQuery(document).ready(function($) {
 
 
 	//START COMMANDS
-	var canon = require('pilot/canon');
-
+	
 	//Key up command
-	canon.addCommand({		
+	editor.commands.addCommand({		
 		name: "up",
 		bindKey: {
 			win: "Up",
@@ -435,7 +434,7 @@ jQuery(document).ready(function($) {
 
 
 	//key down command
-	canon.addCommand({
+	editor.commands.addCommand({
 		name: "down",
 		bindKey: {
 			win: "Down",
@@ -465,7 +464,7 @@ jQuery(document).ready(function($) {
 	
 
 	
-	canon.addCommand({
+	editor.commands.addCommand({
 		name: "enter",
 		bindKey: {
 			win: "Return",
@@ -476,7 +475,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// save command: 
-	canon.addCommand({
+	editor.commands.addCommand({
 		name: "save",
 		bindKey: {
 			win: "Ctrl-S",

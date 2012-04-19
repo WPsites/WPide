@@ -154,42 +154,65 @@ function onSessionChange(e)  {
 	//remove all options, starting a fresh list
 	ac.options.length = 0;
 
-	//loop through tags and check for a match
-	var tag;
-	for(i in html_tags) {
-		//if(!html_tags.hasOwnProperty(i) ){
-		//	continue;
-		//}
 
-		tag=html_tags[i];					
-		if( text.length ){
+	//loop through WP tags and check for a match
+	if (autocomplete_wordpress){
+		var tag;
+		for(i in autocomplete_wordpress) {
+			//if(!html_tags.hasOwnProperty(i) ){
+			//	continue;
+			//}
+	
+			tag= i;
+			//see if the tag is a match
 			if( text !== tag.substr(0,text.length) ){
-				//console.log('trying to match -' + text + '- against the string' + tag.substr(0,text.length) + ' its length is ' + text.length );
 				continue;
 			}
 			
-		}
-
-		var option = document.createElement('option');
-		option.text = tag;
-		option.value = tag;
-		option.setAttribute('title', '/wp-content/plugins/WPide/images/wpac.png');//path to icon image
-
-		try {
-			ac.add(option, null); // standards compliant; doesn't work in IE
-		}
-		catch(ex) {
-			ac.add(option); // IE only
-		}
-
-	}//end for
+			var option = document.createElement('option');
+			option.text = tag;
+			option.value = tag;
+			option.setAttribute('title', '/wp-content/plugins/WPide/images/wpac.png');//path to icon image or wpac.png
 	
-
-
-	//if the return list contains everything then don't display it
-	if (html_tags.length === ac.options.length){
-		ac.options.length = 0;
-	}
+			try {
+				ac.add(option, null); // standards compliant; doesn't work in IE
+			}
+			catch(ex) {
+				ac.add(option); // IE only
+			}
+	
+		}//end for
+	}//end php autocomplete
+	
+	//loop through PHP tags and check for a match
+	if (autocomplete_php){
+		var tag;
+		for(i in autocomplete_php) {
+			//if(!html_tags.hasOwnProperty(i) ){
+			//	continue;
+			//}
+	
+			tag= i;
+			//see if the tag is a match
+			if( text !== tag.substr(0,text.length) ){
+				continue;
+			}
+			
+			var option = document.createElement('option');
+			option.text = tag;
+			option.value = tag;
+			option.setAttribute('title', '/wp-content/plugins/WPide/images/phpac.png');//path to icon image or wpac.png
+	
+			try {
+				ac.add(option, null); // standards compliant; doesn't work in IE
+			}
+			catch(ex) {
+				ac.add(option); // IE only
+			}
+	
+		}//end for
+	}//end php autocomplete
+	
 
 	//check for matches
 	if ( ac.length === 0 ) {
@@ -230,6 +253,9 @@ function wpide_set_file_contents(file, callback_func){
 	jQuery.post(ajaxurl, data, function(response) { 
 		var the_path = file.replace(/^.*[\\\/]/, ''); 
 		var the_id = "wpide_tab_" + last_added_editor_session;
+		
+		//enable editor now we have a file open
+		jQuery('#fancyeditordiv textarea').removeAttr("disabled");
         
 		jQuery("#wpide_toolbar_tabs").append('<span id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a> <a class="close_tab" href="#">x</a> ');		
 			
@@ -380,6 +406,9 @@ jQuery(document).ready(function($) {
 	//var intialData = $('#newcontent').val()
 	var intialData = "Use the file manager to find a file you wish edit, click the file name to edit. \n\n";
 	editor.getSession().setValue( intialData );
+	
+	//make initial editor read only
+	$('#fancyeditordiv textarea').attr("disabled", "disabled");
 
 	//use editors php mode
 	var phpMode = require("ace/mode/php").Mode;

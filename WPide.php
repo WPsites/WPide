@@ -56,6 +56,7 @@ class WPide2
 	<link rel='stylesheet' href='<?php echo plugins_url("jqueryFileTree.css", __FILE__ );?>' type='text/css' media='all' />
 	
 	<script src="<?php echo plugins_url("js/jquery.dd.js", __FILE__ );?>" type="text/javascript"></script>
+	
 	<link rel='stylesheet' href='<?php echo plugins_url("dd.css", __FILE__ );?>' type='text/css' media='all' />
 		
       <style type="text/css">
@@ -138,11 +139,13 @@ class WPide2
 		text-align:left;
 	}
 	
-	.toplevel_page_wpide #submitdiv{
+	.toplevel_page_wpide #submitdiv,
+	.toplevel_page_wpide #docinfodiv h3.hndle{
 		 width:22%;
 		 float:right;
 	 }
-	 .toplevel_page_wpide #submitdiv h3.hndle{
+	 .toplevel_page_wpide #submitdiv h3.hndle,
+	 .toplevel_page_wpide #docinfodiv h3.hndle{
 	 	font-family: Georgia,"Times New Roman";
 		font-size: 15px;
 		font-weight: bold;
@@ -183,7 +186,12 @@ class WPide2
 			background-color:#f4f4f4;
 			color:#aaa;
 		}
-	
+	#wpide_save_container{
+		float: left;
+		clear: left;
+		margin-left: 68%;
+		margin-top: 20px;
+	}
     </style>
 
     <?php
@@ -222,8 +230,10 @@ class WPide2
         wp_enqueue_script('ace-mode-php', $plugin_path . 'ace-0.2.0/src/mode-php.js');
 		//include ace theme
 		wp_enqueue_script('ace-theme', plugins_url("ace-0.2.0/src/theme-dawn.js", __FILE__ ) );//monokai is nice
+		// wordpress-completion tags
+		wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete.wordpress.js", __FILE__ ) );
 		// php-completion tags
-		wp_enqueue_script('wpide-php-completion', plugins_url("js/php-completion.js", __FILE__ ) );
+		wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete.php.js", __FILE__ ) );
 		// load editor
 		wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
     }
@@ -371,15 +381,6 @@ if ( ! WP_Filesystem($creds) ) {
 			
 <div id="wpide_toolbar" class="quicktags-toolbar"> 
   <div id="wpide_toolbar_tabs"> </div>
-  <form action="" method="get">
-    <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
-    FILE</a> 
-    <input type="hidden" id="filename" name="filename" value="" />
-        <?php
-        if ( function_exists('wp_nonce_field') )
-            wp_nonce_field('plugin-name-action_wpidenonce');
-        ?>
-  </form>
 </div>
 			
 <div id="wpide_toolbar_buttons"> 
@@ -387,12 +388,9 @@ if ( ! WP_Filesystem($creds) ) {
   <a href="#"></a> <a href="#"></a> </div>
 			
 			
-<div style='width:75%;height:650px;margin-right:0!important;float:left;' id='fancyeditordiv'></div>	
-			
-			
+<div style='width:75%;height:650px;margin-right:0!important;float:left;' id='fancyeditordiv'></div>		
+				
 			<div id="submitdiv" class="postbox "> 
-			  <div class="handlediv" title="Click to toggle"><br>
-			  </div>
 			  <h3 class="hndle"><span>Files</span></h3>
 			  <div class="inside"> 
 				<div class="submitbox" id="submitpost"> 
@@ -410,6 +408,16 @@ if ( ! WP_Filesystem($creds) ) {
 			  </div>
 			</div>
 
+
+ <form id="wpide_save_container" action="" method="get">
+    <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
+    FILE</a> 
+    <input type="hidden" id="filename" name="filename" value="" />
+        <?php
+        if ( function_exists('wp_nonce_field') )
+            wp_nonce_field('plugin-name-action_wpidenonce');
+        ?>
+  </form>
 
 			
 		<?php

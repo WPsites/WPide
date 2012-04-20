@@ -169,6 +169,9 @@ function onSessionChange(e)  {
 				continue;
 			}
 			
+			//add parentheses
+			tag = tag + "()";
+			
 			var option = document.createElement('option');
 			option.text = tag;
 			option.value = tag;
@@ -197,6 +200,9 @@ function onSessionChange(e)  {
 			if( text !== tag.substr(0,text.length) ){
 				continue;
 			}
+			
+			//add parentheses
+			tag = tag + "()";
 			
 			var option = document.createElement('option');
 			option.text = tag;

@@ -69,11 +69,12 @@ class WPide2
 	#template div{margin-right:0 !important;}
 	
 	#wpide_toolbar{
-		width:75%;
-		height:30px;
-		text-align:right;
-		padding-top:20px;
-		position:relative;
+		width: 75%;
+		min-height: 30px;
+		text-align: right;
+		padding-top: 20px;
+		position: relative;
+		float: left;
 	}
 	#wpide_toolbar form{
 		position: absolute;
@@ -141,8 +142,9 @@ class WPide2
 	
 	.toplevel_page_wpide #submitdiv,
 	.toplevel_page_wpide #docinfodiv h3.hndle{
-		 width:22%;
+		 width:100%;
 		 float:right;
+		 clear:right;
 	 }
 	 .toplevel_page_wpide #submitdiv h3.hndle,
 	 .toplevel_page_wpide #docinfodiv h3.hndle{
@@ -174,7 +176,7 @@ class WPide2
 		-webkit-border-top-left-radius: 0px;
 		border-top-right-radius: 6px;
 		border-top-left-radius: 0px;
-		}
+	}
 		
 		#wpide_toolbar_buttons a{
 			display:block;
@@ -191,6 +193,30 @@ class WPide2
 		clear: left;
 		margin-left: 68%;
 		margin-top: 20px;
+	}
+	
+	#wpide_info {
+		position: relative;
+		min-height: 30px;
+		width: 100%;
+		margin-top: 50px;
+		padding-right:2px;
+		float: right;
+		clear: right;
+		text-align: left;
+		overflow: visible;
+		border-bottom: 1px solid #CCC;
+		background-color: #E9E9E9;
+		background-image: -ms-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -moz-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -o-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -webkit-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: linear-gradient(bottom,#DDD,#E9E9E9);
+		-webkit-border-top-right-radius: 0px;
+		-webkit-border-top-left-radius: 6px;
+		border-top-right-radius: 0px;
+		border-top-left-radius: 6px;
+
 	}
     </style>
 
@@ -378,47 +404,60 @@ if ( ! WP_Filesystem($creds) ) {
 	return;
 }
 ?>
-			
-<div id="wpide_toolbar" class="quicktags-toolbar"> 
-  <div id="wpide_toolbar_tabs"> </div>
-</div>
-			
-<div id="wpide_toolbar_buttons"> 
-  <div id="wpide_message" class="error highlight" style="display:none;width: 97%;position: absolute;top: 1px;left: 2px;text-align:left;margin:0;padding:5px;"></div>
-  <a href="#"></a> <a href="#"></a> </div>
-			
-			
-<div style='width:75%;height:650px;margin-right:0!important;float:left;' id='fancyeditordiv'></div>		
-				
-			<div id="submitdiv" class="postbox "> 
-			  <h3 class="hndle"><span>Files</span></h3>
-			  <div class="inside"> 
-				<div class="submitbox" id="submitpost"> 
-				  <div id="minor-publishing"> 
-				  </div>
-				  <div id="major-publishing-actions"> 
-					<div id="wpide_file_browser"></div>
-					<br style="clear:both;" />
-					<div id="publishing-action"> <img src="/wp-admin/images/wpspin_light.gif" class="ajax-loading" id="ajax-loading" alt="" style="visibility: hidden; "> 
-					  <input name="save" type="submit" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Update">
-					</div>
-					<div class="clear"></div>
-				  </div>
+
+<div id="poststuff" class="metabox-holder has-right-sidebar">
+
+	<div id="side-info-column" class="inner-sidebar">
+		
+		<div id="wpide_info"><div id="wpide_info_content"></div> </div>
+
+		<div id="submitdiv" class="postbox "> 
+		  <h3 class="hndle"><span>Files</span></h3>
+		  <div class="inside"> 
+			<div class="submitbox" id="submitpost"> 
+			  <div id="minor-publishing"> 
+			  </div>
+			  <div id="major-publishing-actions"> 
+				<div id="wpide_file_browser"></div>
+				<br style="clear:both;" />
+				<div id="publishing-action"> <img src="/wp-admin/images/wpspin_light.gif" class="ajax-loading" id="ajax-loading" alt="" style="visibility: hidden; "> 
+				  <input name="save" type="submit" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Update">
 				</div>
+				<div class="clear"></div>
 			  </div>
 			</div>
+		  </div>
+		</div>
+				
+		
+	</div>
 
+	<div id="post-body">			
+		<div id="wpide_toolbar" class="quicktags-toolbar"> 
+		  <div id="wpide_toolbar_tabs"> </div>
+		</div>
+					
+		<div id="wpide_toolbar_buttons"> 
+		  <div id="wpide_message" class="error highlight" style="display:none;width: 97%;position: absolute;top: 1px;left: 2px;text-align:left;margin:0;padding:5px;"></div>
+		  <a href="#"></a> <a href="#"></a> </div>
+					
+					
+		<div style='width:75%;height:650px;margin-right:0!important;float:left;' id='fancyeditordiv'></div>
+		
+		<form id="wpide_save_container" action="" method="get">
+		   <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
+		   FILE</a> 
+		   <input type="hidden" id="filename" name="filename" value="" />
+		       <?php
+		       if ( function_exists('wp_nonce_field') )
+			   wp_nonce_field('plugin-name-action_wpidenonce');
+		       ?>
+		 </form>
+	</div>	
+		
+	
 
- <form id="wpide_save_container" action="" method="get">
-    <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
-    FILE</a> 
-    <input type="hidden" id="filename" name="filename" value="" />
-        <?php
-        if ( function_exists('wp_nonce_field') )
-            wp_nonce_field('plugin-name-action_wpidenonce');
-        ?>
-  </form>
-
+</div>
 			
 		<?php
 	}

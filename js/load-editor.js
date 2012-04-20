@@ -237,6 +237,26 @@ function onSessionChange(e)  {
 			selectACitem(item.srcElement.textContent);
 		});
 		
+		jQuery("#ac_child a").mouseover(
+			function (item) {
+			  //mouse over
+			  key = String(item.srcElement.textContent.replace("()",""));
+
+				try
+				{
+					//seems to be working now just need to know if its autocomplete_wordpress we need to check or autocomplete_php?
+					  if (autocomplete_wordpress[key].desc != undefined){
+						jQuery("#wpide_info_content").html( autocomplete_wordpress[key].desc );
+					  }
+				}
+			      catch(err)
+				{
+				//Handle errors here
+				}
+			  
+			}
+		);
+		
 		
 		jQuery("#ac_child").css("z-index", "9999");
 		jQuery("#ac_child").css("background-color", "#ffffff");

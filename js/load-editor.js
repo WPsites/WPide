@@ -176,6 +176,7 @@ function onSessionChange(e)  {
 			option.text = tag;
 			option.value = tag;
 			option.setAttribute('title', '/wp-content/plugins/WPide/images/wpac.png');//path to icon image or wpac.png
+		
 	
 			try {
 				ac.add(option, null); // standards compliant; doesn't work in IE
@@ -208,6 +209,7 @@ function onSessionChange(e)  {
 			option.text = tag;
 			option.value = tag;
 			option.setAttribute('title', '/wp-content/plugins/WPide/images/phpac.png');//path to icon image or wpac.png
+			
 	
 			try {
 				ac.add(option, null); // standards compliant; doesn't work in IE
@@ -240,14 +242,40 @@ function onSessionChange(e)  {
 		jQuery("#ac_child a").mouseover(
 			function (item) {
 			  //mouse over
-			  key = String(item.srcElement.textContent.replace("()",""));
-
-				try
+			  	try
 				{
-					//seems to be working now just need to know if its autocomplete_wordpress we need to check or autocomplete_php?
-					  if (autocomplete_wordpress[key].desc != undefined){
-						jQuery("#wpide_info_content").html( autocomplete_wordpress[key].desc );
-					  }
+					//only want this event for the anchor, ignore span hover event
+					if (item.srcElement.tagName == 'A'){
+						key = jQuery(this).find("span.ddTitleText").text().replace("()","");
+						
+						//wordpress autocomplete
+						if ( jQuery(this).find("img").attr("src").indexOf("wpac.png")  >= 0){
+					
+						  if (autocomplete_wordpress[key].desc != undefined){
+							jQuery("#wpide_info_content").html(
+											"<strong>" + String(item.srcElement.textContent) + "</strong><br />" +
+											   autocomplete_wordpress[key].desc + "<br /><br /><em>" +
+											   autocomplete_wordpress[key].params + "</em>"
+											   );
+						  }
+						  
+						}
+						
+						//php autocomplete
+						if ( jQuery(this).find("img").attr("src").indexOf("phpac.png") >= 0){
+					
+						  if (autocomplete_php[key][0] != undefined){
+							jQuery("#wpide_info_content").html(
+											"<strong>" + String(item.srcElement.textContent) + "</strong><br />" +
+											   "<em>" + autocomplete_php[key][0] + "</em>"
+											   );
+							
+						  }
+						  
+						}
+					}
+					
+			
 				}
 			      catch(err)
 				{

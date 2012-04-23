@@ -218,6 +218,11 @@ class WPide2
 		border-top-left-radius: 6px;
 
 	}
+	
+	#wpide_info_content{
+		margin-top: 8px;
+		margin-left: 10px;
+	}
     </style>
 
     <?php

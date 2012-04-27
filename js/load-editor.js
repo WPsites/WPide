@@ -10,6 +10,7 @@ var current_editor_session = 0;
 var EditSession = require('ace/edit_session').EditSession; 
 var UndoManager = require('ace/undomanager').UndoManager;
 var Search = require("ace/search").Search;
+var TokenIterator = require("ace/token_iterator").TokenIterator;
 
 var oHandler;
 
@@ -20,10 +21,8 @@ function onSessionChange(e)  {
 			return;
 		}
 	}catch(error){}
-
-	//get cursor/selection
-	var range = editor.getSelectionRange();
 	
+
 	try {
 		if ( e.data.action == 'removeText' ){
 			
@@ -42,6 +41,14 @@ function onSessionChange(e)  {
 	range = editor.getSelectionRange();
 	//take note of selection row to compare with search
 	cursor_row = range.start.row;
+	
+	//quit autocomplete if we are writing a "string"
+	var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
+	var current_token_type = iterator.getCurrentToken().type;
+	if(iterator.getCurrentToken().type == "string"){
+		wpide_close_autocomplete();
+		return;
+	}
 	
 	if (range.start.column > 0){
 	
@@ -277,7 +284,7 @@ function wpide_close_autocomplete(){
 	autocompleting = false;
 	
 	//clear the text in the command help panel
-	jQuery("#wpide_info_content").html("");
+	//jQuery("#wpide_info_content").html("");
 }
 
 function wpide_function_help() {

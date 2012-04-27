@@ -255,9 +255,7 @@ class WPide2
 					  <div id="major-publishing-actions"> 
 						<div id="wpide_file_browser"></div>
 						<br style="clear:both;" />
-						<div id="publishing-action"> <img src="/wp-admin/images/wpspin_light.gif" class="ajax-loading" id="ajax-loading" alt="">
-						  <input name="save" type="submit" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Update">
-						</div>
+						
 						<div class="clear"></div>
 					  </div>
 					</div>

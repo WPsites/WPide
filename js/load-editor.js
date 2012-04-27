@@ -22,17 +22,16 @@ function onSessionChange(e)  {
 		}
 	}catch(error){}
 	
+	
 
 	try {
 		if ( e.data.action == 'removeText' ){
 			
 		       if (autocompleting) {
-				//console.log(e.data);
-				
 				autocompletelength = (autocompletelength - 1) ;
-				
+			}else{
+				return;
 			}
-			//return;
 		}
 	}catch(error){}
 	
@@ -42,13 +41,15 @@ function onSessionChange(e)  {
 	//take note of selection row to compare with search
 	cursor_row = range.start.row;
 	
+	try{
 	//quit autocomplete if we are writing a "string"
-	var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
-	var current_token_type = iterator.getCurrentToken().type;
-	if(iterator.getCurrentToken().type == "string"){
-		wpide_close_autocomplete();
-		return;
-	}
+		var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
+		var current_token_type = iterator.getCurrentToken().type;
+		if(iterator.getCurrentToken().type == "string"){
+			wpide_close_autocomplete();
+			return;
+		}
+	}catch(error){}
 	
 	if (range.start.column > 0){
 	
@@ -275,6 +276,13 @@ function onSessionChange(e)  {
 		
 	}
 
+}
+
+function token_test(){
+	
+	var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
+	var current_token_type = iterator.getCurrentToken().type;
+	return iterator.getCurrentToken();
 }
 
 function wpide_close_autocomplete(){

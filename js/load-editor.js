@@ -45,8 +45,7 @@ function onSessionChange(e)  {
 	//quit autocomplete if we are writing a "string"
 		var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
 		var current_token_type = iterator.getCurrentToken().type;
-		if(iterator.getCurrentToken().type == "string"){
-			wpide_close_autocomplete();
+		if(current_token_type == "string" || current_token_type == "comment"){
 			return;
 		}
 	}catch(error){}

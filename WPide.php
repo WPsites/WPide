@@ -223,6 +223,32 @@ class WPide2
 		margin-top: 8px;
 		margin-left: 10px;
 	}
+	.wpide_func_highlight,
+	.wpide_func_highlight_black {
+		font-size: 120%;
+	}
+	.wpide_func_highlight{
+		color: #4A8EAD;
+	}
+	.wpide_func_params{
+		padding-left:10px;
+		display: block;
+		color:#555;
+		font-family: courier;
+	}
+	.wpide_func_desc{
+		color:#333;
+	}
+	.wpide_func_arg_notrequired{
+		color:#888;	
+	}
+	.wpide_func_arg_notrequired em{
+		color: green;
+		display: block;
+		font-size: 80%;
+		line-height: 100%;
+	}
+	
     </style>
 
     <?php

@@ -94,8 +94,7 @@ function onSessionChange(e)  {
 	//console.log("Searching for text \""+text+"\" length: "+ text.length);
 	if (text.length < 3){
 		
-		if (ac) ac.style.display='none';
-		if (oHandler) oHandler.close();
+		wpide_close_autocomplete();
 		return;
 	}
 	
@@ -114,11 +113,11 @@ function onSessionChange(e)  {
 	if( document.getElementById('ac') ){
 		ac=document.getElementById('ac');
 
+	//add editor click listener
         //editor clicks should hide the autocomplete dropdown
         editor.container.addEventListener('click', function(e){
 		
-		if (ac) ac.style.display='none';
-		if (oHandler) oHandler.close();
+		wpide_close_autocomplete();
 	       
 	       	autocompleting=false;
 		autocompletelength = 2;
@@ -224,10 +223,7 @@ function onSessionChange(e)  {
 
 	//check for matches
 	if ( ac.length === 0 ) {
-		if (ac) ac.style.display='none';
-		if (oHandler) oHandler.close();
-		
-		//console.log("set auto complete false due to ac.length==0");
+		wpide_close_autocomplete();
 	} else {
 
 		ac.selectedIndex=0;			
@@ -239,51 +235,25 @@ function onSessionChange(e)  {
 			selectACitem(item.srcElement.textContent);
 		});
 		
-		jQuery("#ac_child a").mouseover(
-			function (item) {
-			  //mouse over
-			  	try
-				{
-					//only want this event for the anchor, ignore span hover event
-					if (item.srcElement.tagName == 'A'){
-						key = jQuery(this).find("span.ddTitleText").text().replace("()","");
-						
-						//wordpress autocomplete
-						if ( jQuery(this).find("img").attr("src").indexOf("wpac.png")  >= 0){
-					
-						  if (autocomplete_wordpress[key].desc != undefined){
-							jQuery("#wpide_info_content").html(
-											"<strong>" + String(item.srcElement.textContent) + "</strong><br />" +
-											   autocomplete_wordpress[key].desc + "<br /><br /><em>" +
-											   autocomplete_wordpress[key].params + "</em>"
-											   );
-						  }
-						  
-						}
-						
-						//php autocomplete
-						if ( jQuery(this).find("img").attr("src").indexOf("phpac.png") >= 0){
-					
-						  if (autocomplete_php[key][0] != undefined){
-							jQuery("#wpide_info_content").html(
-											"<strong>" + String(item.srcElement.textContent) + "</strong><br />" +
-											   "<em>" + autocomplete_php[key][0] + "</em>"
-											   );
-							
-						  }
-						  
-						}
-					}
-					
+		jQuery("#ac_child a").mouseover(function(item){
+			//show the code in the info panel
 			
+			//if this command item is enabled
+			if (jQuery("#"+item.srcElement.id).hasClass("enabled")){
+				
+				var selected_item_index = jQuery("#"+item.srcElement.id).index();
+				
+				if (selected_item_index > -1){ //if select item is valid
+					
+					//set the selected menu item
+					oHandler.selectedIndex(selected_item_index);
+					//show command help panel for this command
+					wpide_function_help();
+					
 				}
-			      catch(err)
-				{
-				//Handle errors here
-				}
-			  
 			}
-		);
+
+		});
 		
 		
 		jQuery("#ac_child").css("z-index", "9999");
@@ -293,8 +263,112 @@ function onSessionChange(e)  {
 		jQuery("#ac_msdd").css("top", ac.style.top);
 		jQuery("#ac_msdd").css("left", ac.style.left);
 		
+		//show command help panel for this command
+		wpide_function_help();
+		
 	}
 
+}
+
+function wpide_close_autocomplete(){
+	if (ac) ac.style.display='none';
+	if (oHandler) oHandler.close();
+	
+	//clear the text in the command help panel
+	jQuery("#wpide_info_content").html("");
+}
+
+function wpide_function_help() {
+  //mouse over
+
+	try
+	{
+		var selected_command_item = jQuery("#ac_child a.selected");
+		
+		
+			key = selected_command_item.find("span.ddTitleText").text().replace("()","");
+			
+			//wordpress autocomplete
+			if ( selected_command_item.find("img").attr("src").indexOf("wpac.png")  >= 0){
+		
+			  if (autocomplete_wordpress[key].desc != undefined){
+				
+				//compose the param info
+				var param_text ="";
+				for(i=0; i<autocomplete_wordpress[key].params.length; i++) {
+					
+					//wrap params in a span to highlight not required
+					if (autocomplete_wordpress[key].params[i].required == "no"){
+						param_text = param_text + "<span class='wpide_func_arg_notrequired'>" + autocomplete_wordpress[key].params[i]['param'] + "<em>optional</em></span><br /> <br />";
+					}else{
+						param_text = param_text + autocomplete_wordpress[key].params[i]['param'] + "<br /> <br />";
+					}
+					
+				}
+				//compose returns text
+				if (autocomplete_wordpress[key].returns.length > 0){
+					returns_text = "<br /><br /><strong>Returns:</strong> " + autocomplete_wordpress[key].returns;
+				}else{
+					returns_text = "";
+				}
+				
+				
+				//output command info
+				jQuery("#wpide_info_content").html(
+								"<strong class='wpide_func_highlight_black'>Function: </strong><strong class='wpide_func_highlight'>" + key  + "(</strong><br />" +
+								   "<span class='wpide_func_desc'>" + autocomplete_wordpress[key].desc + "</span><br /><br /><em class='wpide_func_params'>" +
+								   param_text + "</em>"+
+								   "<strong class='wpide_func_highlight'>)</strong> " +
+								   returns_text
+								   );
+			  }
+			  
+			}
+			
+			//php autocomplete
+			if ( selected_command_item.find("img").attr("src").indexOf("phpac.png") >= 0){
+		
+			  if (autocomplete_php[key].returns != undefined){
+				
+				//params text
+				var param_text ="";
+				for(i=0; i<autocomplete_php[key].params.length; i++) {
+					
+					//wrap params in a span to highlight not required
+					if (autocomplete_php[key].params[i].required == "no"){
+						param_text = param_text + "<span class='wpide_func_arg_notrequired'>" + autocomplete_php[key].params[i]['param'] + "<em>optional</em></span><br /> <br />";
+					}else{
+						param_text = param_text + autocomplete_php[key].params[i]['param'] + "<br /> <br />";
+					}
+					
+				}
+				//compose returns text
+				if (autocomplete_php[key].returns.length > 0){
+					returns_text = "<br /><br /><strong>Returns:</strong> " + autocomplete_php[key].returns;
+				}else{
+					returns_text = "";
+				}
+				
+				jQuery("#wpide_info_content").html(
+								"<strong class='wpide_func_highlight_black'>Function: </strong><strong class='wpide_func_highlight'>" + key + "(</strong><br />" +
+								   autocomplete_php[key].desc + "<br /><br /><em class='wpide_func_params'>" +
+								   param_text + "</em>" +
+								   "<strong class='wpide_func_highlight'>)</strong>" +
+								   returns_text
+								   );
+				
+			  }
+			  
+			}
+		
+		
+
+	}
+      catch(err)
+	{
+	//Handle errors here
+	}
+  
 }
 
 //open another file and add to editor
@@ -500,6 +574,9 @@ jQuery(document).ready(function($) {
 			if (oHandler && oHandler.visible() === 'block'){
 				oHandler.previous();
 				
+				//show command help panel for this command
+				wpide_function_help();
+				
 			}else if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
 				if( select.selectedIndex === 0 ) {
@@ -528,6 +605,9 @@ jQuery(document).ready(function($) {
 		
 			if (oHandler && oHandler.visible() === 'block'){
 				oHandler.next();
+				
+				//show command help panel for this command
+				wpide_function_help();
 				
 			}else if ( document.getElementById('ac').style.display === 'block' ) {
 				var select=document.getElementById('ac');

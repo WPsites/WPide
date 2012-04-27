@@ -509,6 +509,9 @@ function selectACitem (item) {
 			tag = jQuery("#ac_msdd a.selected").children("span.ddTitleText").text(); //get tag from new msdropdown
 		}
 		
+		//clean up the tag/command
+		tag = tag.replace(")", ""); //remove end parenthesis
+		
 		
 		editor.selection.setSelectionRange(sel);				
 		editor.insert(tag);

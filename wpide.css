@@ -1,0 +1,193 @@
+	#quicktags, #post-status-info, #editor-toolbar, #newcontent, .ace_print_margin { display: none; }
+    #fancyeditordiv {
+	  position: relative;
+	  width: 70%;
+	  height: 400px;
+	}
+	#template div{margin-right:0 !important;}
+	
+	#wpide_toolbar{
+		width: 75%;
+		min-height: 30px;
+		text-align: right;
+		padding-top: 20px;
+		position: relative;
+		float: left;
+	}
+	#wpide_toolbar form{
+		position: absolute;
+		left: 104%;
+	}
+	#wpide_toolbar_tabs{
+		width:100%;
+	}
+	
+	#wpide_toolbar .wpide_tab {
+        position:relative;
+		height: 18px;
+		font: 13px/18px Arial,Helvetica,sans-serif normal;
+		margin-top: -2px;
+		margin-right: 2px;
+		padding: 6px;
+        padding-right:20px;
+		float: left;
+		cursor: pointer;
+		border-width: 1px;
+		border-style: solid;
+		-webkit-border-top-right-radius: 3px;
+		-webkit-border-top-left-radius: 3px;
+		border-top-right-radius: 3px;
+		border-top-left-radius: 3px;
+		background-color: #E8E8E8;
+		border-color: #DFDFDF #DFDFDF #CCC;
+		color: #B00001;
+		text-decoration: none;
+		font-style: italic;
+        
+        -moz-opacity:.60; 
+        filter:alpha(opacity=60); 
+        opacity:.60;
+	}
+    #wpide_toolbar .wpide_tab.active {
+        -moz-opacity:1; 
+        filter:alpha(opacity=1); 
+        opacity:1;
+        border-left-color:#bbb;
+        border-right-color:#bbb;
+        border-top-color:#bbb;
+        border-bottom-color:#dedede;
+    }
+	
+    #wpide_toolbar .close_tab {
+        color: #575757;
+        font-style: normal;
+        padding-bottom: 7px;
+        padding-left: 7px;
+        position: absolute;
+        right: 3px;
+        text-decoration: none;
+        top: -2px;
+    }
+    #wpide_toolbar .close_tab:hover{
+        color:#B00001;
+        font-weight:bold;
+    }
+    
+	#wpide_file_browser{
+		margin-right:2%;
+		text-align:left;
+	}
+	
+	.toplevel_page_wpide #submitdiv,
+	.toplevel_page_wpide #docinfodiv h3.hndle{
+		 width:100%;
+		 float:right;
+		 clear:right;
+	 }
+	 .toplevel_page_wpide #submitdiv h3.hndle,
+	 .toplevel_page_wpide #docinfodiv h3.hndle{
+	 	font-family: Georgia,"Times New Roman";
+		font-size: 15px;
+		font-weight: bold;
+		padding: 7px 10px;
+		margin: 0;
+		line-height: 1;
+	 }
+	 
+	 #wpide_toolbar_buttons {
+	 	position:relative;
+	 	min-height:30px;
+		width:75%;
+		float:left;
+        clear:left;
+		text-align:left;
+		overflow:hidden;
+		border-bottom: 1px solid #CCC;
+		background-color: #E9E9E9;
+		background-image: -ms-linear-gradient(bottom,#ddd,#e9e9e9);
+		background-image: -moz-linear-gradient(bottom,#ddd,#e9e9e9);
+		background-image: -o-linear-gradient(bottom,#ddd,#e9e9e9);
+		background-image: -webkit-linear-gradient(bottom,#ddd,#e9e9e9);
+		background-image: linear-gradient(bottom,#ddd,#e9e9e9);
+		
+		-webkit-border-top-right-radius: 6px;
+		-webkit-border-top-left-radius: 0px;
+		border-top-right-radius: 6px;
+		border-top-left-radius: 0px;
+	}
+		
+		#wpide_toolbar_buttons a{
+			display:block;
+			float:left;
+			margin:6px;
+		}
+		
+		#wpwrap div.ace_gutter{
+			background-color:#f4f4f4;
+			color:#aaa;
+		}
+	#wpide_save_container{
+		float: left;
+		clear: left;
+		margin-left: 68%;
+		margin-top: 20px;
+	}
+	
+	#wpide_info {
+		position: relative;
+		min-height: 30px;
+		width: 100%;
+		margin-top: 50px;
+		padding-right:2px;
+		float: right;
+		clear: right;
+		text-align: left;
+		overflow: visible;
+		border-bottom: 1px solid #CCC;
+		background-color: #E9E9E9;
+		background-image: -ms-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -moz-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -o-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: -webkit-linear-gradient(bottom,#DDD,#E9E9E9);
+		background-image: linear-gradient(bottom,#DDD,#E9E9E9);
+		-webkit-border-top-right-radius: 0px;
+		-webkit-border-top-left-radius: 6px;
+		border-top-right-radius: 0px;
+		border-top-left-radius: 6px;
+
+	}
+	
+	#wpide_info_content{
+		margin-top: 8px;
+		margin-left: 10px;
+	}
+	.wpide_func_highlight,
+	.wpide_func_highlight_black {
+		font-size: 120%;
+	}
+	.wpide_func_highlight{
+		color: #4A8EAD;
+	}
+	.wpide_func_params{
+		padding-left:10px;
+		display: block;
+		color:#555;
+		font-family: courier;
+	}
+	.wpide_func_desc{
+		color:#333;
+	}
+	.wpide_func_arg_notrequired{
+		color:#888;	
+	}
+	.wpide_func_arg_notrequired em{
+		color: green;
+		display: block;
+		font-size: 80%;
+		line-height: 100%;
+	}
+        .inner-sidebar{
+            background-image: url(images/wpide_logo.jpg);
+            background-repeat: no-repeat;
+            background-position: top right;
+        }

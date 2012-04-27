@@ -274,6 +274,8 @@ function wpide_close_autocomplete(){
 	if (ac) ac.style.display='none';
 	if (oHandler) oHandler.close();
 	
+	autocompleting = false;
+	
 	//clear the text in the command help panel
 	jQuery("#wpide_info_content").html("");
 }
@@ -510,9 +512,8 @@ function selectACitem (item) {
 		
 		editor.selection.setSelectionRange(sel);				
 		editor.insert(tag);
-		autocompleting = false;
-		ac_dropdwn.style.display='none';
-		if (oHandler) oHandler.close();
+		
+		wpide_close_autocomplete();
 	} else {
 		editor.insert('\n');
 	}

@@ -25,13 +25,13 @@ class WPide2
 		if ( $_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ||
 			$_GET['page'] === 'wpide' ){
                 
-            //force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
-            define('FS_METHOD', 'direct'); 
+			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
+			define('FS_METHOD', 'direct'); 
 
 			// Uncomment any of these calls to add the functionality that you need.
-			add_action('admin_head', 'WPide2::add_admin_head');
+			//add_action('admin_head', 'WPide2::add_admin_head');
 			add_action('admin_init', 'WPide2::add_admin_js');
-			//add_action('admin_head', 'WPide2::add_admin_styles');
+			add_action('admin_init', 'WPide2::add_admin_styles');
 			
 			//setup jqueryFiletree list callback
 			add_action('wp_ajax_jqueryFileTree', 'WPide2::jqueryFileTree_get_list');
@@ -52,19 +52,6 @@ class WPide2
     public static function add_admin_head()
     {
 
-    ?>
-	<link rel='stylesheet' href='<?php echo plugins_url("jqueryFileTree.css", __FILE__ );?>' type='text/css' media='all' />
-	
-	<script src="<?php echo plugins_url("js/jquery.dd.js", __FILE__ );?>" type="text/javascript"></script>
-	
-	<link rel='stylesheet' href='<?php echo plugins_url("dd.css", __FILE__ );?>' type='text/css' media='all' />
-	
-	<link rel='stylesheet' href='<?php echo plugins_url("wpide.css", __FILE__ );?>' type='text/css' media='all' />
-
-
-
-    <?php
-
     }
 
 
@@ -76,36 +63,45 @@ class WPide2
 
 
 
+	public static function add_admin_js(){
+		
+	    $plugin_path =  plugin_dir_url( __FILE__ );
+		    //include file tree
+		    wp_enqueue_script('jquery-file-tree', plugins_url("jqueryFileTree.js", __FILE__ ) );
+		    //include ace
+		    wp_enqueue_script('ace', plugins_url("ace-0.2.0/src/ace.js", __FILE__ ) );
+		    //include ace modes for css, javascript & php
+		    wp_enqueue_script('ace-mode-css', $plugin_path . 'ace-0.2.0/src/mode-css.js');
+		    wp_enqueue_script('ace-mode-javascript', $plugin_path . 'ace-0.2.0/src/mode-javascript.js');
+		    wp_enqueue_script('ace-mode-php', $plugin_path . 'ace-0.2.0/src/mode-php.js');
+		    //include ace theme
+		    wp_enqueue_script('ace-theme', plugins_url("ace-0.2.0/src/theme-dawn.js", __FILE__ ) );//monokai is nice
+		    // wordpress-completion tags
+		    wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete.wordpress.js", __FILE__ ) );
+		    // php-completion tags
+		    wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete.php.js", __FILE__ ) );
+		    // load editor
+		    wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
+		    // load autocomplete dropdown 
+		    wp_enqueue_script('wpide-dd', plugins_url("js/jquery.dd.js", __FILE__ ) );
+    
+    
+	}
+    
+	public static function add_admin_styles(){
 
-
-
-
-
-
-
-
-
-
-    public static function add_admin_js()
-    {
-        $plugin_path =  plugin_dir_url( __FILE__ );
-		//include file tree
-		wp_enqueue_script('jquery-file-tree', plugins_url("jqueryFileTree.js", __FILE__ ) );
-		//include ace
-       	wp_enqueue_script('ace', plugins_url("ace-0.2.0/src/ace.js", __FILE__ ) );
-		//include ace modes for css, javascript & php
-		wp_enqueue_script('ace-mode-css', $plugin_path . 'ace-0.2.0/src/mode-css.js');
-		wp_enqueue_script('ace-mode-javascript', $plugin_path . 'ace-0.2.0/src/mode-javascript.js');
-        wp_enqueue_script('ace-mode-php', $plugin_path . 'ace-0.2.0/src/mode-php.js');
-		//include ace theme
-		wp_enqueue_script('ace-theme', plugins_url("ace-0.2.0/src/theme-dawn.js", __FILE__ ) );//monokai is nice
-		// wordpress-completion tags
-		wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete.wordpress.js", __FILE__ ) );
-		// php-completion tags
-		wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete.php.js", __FILE__ ) );
-		// load editor
-		wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
-    }
+		//main wpide styles
+		 wp_register_style( 'wpide_style', plugins_url('wpide.css', __FILE__) );
+		 wp_enqueue_style( 'wpide_style' );
+		 //filetree styles
+		 wp_register_style( 'wpide_filetree_style', plugins_url('jqueryFileTree.css', __FILE__) );
+		 wp_enqueue_style( 'wpide_filetree_style' );
+		 //autocomplete dropdown styles
+		 wp_register_style( 'wpide_dd_style', plugins_url('dd.css', __FILE__) );
+		 wp_enqueue_style( 'wpide_dd_style' );
+		 
+		
+	}
     
 	
 	

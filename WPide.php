@@ -203,6 +203,9 @@ class WPide2
 		?>
 		<script>
 
+			var wpide_app_path = "<?php echo plugin_dir_url( __FILE__ ); ?>";
+			
+			
 			jQuery(document).ready( function($) {
 				$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
 	

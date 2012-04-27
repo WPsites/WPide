@@ -181,7 +181,7 @@ function onSessionChange(e)  {
 			var option = document.createElement('option');
 			option.text = tag;
 			option.value = tag;
-			option.setAttribute('title', '/wp-content/plugins/WPide/images/wpac.png');//path to icon image or wpac.png
+			option.setAttribute('title', wpide_app_path + 'images/wpac.png');//path to icon image or wpac.png
 		
 	
 			try {
@@ -214,7 +214,7 @@ function onSessionChange(e)  {
 			var option = document.createElement('option');
 			option.text = tag;
 			option.value = tag;
-			option.setAttribute('title', '/wp-content/plugins/WPide/images/phpac.png');//path to icon image or wpac.png
+			option.setAttribute('title', wpide_app_path + 'images/phpac.png');//path to icon image or wpac.png
 			
 	
 			try {

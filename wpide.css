@@ -191,3 +191,30 @@
             background-repeat: no-repeat;
             background-position: top right;
         }
+        
+        #fancyeditordiv{
+            width:75%;
+            height:650px;
+            margin-right:0!important;
+            float:left;
+        }
+        
+        #wpide_message{
+            display:none;
+            width: 97%;
+            position: absolute;
+            top: 1px;
+            left: 2px;
+            text-align:left;
+            margin:0;
+            padding:5px;
+        }
+        
+        #wpide_save{
+            margin-right:25px;
+        }
+        
+        #publishing-action img{
+            visibility: hidden;
+        }
+        

@@ -49,14 +49,10 @@ class WPide2
 
 
 
-    public static function add_admin_head()
-    {
-
-    }
-
-
-
-
+	public static function add_admin_head()
+	{
+    
+	}
 
 
 
@@ -106,24 +102,24 @@ class WPide2
 	
 	
 	public static function jqueryFileTree_get_list() {
-    	//check the user has the permissions
-        check_admin_referer('plugin-name-action_wpidenonce'); 
-        if ( !current_user_can('edit_themes') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
-        
-        //setup wp_filesystem api
-        global $wp_filesystem;
-        if ( ! WP_Filesystem($creds) ) 
-            return false;
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+		//setup wp_filesystem api
+		global $wp_filesystem;
+		if ( ! WP_Filesystem($creds) ) 
+		    return false;
         
 		$_POST['dir'] = urldecode($_POST['dir']);
 		$root = WP_CONTENT_DIR;
 		
 		if( $wp_filesystem->exists($root . $_POST['dir']) ) {
 			//$files = scandir($root . $_POST['dir']);
-            //print_r($files);
-            $files = $wp_filesystem->dirlist($root . $_POST['dir']);
-            //print_r($files);
+			//print_r($files);
+			$files = $wp_filesystem->dirlist($root . $_POST['dir']);
+			//print_r($files);
             
 			if( count($files) > 2 ) { /* The 2 accounts for . and .. */
 				echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
@@ -150,14 +146,14 @@ class WPide2
 	
 	public static function wpide_get_file() {
 		//check the user has the permissions
-        check_admin_referer('plugin-name-action_wpidenonce'); 
-        if ( !current_user_can('edit_themes') )
-		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
-        
-        //setup wp_filesystem api
-        global $wp_filesystem;
-        if ( ! WP_Filesystem($creds) ) 
-            return false;
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+		//setup wp_filesystem api
+		global $wp_filesystem;
+		if ( ! WP_Filesystem($creds) ) 
+		    return false;
         
          
 		$root = WP_CONTENT_DIR;
@@ -167,17 +163,17 @@ class WPide2
 	}
 	
 	public static function wpide_save_file() {
-        //check the user has the permissions
-        check_admin_referer('plugin-name-action_wpidenonce'); 
-        if ( !current_user_can('edit_themes') )
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
 		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
         
-        //setup wp_filesystem api
-        global $wp_filesystem;
-        if ( ! WP_Filesystem($creds) ) 
-            echo "Cannot initialise the WP file system API";
-        
-        //save a copy of the file and create a backup just in case
+		//setup wp_filesystem api
+		global $wp_filesystem;
+		if ( ! WP_Filesystem($creds) ) 
+		    echo "Cannot initialise the WP file system API";
+		
+		//save a copy of the file and create a backup just in case
 		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
 		
@@ -187,10 +183,10 @@ class WPide2
 		$new_file_info = pathinfo($backup_path);
 		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) $wp_filesystem->mkdir($new_file_info['dirname'], 0775);
 		
-        //do backup
+		//do backup
 		$wp_filesystem->copy( $file_name, $backup_path );
         
-        //save file
+		//save file
 		if( $wp_filesystem->put_contents( $file_name, stripslashes($_POST['content'])) ) echo "success";
 		die(); // this is required to return a proper result
 	}
@@ -207,96 +203,96 @@ class WPide2
 		?>
 		<script>
 
-		jQuery(document).ready( function($) {
-			$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
-
-			    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
-                    		$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
-			    }else{
-				
-				var image_patern =new RegExp("(\.jpg|\.gif|\.png|\.bmp)$");
-				if ( image_patern.test(file) ){
-					alert("Image editing is not currently available. It's a planned feature using http://pixlr.com/");
-				}else{
-					$(parent).addClass('wait');
-					 
-					wpide_set_file_contents(file, function(){
-							
-							//once file loaded remove the wait class/indicator
-							$(parent).removeClass('wait');
-							
-						});
+			jQuery(document).ready( function($) {
+				$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
+	
+				    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
+					$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
+				    }else{
 					
-					$('#filename').val(file);
-				}
-				 
-			    }
-			    
+					var image_patern =new RegExp("(\.jpg|\.gif|\.png|\.bmp)$");
+					if ( image_patern.test(file) ){
+						alert("Image editing is not currently available. It's a planned feature using http://pixlr.com/");
+					}else{
+						$(parent).addClass('wait');
+						 
+						wpide_set_file_contents(file, function(){
+								
+								//once file loaded remove the wait class/indicator
+								$(parent).removeClass('wait');
+								
+							});
+						
+						$('#filename').val(file);
+					}
+					 
+				    }
+				    
+				});
 			});
-		});
 		</script>
 		
-<?php
-$url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
-if ( ! WP_Filesystem($creds) ) {
-    request_filesystem_credentials($url, '', true, false, null);
-	return;
-}
-?>
-
-<div id="poststuff" class="metabox-holder has-right-sidebar">
-
-	<div id="side-info-column" class="inner-sidebar">
+		<?php
+		$url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+		if ( ! WP_Filesystem($creds) ) {
+		    request_filesystem_credentials($url, '', true, false, null);
+			return;
+		}
+		?>
 		
-		<div id="wpide_info"><div id="wpide_info_content"></div> </div>
-
-		<div id="submitdiv" class="postbox "> 
-		  <h3 class="hndle"><span>Files</span></h3>
-		  <div class="inside"> 
-			<div class="submitbox" id="submitpost"> 
-			  <div id="minor-publishing"> 
-			  </div>
-			  <div id="major-publishing-actions"> 
-				<div id="wpide_file_browser"></div>
-				<br style="clear:both;" />
-				<div id="publishing-action"> <img src="/wp-admin/images/wpspin_light.gif" class="ajax-loading" id="ajax-loading" alt="" style="visibility: hidden; "> 
-				  <input name="save" type="submit" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Update">
-				</div>
-				<div class="clear"></div>
-			  </div>
-			</div>
-		  </div>
-		</div>
+		<div id="poststuff" class="metabox-holder has-right-sidebar">
+		
+			<div id="side-info-column" class="inner-sidebar">
 				
+				<div id="wpide_info"><div id="wpide_info_content"></div> </div>
 		
-	</div>
-
-	<div id="post-body">			
-		<div id="wpide_toolbar" class="quicktags-toolbar"> 
-		  <div id="wpide_toolbar_tabs"> </div>
+				<div id="submitdiv" class="postbox "> 
+				  <h3 class="hndle"><span>Files</span></h3>
+				  <div class="inside"> 
+					<div class="submitbox" id="submitpost"> 
+					  <div id="minor-publishing"> 
+					  </div>
+					  <div id="major-publishing-actions"> 
+						<div id="wpide_file_browser"></div>
+						<br style="clear:both;" />
+						<div id="publishing-action"> <img src="/wp-admin/images/wpspin_light.gif" class="ajax-loading" id="ajax-loading" alt="">
+						  <input name="save" type="submit" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Update">
+						</div>
+						<div class="clear"></div>
+					  </div>
+					</div>
+				  </div>
+				</div>
+						
+				
+			</div>
+		
+			<div id="post-body">			
+				<div id="wpide_toolbar" class="quicktags-toolbar"> 
+				  <div id="wpide_toolbar_tabs"> </div>
+				</div>
+							
+				<div id="wpide_toolbar_buttons"> 
+				  <div id="wpide_message" class="error highlight"></div>
+				  <a href="#"></a> <a href="#"></a> </div>
+							
+							
+				<div id='fancyeditordiv'></div>
+				
+				<form id="wpide_save_container" action="" method="get">
+				   <a href="#" id="wpide_save" class="button-primary">SAVE 
+				   FILE</a> 
+				   <input type="hidden" id="filename" name="filename" value="" />
+				       <?php
+				       if ( function_exists('wp_nonce_field') )
+					   wp_nonce_field('plugin-name-action_wpidenonce');
+				       ?>
+				 </form>
+			</div>	
+				
+			
+		
 		</div>
-					
-		<div id="wpide_toolbar_buttons"> 
-		  <div id="wpide_message" class="error highlight" style="display:none;width: 97%;position: absolute;top: 1px;left: 2px;text-align:left;margin:0;padding:5px;"></div>
-		  <a href="#"></a> <a href="#"></a> </div>
-					
-					
-		<div style='width:75%;height:650px;margin-right:0!important;float:left;' id='fancyeditordiv'></div>
-		
-		<form id="wpide_save_container" action="" method="get">
-		   <a href="#" id="wpide_save" class="button-primary" style="margin-right:25px;">SAVE 
-		   FILE</a> 
-		   <input type="hidden" id="filename" name="filename" value="" />
-		       <?php
-		       if ( function_exists('wp_nonce_field') )
-			   wp_nonce_field('plugin-name-action_wpidenonce');
-		       ?>
-		 </form>
-	</div>	
-		
-	
-
-</div>
 			
 		<?php
 	}

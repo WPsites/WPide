@@ -2,188 +2,219 @@ var autocompleting = false;
 var autocompletelength = 2;
 var editor = '';
 
-jQuery(document).ready(function($) {
+var saved_editor_sessions = [];
+var saved_undo_manager = [];
+var last_added_editor_session = 0;
+var current_editor_session = 0;
 
-	//quit if editing this plugin since it will spaz out!!
-	if ( $('input[name=file]').val() == 'ace/ace.php' ){
-		$('#newcontent').css({'display': 'inline', 'width': '70%'}); //unhide the usual textarea
-		return;
-	}
+var EditSession = require('ace/edit_session').EditSession; 
+var UndoManager = require('ace/undomanager').UndoManager;
+var Search = require("ace/search").Search;
+var TokenIterator = require("ace/token_iterator").TokenIterator;
 
-	//add div for ace editor to latch on to
-	$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
-	//create the editor instance
-	editor = ace.edit("fancyeditordiv");
-	//set the editor theme
-	editor.setTheme("ace/theme/dawn"); 
-	//get a copy of the initial file contents (the file being edited)
-	var intialData = $('#newcontent').val();
-	//add the file contents to our new editor instance
-	editor.getSession().setValue( intialData );
+var oHandler;
 
-
-	//are we editing a theme or plugin?
-	var aceedittype;
-	if (/wp\-admin\/plugin-editor\.php/.test(document.URL))
-		aceedittype = 'plugin';
-	else if (/wp\-admin\/theme-editor\.php/.test(document.URL))
-		aceedittype = 'theme';
-
-
-
-	//ajax call to generate a backup of this file we are about to edit
-	var data = { action: 'ace_backup_call', filename: $('input[name=file]').val(), edittype: aceedittype };
-	jQuery.post(ajaxurl, data, function(response) { 
-		if (response === 'success'){
-			alert("A backup copy of this file has been generated.");
-		}
-	});
-
-	//use editors php mode
-	// var phpMode = require("ace/mode/php").Mode;
-	// editor.getSession().setMode(new phpMode());
-	var currentFilename = $('input[name=file]').val();
-	var mode; 
-	if (/\.css$/.test(currentFilename))
-		mode = require("ace/mode/css").Mode;
-	else if (/\.js$/.test(currentFilename))
-		mode = require("ace/mode/javascript").Mode;
-	else
-		mode = require("ace/mode/php").Mode;	
-	editor.getSession().setMode(new mode());
-
-
-	$('#submit').click(function(event){
-        var use_val = editor.getSession().getValue();
-	    $('textarea#newcontent').text( use_val ); //.html does some dodgy things with certain php files
-	});
-
-
-	//START WP AUTOCOMPLETE
-
-	//create the autocomplete dropdown
-	ac = document.createElement('select');
-	ac.id = 'ac';
-	ac.namme = 'ac';
-	ac.style.position='absolute';
-	ac.style.zIndex=100;
-	ac.style.width='auto';
-	ac.style.display='none';
-	ac.style.height='auto';
-	ac.size=10;
-	editor.container.appendChild(ac);
-
-
-
-
-	//hook onto any change in editor contents
-	editor.getSession().on('change', function(e) {
-
-		//don't continue with autocomplete if /n entered
-		try {
-			if ( e.data.text.charCodeAt(0) == 10 ){
-				return;
-			}
-		} catch(e) {}
-
-		//get cursor/selection
-		var range = editor.getSelectionRange();
-	
-		//do we need to extend the length of the autocomplete string
-		if (autocompleting) {
-			autocompletelength = autocompletelength + 1;
-		} else {
-			autocompletelength = 2;
-		}
-
-
-		//modify the cursor/selection data we have to get text from the editor to check for matching function/method
-		//set start column
-		range.start.column = range.start.column - autocompletelength;
-		//no column lower than 1 thanks
-		if (range.start.column < 1) range.start.column = 0; 
-		//set end column
-		range.end.column = range.end.column + 1;
-		//get the editor text based on that range
-		var text = editor.getSession().doc.getTextRange(range);
-
-		//dont show if no text passed
-		$quit_onchange = false;
-		try {
-			if (text==="") {
-			   ac.style.display='none';
-			}
-		} catch(e) { }//catch end
-		// if string length less than 3 then quit this
-		if (text.length < 3){
+function onSessionChange(e)  {
+	//don't continue with autocomplete if /n entered
+	try {
+		if ( e.data.text.charCodeAt(0) === 10 ){
 			return;
 		}
+	}catch(error){}
+	
+	
+
+	try {
+		if ( e.data.action == 'removeText' ){
+			
+		       if (autocompleting) {
+				autocompletelength = (autocompletelength - 1) ;
+			}else{
+				return;
+			}
+		}
+	}catch(error){}
+	
+	
+	//get current cursor position
+	range = editor.getSelectionRange();
+	//take note of selection row to compare with search
+	cursor_row = range.start.row;
+	
+	try{
+	//quit autocomplete if we are writing a "string"
+		var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
+		var current_token_type = iterator.getCurrentToken().type;
+		if(current_token_type == "string" || current_token_type == "comment"){
+			return;
+		}
+	}catch(error){}
+	
+	if (range.start.column > 0){
+	
+		//search for command text user has entered that we need to try match functions against
+		var search = new Search().set({
+			needle: "[\\n \.\)\(]",
+			backwards: true,
+			wrap: false,
+			caseSensitive: false,
+			wholeWord: false,
+			regExp: true
+		      });
+		      //console.log(search.find(editor.getSession()));
+		      
+		range = search.find(editor.getSession());
+		
+		if (range) range.start.column++;
+	
+	}else{ //change this to look char position, if it's starting at 0 then do this
+		
+		range.start.column = 0;
+	}
+	
+	if (! range || range.start.row < cursor_row ){
+		//forse the autocomplete check on this row starting at column 0
+		range = editor.getSelectionRange();
+		range.start.column = 0;
+	}
+
+	
+	//console.log("search result - start row " + range.start.row + "-" + range.end.row + ", column " + range.start.column+ "-" + range.end.column);
+	//console.log(editor.getSelection().getRange());
+	
+	range.end.column = editor.getSession().getSelection().getCursor().column +1;//set end column as cursor pos
+	
+	//console.log("[ \.] based: " + editor.getSession().doc.getTextRange(range));
+	
+	//no column lower than 1 thanks
+	if (range.start.column < 1) {
+		range.start.column = 0;
+	}
+	
+	//console.log("after row " + range.start.row + "-" + range.end.row + ", column " + range.start.column+ "-" + range.end.column);
+	//get the editor text based on that range
+	var text = editor.getSession().doc.getTextRange(range);
+	$quit_onchange = false;
+	
+	//console.log(text);
+	
+	//console.log("Searching for text \""+text+"\" length: "+ text.length);
+	if (text.length < 3){
+		
+		wpide_close_autocomplete();
+		return;
+	}
+	
+	autocompletelength = text.length;
+
+	//create the dropdown for autocomplete
+	var sel = editor.getSelection();
+	var session = editor.getSession();
+	var lead = sel.getSelectionLead();
+
+	var pos = editor.renderer.textToScreenCoordinates(lead.row, lead.column);
+	var ac; // #ac is auto complete html select element
 
 
-		//create the dropdown for autocomplete
-		var sel = editor.getSelection();
-		var session = editor.getSession();
-		var lead = sel.getSelectionLead();
 
-		var pos = editor.renderer.textToScreenCoordinates(lead.row, lead.column);
-		var ac;
+	if( document.getElementById('ac') ){
+		ac=document.getElementById('ac');
 
-
-
-		if( document.getElementById('ac') ){
-			ac=document.getElementById('ac');
-
-			//editor clicks should hide the autocomplete dropdown
-			editor.container.addEventListener('click',function(e){
-				ac.style.display='none';
-			});
-
-		} //end - create initial autocomplete dropdown and related actions
+	//add editor click listener
+        //editor clicks should hide the autocomplete dropdown
+        editor.container.addEventListener('click', function(e){
+		
+		wpide_close_autocomplete();
+	       
+	       	autocompleting=false;
+		autocompletelength = 2;
+		
+        }, false);
+	
+	} //end - create initial autocomplete dropdown and related actions
 
 
-		//calulate the editor container offset
-		var obj=editor.container;
+	//calulate the editor container offset
+	var obj=editor.container;
 
-		var curleft = 0;
-		var curtop = 0;
+	var curleft = 0;
+	var curtop = 0;
 
-		if (obj.offsetParent) {
+	if (obj.offsetParent) {
 
-			do {
-				curleft += obj.offsetLeft;
-				curtop += obj.offsetTop;
-			} while (obj = obj.offsetParent);
-
-		}						
-
-
-		//position autocomplete
-		ac.style.top=pos.pageY - curtop + 40 + "px";
-		ac.style.left=pos.pageX - curleft + 20 + "px";
-		ac.style.display='block';
-		ac.style.background='white';
+		do {
+			curleft += obj.offsetLeft;
+			curtop += obj.offsetTop;
+		} while (obj = obj.offsetParent);
+		
+	}						
 
 
-		//remove all options, starting a fresh list
-		ac.options.length = 0;
+	//position autocomplete
+	ac.style.top= ((pos.pageY - curtop)+20) + "px";
+	ac.style.left= ((pos.pageX - curleft)+10) + "px";
+	ac.style.display='block';
+	ac.style.background='white';
 
-		//loop through tags and check for a match
+
+	//remove all options, starting a fresh list
+	ac.options.length = 0;
+
+
+	//loop through WP tags and check for a match
+	if (autocomplete_wordpress){
 		var tag;
-		for(i in html_tags){
-			if(!html_tags.hasOwnProperty(i) ){
+		for(i in autocomplete_wordpress) {
+			//if(!html_tags.hasOwnProperty(i) ){
+			//	continue;
+			//}
+	
+			tag= i;
+			//see if the tag is a match
+			if( text !== tag.substr(0,text.length) ){
 				continue;
 			}
-
-			tag=html_tags[i];					
-			if( text ){
-				if( text!=tag.substr(0,text.length) ){
-					continue;
-				}
-			}
-
+			
+			//add parentheses
+			tag = tag + "()";
+			
 			var option = document.createElement('option');
 			option.text = tag;
 			option.value = tag;
+			option.setAttribute('title', wpide_app_path + 'images/wpac.png');//path to icon image or wpac.png
+		
+	
+			try {
+				ac.add(option, null); // standards compliant; doesn't work in IE
+			}
+			catch(ex) {
+				ac.add(option); // IE only
+			}
+	
+		}//end for
+	}//end php autocomplete
+	
+	//loop through PHP tags and check for a match
+	if (autocomplete_php){
+		var tag;
+		for(i in autocomplete_php) {
+			//if(!html_tags.hasOwnProperty(i) ){
+			//	continue;
+			//}
+	
+			tag= i;
+			//see if the tag is a match
+			if( text !== tag.substr(0,text.length) ){
+				continue;
+			}
+			
+			//add parentheses
+			tag = tag + "()";
+			
+			var option = document.createElement('option');
+			option.text = tag;
+			option.value = tag;
+			option.setAttribute('title', wpide_app_path + 'images/phpac.png');//path to icon image or wpac.png
 
 			try {
 				ac.add(option, null); // standards compliant; doesn't work in IE
@@ -192,33 +223,365 @@ jQuery(document).ready(function($) {
 				ac.add(option); // IE only
 			}
 
-		};//end for
+	
+		}//end for
+	}//end php autocomplete
+	
 
+	//check for matches
+	if ( ac.length === 0 ) {
+		wpide_close_autocomplete();
+	} else {
 
+		ac.selectedIndex=0;			
+		autocompleting=true;
+		oHandler = jQuery("#ac").msDropDown({visibleRows:10, rowHeight:20}).data("dd");
+		
+		jQuery("#ac_child").click(function(item){
+			//console.log(item.srcElement.textContent);
+			selectACitem(item.srcElement.textContent);
+		});
+		
+		jQuery("#ac_child a").mouseover(function(item){
+			//show the code in the info panel
+			
+			//if this command item is enabled
+			if (jQuery("#"+item.srcElement.id).hasClass("enabled")){
+				
+				var selected_item_index = jQuery("#"+item.srcElement.id).index();
+				
+				if (selected_item_index > -1){ //if select item is valid
+					
+					//set the selected menu item
+					oHandler.selectedIndex(selected_item_index);
+					//show command help panel for this command
+					wpide_function_help();
+					
+				}
+			}
 
-		//if the return list contains everything then don't display it
-		if (html_tags.length == ac.options.length) {
-			ac.options.length =0;
+		});
+		
+		
+		jQuery("#ac_child").css("z-index", "9999");
+		jQuery("#ac_child").css("background-color", "#ffffff");
+		jQuery("#ac_msdd").css("z-index", "9999");
+		jQuery("#ac_msdd").css("position", "absolute");
+		jQuery("#ac_msdd").css("top", ac.style.top);
+		jQuery("#ac_msdd").css("left", ac.style.left);
+		
+		//show command help panel for this command
+		wpide_function_help();
+		
+	}
+
+}
+
+function token_test(){
+	
+	var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
+	var current_token_type = iterator.getCurrentToken().type;
+	return iterator.getCurrentToken();
+}
+
+function wpide_close_autocomplete(){
+	if (ac) ac.style.display='none';
+	if (oHandler) oHandler.close();
+	
+	autocompleting = false;
+	
+	//clear the text in the command help panel
+	//jQuery("#wpide_info_content").html("");
+}
+
+function wpide_function_help() {
+  //mouse over
+
+	try
+	{
+		var selected_command_item = jQuery("#ac_child a.selected");
+		
+		
+			key = selected_command_item.find("span.ddTitleText").text().replace("()","");
+			
+			//wordpress autocomplete
+			if ( selected_command_item.find("img").attr("src").indexOf("wpac.png")  >= 0){
+		
+			  if (autocomplete_wordpress[key].desc != undefined){
+				
+				//compose the param info
+				var param_text ="";
+				for(i=0; i<autocomplete_wordpress[key].params.length; i++) {
+					
+					//wrap params in a span to highlight not required
+					if (autocomplete_wordpress[key].params[i].required == "no"){
+						param_text = param_text + "<span class='wpide_func_arg_notrequired'>" + autocomplete_wordpress[key].params[i]['param'] + "<em>optional</em></span><br /> <br />";
+					}else{
+						param_text = param_text + autocomplete_wordpress[key].params[i]['param'] + "<br /> <br />";
+					}
+					
+				}
+				//compose returns text
+				if (autocomplete_wordpress[key].returns.length > 0){
+					returns_text = "<br /><br /><strong>Returns:</strong> " + autocomplete_wordpress[key].returns;
+				}else{
+					returns_text = "";
+				}
+				
+				
+				//output command info
+				jQuery("#wpide_info_content").html(
+								"<strong class='wpide_func_highlight_black'>Function: </strong><strong class='wpide_func_highlight'>" + key  + "(</strong><br />" +
+								   "<span class='wpide_func_desc'>" + autocomplete_wordpress[key].desc + "</span><br /><br /><em class='wpide_func_params'>" +
+								   param_text + "</em>"+
+								   "<strong class='wpide_func_highlight'>)</strong> " +
+								   returns_text
+								   );
+			  }
+			  
+			}
+			
+			//php autocomplete
+			if ( selected_command_item.find("img").attr("src").indexOf("phpac.png") >= 0){
+		
+			  if (autocomplete_php[key].returns != undefined){
+				
+				//params text
+				var param_text ="";
+				for(i=0; i<autocomplete_php[key].params.length; i++) {
+					
+					//wrap params in a span to highlight not required
+					if (autocomplete_php[key].params[i].required == "no"){
+						param_text = param_text + "<span class='wpide_func_arg_notrequired'>" + autocomplete_php[key].params[i]['param'] + "<em>optional</em></span><br /> <br />";
+					}else{
+						param_text = param_text + autocomplete_php[key].params[i]['param'] + "<br /> <br />";
+					}
+					
+				}
+				//compose returns text
+				if (autocomplete_php[key].returns.length > 0){
+					returns_text = "<br /><br /><strong>Returns:</strong> " + autocomplete_php[key].returns;
+				}else{
+					returns_text = "";
+				}
+				
+				jQuery("#wpide_info_content").html(
+								"<strong class='wpide_func_highlight_black'>Function: </strong><strong class='wpide_func_highlight'>" + key + "(</strong><br />" +
+								   autocomplete_php[key].desc + "<br /><br /><em class='wpide_func_params'>" +
+								   param_text + "</em>" +
+								   "<strong class='wpide_func_highlight'>)</strong>" +
+								   returns_text
+								   );
+				
+			  }
+			  
+			}
+		
+		
+
+	}
+      catch(err)
+	{
+	//Handle errors here
+	}
+  
+}
+
+//open another file and add to editor
+function wpide_set_file_contents(file, callback_func){
+	"use strict";
+    
+	//ajax call to get file contents we are about to edit
+	var data = { action: 'wpide_get_file', filename: file, _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val() };
+
+	jQuery.post(ajaxurl, data, function(response) { 
+		var the_path = file.replace(/^.*[\\\/]/, ''); 
+		var the_id = "wpide_tab_" + last_added_editor_session;
+		
+		//enable editor now we have a file open
+		jQuery('#fancyeditordiv textarea').removeAttr("disabled");
+        
+		jQuery("#wpide_toolbar_tabs").append('<span id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a> <a class="close_tab" href="#">x</a> ');		
+			
+		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
+		saved_editor_sessions[last_added_editor_session].on('change', onSessionChange);
+		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());//new undo manager for this session
+		
+		last_added_editor_session++; //increment session counter
+			
+		//add click event for the new tab. 
+        //We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
+		jQuery(".wpide_tab").off('click').on("click", function(event){
+			event.preventDefault();
+
+			jQuery('input[name=filename]').val( jQuery(this).attr('rel') );
+            
+			//save current editor into session
+			//get old editor out of session and apply to editor
+			var clicksesh = jQuery(this).attr('sessionrel'); //editor id number
+			saved_editor_sessions[ clicksesh ].setUndoManager(saved_undo_manager[ clicksesh ]);
+			editor.setSession( saved_editor_sessions[ clicksesh ] );
+            
+            //set this tab as active
+            jQuery(".wpide_tab").removeClass('active');
+            jQuery(this).addClass('active');
+		
+			var currentFilename = jQuery(this).attr('rel');
+			var mode;
+
+            //set the editor mode based on file name
+			if (/\.css$/.test(currentFilename)) {
+				mode = require("ace/mode/css").Mode;
+			}
+            else if (/\.less$/.test(currentFilename)) {
+				mode = require("ace/mode/css").Mode;
+			}
+			else if (/\.js$/.test(currentFilename)) {
+				mode = require("ace/mode/javascript").Mode;
+			}
+			else {
+				mode = require("ace/mode/php").Mode; //default to php	
+			}
+			editor.getSession().setMode(new mode());
+			
+			editor.getSession().on('change', onSessionChange);
+			editor.resize(); 
+			editor.focus(); 
+			//make a note of current editor
+			current_editor_session = clicksesh;
+		
+		});
+        
+		//add click event for tab close. 
+		//We are actually clearing the click event and adding it again for all tab elements, it's the only way I could get the click handler listening on all dynamically added tabs
+		jQuery(".close_tab").off('click').on("click", function(event){
+		event.preventDefault();
+		var clicksesh = jQuery(this).parent().attr('sessionrel');
+		var activeFallback;
+            
+            //if the currently selected tab is being removed then remember to make the first tab active
+            if ( jQuery("#wpide_tab_"+clicksesh).hasClass('active') ) {
+                activeFallback = true;
+            }else{
+                activeFallback = false;
+            }
+            
+            //remove tab
+            jQuery(this).parent().remove();
+            
+            //clear session and undo
+    	   saved_undo_manager[clicksesh] = undefined;
+		   saved_editor_sessions[clicksesh] = undefined;
+          
+           
+           //Clear the active editor if all tabs closed or activate first tab if required since the active tab may have been deleted
+           if (jQuery(".wpide_tab").length == 0){
+               editor.getSession().setValue( "" );
+           }else if ( activeFallback ){
+               jQuery(".wpide_tab")[0].click();
+           }
+   
+		});
+		
+    		jQuery("#"+the_id).click();
+	
+	if (callback_func != null) {
+		callback_func(response);
+	}
+	
+	});
+	
+	
+}
+
+function saveDocument() {
+	//ajax call to save the file and generate a backup if needed
+	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
+	jQuery.post(ajaxurl, data, function(response) { 
+		if (response === 'success') {
+			jQuery("#wpide_message").html('<span>File saved.</span>');
+			jQuery("#wpide_message").show();
+			jQuery("#wpide_message").fadeOut(5000); 
+		} else {
+			alert("error: " + response);
 		}
+	});	
+}
 
-		//check for matches
-		if( ac.length==0 ){
-				ac.style.display='none';
-				autocompleting=false;
+//enter/return command
+function selectACitem (item) {
+	if( document.getElementById('ac').style.display === 'block'  ){
+		var ac_dropdwn = document.getElementById('ac');
+		var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
+		var sel = editor.selection.getRange();
+		var line = editor.getSession().getLine(sel.start.row);										
+		sel.start.column = sel.start.column - autocompletelength;
+		
+		if (item.length){
+			tag = item; //get tag from new msdropdown passed as arg	
 		}else{
-			ac.selectedIndex=0;			
-			autocompleting=true;
+			tag = jQuery("#ac_msdd a.selected").children("span.ddTitleText").text(); //get tag from new msdropdown
 		}
+		
+		//clean up the tag/command
+		tag = tag.replace(")", ""); //remove end parenthesis
+		
+		
+		editor.selection.setSelectionRange(sel);				
+		editor.insert(tag);
+		
+		wpide_close_autocomplete();
+	} else {
+		editor.insert('\n');
+	}
+}
+	
+	
+jQuery(document).ready(function($) {
+	$("#wpide_save").click(saveDocument);
+	
 
-	});//end editor change event
+	
+	//add div for ace editor to latch on to
+	//$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
+	//create the editor instance
+	editor = ace.edit("fancyeditordiv");
+	//set the editor theme
+	editor.setTheme("ace/theme/dawn"); 
+	//get a copy of the initial file contents (the file being edited)
+	//var intialData = $('#newcontent').val()
+	var intialData = "Use the file manager to find a file you wish edit, click the file name to edit. \n\n";
+	editor.getSession().setValue( intialData );
+	
+	//make initial editor read only
+	$('#fancyeditordiv textarea').attr("disabled", "disabled");
+
+	//use editors php mode
+	var phpMode = require("ace/mode/php").Mode;
+	editor.getSession().setMode(new phpMode());
+	
+	//START AUTOCOMPLETE
+	//create the autocomplete dropdown
+	var ac = document.createElement('select');
+	ac.id = 'ac';
+	ac.name = 'ac';
+	ac.style.position='absolute';
+	ac.style.zIndex=100;
+	ac.style.width='auto';
+	ac.style.display='none';
+	ac.style.height='auto';
+	ac.size=10;
+	editor.container.appendChild(ac);
+
+	//hook onto any change in editor contents
+	editor.getSession().on('change', onSessionChange);//end editor change event
 
 
 
 	//START COMMANDS
-	var canon = require('pilot/canon');
-
+	
 	//Key up command
-	canon.addCommand({		
+	editor.commands.addCommand({		
 		name: "up",
 		bindKey: {
 			win: "Up",
@@ -227,85 +590,82 @@ jQuery(document).ready(function($) {
 		},			
 
 		exec: function(env, args, request) {
-			if( document.getElementById('ac').style.display === 'block'  ){
-
+			if (oHandler && oHandler.visible() === 'block'){
+				oHandler.previous();
+				
+				//show command help panel for this command
+				wpide_function_help();
+				
+			}else if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
-
-				if( select.selectedIndex==0 ){
-					select.selectedIndex=select.options.length-1;
-				}else{
-					select.selectedIndex=select.selectedIndex-1;
+				if( select.selectedIndex === 0 ) {
+					select.selectedIndex = select.options.length-1;
+				} else {
+					select.selectedIndex = select.selectedIndex-1;
 				}
-
-			}else{
+			} else {
 				var range = editor.getSelectionRange();
 				editor.clearSelection();
-				editor.moveCursorTo(range.end.row -1, range.end.column);
+				editor.moveCursorTo(range.end.row - 1, range.end.column);
 			}
 		}
 	});
 
 
 	//key down command
-	canon.addCommand({
-
+	editor.commands.addCommand({
 		name: "down",
-
 		bindKey: {
 			win: "Down",
 			mac: "Down",
 			sender: "editor"
 		},
-
 		exec: function(env, args, request) {
-			if( document.getElementById('ac').style.display === 'block' ){
-
+		
+			if (oHandler && oHandler.visible() === 'block'){
+				oHandler.next();
+				
+				//show command help panel for this command
+				wpide_function_help();
+				
+			}else if ( document.getElementById('ac').style.display === 'block' ) {
 				var select=document.getElementById('ac');
-			
-				if( select.selectedIndex==select.options.length-1 ){
+				if ( select.selectedIndex === select.options.length-1 ) {
 					select.selectedIndex=0;
-				}else{
+				} else {
 					select.selectedIndex=select.selectedIndex+1;
 				}
-			}else{
+			} else {
 				var range = editor.getSelectionRange();
 				editor.clearSelection();
 				editor.moveCursorTo(range.end.row +1, range.end.column);
 			}
 		}
 	});
+	
 
-
-	//enter/return command
-	function trythis () {
-
-			if( document.getElementById('ac').style.display === 'block'  ){
-		
-				var ac_dropdwn =document.getElementById('ac');
-				var tag=ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
-				var sel=editor.selection.getRange();
-				var line=editor.getSession().getLine(sel.start.row);										
-				sel.start.column=sel.start.column-(autocompletelength+1);
-				editor.selection.setSelectionRange(sel);				
-				editor.insert(tag);
-				autocompleting=false;
-			
-			}else{
-				editor.insert('\n');
-			}
-	}
-	canon.addCommand({
+	
+	editor.commands.addCommand({
 		name: "enter",
 		bindKey: {
 			win: "Return",
 			mac: "Return",
 			sender: "editor"
 		},
-		exec: trythis
+		exec: selectACitem
 	});
 
+	// save command: 
+	editor.commands.addCommand({
+		name: "save",
+		bindKey: {
+			win: "Ctrl-S",
+			mac: "Command-S",
+			sender: "editor"
+		},
+		exec: saveDocument
+	});
 
 	//END COMMANDS
-
 
 });//end jquery load

@@ -2,38 +2,42 @@
 Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
-Tested up to: 3.3.1
-Stable tag: 1.0.6
+Tested up to: 3.3.2
+Stable tag: 2.0
 
-Replace the default WordPress code editor for plugins and themes. Adding syntax highlighting, auto complete of WordPress functions + PHP, line numbers, auto backup of files before editing.
+WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
 == Description ==
 
-Out of frustration of unsatisfactory experiences with desktop based IDE's and code editors we decided to make use of the Ajax.org Cloud9 Editor (http://ace.ajax.org/) and embed it in place of the default WordPress file editor.
+WPide is a WordPress code editor with the long term goal of becoming the ultimate environment to code/develop WordPress themes and plugins. You can edit any files in your wp-content, not just plugins and themes. Code completion will help you remember your WordPress/PHP commands providing function reference along the way. Edit multiple concurrent files with the tabbed editor.
 
-The V2 Development version of this plugin can now be downloaded/installed automatically from the Github repository. You will be given this option when this plugin is first activated. The development version may contain bugs so use with caution.
+Please come forward (either on github or the WordPress support forum) with any bugs, annoyances or any improvements you can suggest. I'd like this plugin to be the best it can be and that's only going to happen if users chip in with their feedback. Code contributions welcome, over on Github.
 
-= This plugin does not currently work on Internet Explorer! =
+This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace.ajax.org/) which is the embeded code editor that powers much of the functionality.
 
 = Current Features: =
 
 *   Syntax highlighting
 *   Line numbers
-*   Auto complete of WordPress functions and PHP
-*   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups)
+*   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
+*   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups/filepath)
+*   File tree allowing you to access and edit any file in your wp-content folder (plugins, themes, uploads etc)
 *   Highlight matching parentheses
+*   Code folding
 *   Auto indentation
+*   Tabbed interface for editing multiple files (editing both plugin and theme files at the same time)
+*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour) ftp/ssh connections aren't setup yet, since WP will not remember a password need to work out how that will work. Maybe use modal to request password when you save but be able to click save all and save a batch with that password. Passwords defined in wp-config.php are persistent and would fix this problem but people don't generaly add those details. Open to ideas here.
 
-= Planned Features: =
+= Feature ideas and improvements: =
 
-*   Tabbed document interface for editing multiple files
-*   Ajax Save
-*   Create and edit directories and files
-*   ctrl + s saving
-*   Improve the code auto complete so that it shows command arguments rather than just commands, possibly with links through to the WordPress codex for further info
+*   Create new files and directories
+*   Image editing (combining many of the tools available in most Paint programs with high-quality features that have become ubiquitous in image editing programs)
+*   Improve the code autocomplete command information, providing more information on the commands, adding links through to the WordPress codex and PHP.net website for further info.
+*   Add find and replace functionality
 *   Create an admin panel to choose between syntax highlighting themes and turn on/off other Ajax.org Cloud9 functionality
-*   Better automated file backup process 
-*   Integration with git for version control
+*   Better automated file backup process
+*   Templates/shortcuts for frequently used code snippets, maybe even with an interface to accept variables that could be injected into code snippet templates.
+*   Integration with version control systems such as Git
 
 
 As with most plugins this one is open source. For issue tracking, further information and anyone wishing to get involved and help contribute to this project can do so over on github https://github.com/WPsites/WPide
@@ -61,6 +65,15 @@ No support for Internet Explorer right now
 
 == Changelog ==
 
+= 2.0 =
+* Recreated this plugin as a dedicated WPide section/app rather than extending the built in plugin/theme editor (just incase WP remove it)
+* Now using the WP filesystem API (although currently restricted to local access)
+* More security checks on file opening and editing
+* Added new file tree for exploring the file system and opening files (any file in wp-content)
+* Massive overhaul to code autocomplete functionality with the addition of function information right in the app
+* Update the ajaxorg Ace Editor to the current branch
+* Tabbed editing
+
 = 1.0.6 =
 * Added link to meta section of plugin list for easy install of V2 Dev version if you have dismissed the alert.
 
@@ -85,11 +98,9 @@ No support for Internet Explorer right now
 
 == DEV NOTES ==
 
-Maybe some interesting things here we could impliment to help with following the WordPress standard and more advanced code styntax checking
+Maybe some interesting things here we could implement to help with following the WordPress standard and more advanced code syntax checking
+
 http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-on-coda-and-textwrangler/
 
 Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.
-
-To give finer control over what files are editable in the plugin/theme editor and to remove the reliance of the built in plugin/theme editor functionality move the plugin to a dedicated admin page with it's own navigation menu and it's own file manager. Use http://abeautifulsite.net/blog/2008/03/jquery-file-tree/ as the file manager component.
-
 

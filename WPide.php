@@ -193,7 +193,7 @@ class WPide2
 	
 	public function add_my_menu_page() {
 		//add_menu_page("wpide", "wpide","edit_themes", "wpidesettings", array( &$this, 'my_menu_page') );
-		add_menu_page('wpide', 'wpide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ));
+		add_menu_page('WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ));
 	}
 	
 	public function my_menu_page() {

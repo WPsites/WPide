@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0
+Stable tag: 2.0.1
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -22,6 +22,7 @@ This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace
 *   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups/filepath)
 *   File tree allowing you to access and edit any file in your wp-content folder (plugins, themes, uploads etc)
+*   Add new files and folders anywhere in wp-content
 *   Highlight matching parentheses
 *   Code folding
 *   Auto indentation
@@ -52,6 +53,7 @@ Thomas Wieczorek - http://www.wieczo.net
 
 1. Upload the WPide folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Access WPide by clicking the WPide menu item in your main administration menu
 
 == Frequently Asked Questions ==
 
@@ -67,6 +69,9 @@ define('FS_CHMOD_FILE', (0644 & ~ umask()));
 1. Editor view, showing line numbers and syntax highlighting.
 
 == Changelog ==
+
+= 2.0.1 =
+* You can now create new files/folders
 
 = 2.0 =
 * Recreated this plugin as a dedicated WPide section/app rather than extending the built in plugin/theme editor (just incase WP remove it)

@@ -39,6 +39,9 @@ class WPide2
 			add_action('wp_ajax_wpide_get_file', 'WPide2::wpide_get_file' );
 			//setup ajax function to save file contents and do automatic backup if needed
 			add_action('wp_ajax_wpide_save_file', 'WPide2::wpide_save_file' );
+			//setup ajax function to create new item (folder, file etc)
+			add_action('wp_ajax_wpide_create_new', 'WPide2::wpide_create_new' );
+			
 		
 		}
 		
@@ -121,8 +124,9 @@ class WPide2
 			$files = $wp_filesystem->dirlist($root . $_POST['dir']);
 			//print_r($files);
             
-			if( count($files) > 2 ) { /* The 2 accounts for . and .. */
-				echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+			if( count($files) > 0 ) { 
+				
 				// All dirs
 				foreach( $files as $file => $file_info ) {
 					if( $file != '.' && $file != '..' && $file_info['type']=='d' ) {
@@ -136,8 +140,10 @@ class WPide2
 						echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "\">" . htmlentities($file) . "</a></li>";
 					}
 				}
-				echo "</ul>";	
 			}
+			//output toolbar for creating new file, folder etc
+			echo "<li class=\"create_new\"><a class='new_directory' title='Create a new directory here.' href=\"#\" rel=\"{type: 'directory', path: '" . htmlentities($_POST['dir']) . "'}\"></a> <a class='new_file' title='Create a new file here.' href=\"#\" rel=\"{type: 'file', path: '" . htmlentities($_POST['dir']) . "'}\"></a><br style='clear:both;' /></li>";
+			echo "</ul>";	
 		}
 	
 		die(); // this is required to return a proper result
@@ -159,6 +165,61 @@ class WPide2
 		$root = WP_CONTENT_DIR;
 		$file_name = $root . stripslashes($_POST['filename']);
 		echo $wp_filesystem->get_contents($file_name);
+		die(); // this is required to return a proper result
+	}
+	
+	public static function wpide_create_new() {
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+		//setup wp_filesystem api
+		global $wp_filesystem;
+		if ( ! WP_Filesystem($creds) ) 
+		    return false;
+		
+		$root = WP_CONTENT_DIR;
+        
+		//check all required vars are passed
+		if (strlen($_POST['path'])>0 && strlen($_POST['type'])>0 && strlen($_POST['file'])>0){
+			
+			
+			$filename = sanitize_file_name( $_POST['file'] );
+			$path = $_POST['path'];
+			
+			if ($_POST['type'] == "directory"){
+				
+				$write_result = $wp_filesystem->mkdir($root . $path . $filename, FS_CHMOD_DIR);
+				
+				if ($write_result){
+					die("1"); //created
+				}else{
+					echo "Problem creating directory" . $root . $path . $filename;
+				}
+				
+			}else if ($_POST['type'] == "file"){
+				
+				$write_result = $wp_filesystem->put_contents(
+					$root . $path . $filename,
+					' ',
+					FS_CHMOD_FILE // predefined mode settings for WP files
+				);
+				
+				if ($write_result){
+					die("1"); //created
+				}else{
+					echo "Problem creating file " . $root . $path . $filename;
+				}
+				
+			}
+			
+			
+			//print_r($_POST);
+			
+				
+		}
+		echo "0";
 		die(); // this is required to return a proper result
 	}
 	
@@ -205,33 +266,50 @@ class WPide2
 
 			var wpide_app_path = "<?php echo plugin_dir_url( __FILE__ ); ?>";
 			
-			
-			jQuery(document).ready( function($) {
-				$('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
+			function the_filetree() {
+				jQuery('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
 	
-				    if ( $(".wpide_tab[rel='"+file+"']").length > 0) { 
-					$(".wpide_tab[sessionrel='"+ $(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
-				    }else{
+				    if ( jQuery(parent).hasClass("create_new") ){ //create new file/folder
+					//to create a new item we need to know the name of it so show input
 					
-					var image_patern =new RegExp("(\.jpg|\.gif|\.png|\.bmp)$");
+					var item = eval('('+file+')');
+					
+					//hide all inputs just incase one is selected
+					jQuery(".new_item_inputs").hide();
+					//show the input form for this
+					jQuery("div.new_" + item.type).show();
+					jQuery("div.new_" + item.type + " input[name='new_" + item.type + "']").focus();
+					jQuery("div.new_" + item.type + " input[name='new_" + item.type + "']").attr("rel", file);
+				
+					
+				    }else if ( jQuery(".wpide_tab[rel='"+file+"']").length > 0) {  //focus existing tab
+					jQuery(".wpide_tab[sessionrel='"+ jQuery(".wpide_tab[rel='"+file+"']").attr("sessionrel") +"']").click();//focus the already open tab
+				    }else{ //open file
+					
+					var image_patern =new RegExp("(\.jpg|\.gif|\.png|\.bmp)jQuery");
 					if ( image_patern.test(file) ){
 						alert("Image editing is not currently available. It's a planned feature using http://pixlr.com/");
 					}else{
-						$(parent).addClass('wait');
+						jQuery(parent).addClass('wait');
 						 
 						wpide_set_file_contents(file, function(){
 								
 								//once file loaded remove the wait class/indicator
-								$(parent).removeClass('wait');
+								jQuery(parent).removeClass('wait');
 								
 							});
 						
-						$('#filename').val(file);
+						jQuery('#filename').val(file);
 					}
 					 
 				    }
 				    
 				});
+			}
+			
+			jQuery(document).ready(function() {
+				// Handler for .ready() called.
+				the_filetree() ;
 			});
 		</script>
 		
@@ -258,7 +336,14 @@ class WPide2
 					  <div id="major-publishing-actions"> 
 						<div id="wpide_file_browser"></div>
 						<br style="clear:both;" />
-						
+						<div class="new_file new_item_inputs">
+							<label for="new_folder">File name</label><input class="has_data" name="new_file" type="text" rel="" value="" placeholder="Filename.ext" />
+							<a href="#" id="wpide_create_new_file" class="button-primary">CREATE</a>
+						</div>
+						<div class="new_directory new_item_inputs">
+							<label for="new_directory">Directory name</label><input class="has_data" name="new_directory" type="text" rel="" value="" placeholder="Filename.ext" />
+							<a href="#" id="wpide_create_new_directory" class="button-primary">CREATE</a>
+						</div>
 						<div class="clear"></div>
 					  </div>
 					</div>

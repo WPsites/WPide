@@ -667,5 +667,50 @@ jQuery(document).ready(function($) {
 	});
 
 	//END COMMANDS
+	
+	
+	//click action for new directory/file submit link
+	$("#wpide_create_new_directory, #wpide_create_new_file").click(function(e){
+		e.preventDefault();
+	
+		var data_input = jQuery(this).parent().find("input.has_data");
+		var item = eval('('+ data_input.attr("rel") +')');
+		
+		//item.path file|directory
+		var data = { action: 'wpide_create_new', path: item.path, type: item.type, file: data_input.val(), _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val() };
+	
+		jQuery.post(ajaxurl, data, function(response) {
+			
+			if (response == "1"){
+				//remove the file/dir name from the text input
+				data_input.val("");
+				
+				if ( jQuery("ul.jqueryFileTree a[rel='"+ item.path +"']").length == 0){
+					
+					//if no parent then we are adding something to the wp-content folder so regenerate the whole filetree
+					the_filetree();
+				
+				}
+				
+				//click the parent once to hide 
+				jQuery("ul.jqueryFileTree a[rel='"+ item.path +"']").click();
+				
+				//hide the parent input block
+				data_input.parent().hide();
+				
+				//click the parent once again to show with new folder and focus on this area
+				jQuery("ul.jqueryFileTree a[rel='"+ item.path +"']").click();
+				jQuery("ul.jqueryFileTree a[rel='"+ item.path +"']").focus();
+				
+			}else if (response == "-1"){
+				alert("Permission/security problem. Refresh WPide and try again.");
+			}else{
+				alert(response);
+			}
+			
+			
+		});
+		
+	});
 
 });//end jquery load

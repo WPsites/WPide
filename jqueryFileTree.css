@@ -21,7 +21,9 @@ UL.jqueryFileTree A {
 	padding: 0px 2px;
 }
 
-UL.jqueryFileTree A:hover {
+UL.jqueryFileTree LI.directory > A:hover,
+UL.jqueryFileTree LI.file > A:hover
+{
 	background: #BDF;
 }
 
@@ -89,3 +91,47 @@ UL.jqueryFileTree A:hover {
 .jqueryFileTree LI.ext_xls { background: url(images/xls.png) left top no-repeat; }
 .jqueryFileTree LI.ext_xml { background: url(images/code.png) left top no-repeat; }
 .jqueryFileTree LI.ext_zip { background: url(images/zip.png) left top no-repeat; }
+
+a.new_directory{
+	background: url(images/new-folder.png) center no-repeat;
+}
+
+a.new_file{
+	background: url(images/new-file.png) center center no-repeat;
+}
+
+ul.jqueryFileTree .new_file,
+ul.jqueryFileTree .new_directory{
+	width:20px;
+	height:20px;
+	padding:2px;
+	float:left;
+	display:block;
+	opacity:0.6;
+}
+ul.jqueryFileTree .new_file:hover,
+ul.jqueryFileTree .new_directory:hover{
+	width:20px;
+	height:20px;
+	padding:2px;
+	float:left;
+	display:block;
+	opacity:1;
+}
+
+div.new_directory,
+div.new_file{
+	display:none;
+}
+
+#major-publishing-actions input[type='text'],
+#major-publishing-actions input[type='text']{
+	text-align:left;
+	width:150px;
+}
+
+#major-publishing-actions label{
+	display: block;
+	font-weight: bold;
+	padding-left: 3px;
+}

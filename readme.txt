@@ -22,7 +22,7 @@ This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace
 *   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups/filepath)
 *   File tree allowing you to access and edit any file in your wp-content folder (plugins, themes, uploads etc)
-*   Add new files and folders anywhere in wp-content
+*   Create new files and directories
 *   Highlight matching parentheses
 *   Code folding
 *   Auto indentation
@@ -31,7 +31,6 @@ This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace
 
 = Feature ideas and improvements: =
 
-*   Create new files and directories
 *   Image editing (combining many of the tools available in most Paint programs with high-quality features that have become ubiquitous in image editing programs)
 *   Improve the code autocomplete command information, providing more information on the commands, adding links through to the WordPress codex and PHP.net website for further info.
 *   Add find and replace functionality

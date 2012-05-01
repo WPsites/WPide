@@ -181,7 +181,7 @@ class WPide2
 		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
 		//create backup directory if not there
 		$new_file_info = pathinfo($backup_path);
-		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) $wp_filesystem->mkdir($new_file_info['dirname'], 0775);
+		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
 		
 		//do backup
 		$wp_filesystem->copy( $file_name, $backup_path );

@@ -55,9 +55,12 @@ Thomas Wieczorek - http://www.wieczo.net
 
 == Frequently Asked Questions ==
 
-= Does this plugin work on Internet Explorer =
+= Can I override the default file permissions when creating files/directories on the local filesystem =
 
-No support for Internet Explorer right now
+Yes you can using the below WordPress settings in wp-config.php which will effect files created with WPide and files added during the WordPress upgrade process.
+
+define('FS_CHMOD_DIR', (0755 & ~ umask()));
+define('FS_CHMOD_FILE', (0644 & ~ umask()));
 
 == Screenshots ==
 

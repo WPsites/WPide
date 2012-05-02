@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -13,7 +13,7 @@ WPide is a WordPress code editor with the long term goal of becoming the ultimat
 
 Please come forward (either on github or the WordPress support forum) with any bugs, annoyances or any improvements you can suggest. I'd like this plugin to be the best it can be and that's only going to happen if users chip in with their feedback. Code contributions welcome, over on Github.
 
-This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace.ajax.org/) which is the embeded code editor that powers much of the functionality.
+This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace.ajax.org/) which is the embedded code editor that powers much of the functionality.
 
 = Current Features: =
 
@@ -27,11 +27,11 @@ This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace
 *   Code folding
 *   Auto indentation
 *   Tabbed interface for editing multiple files (editing both plugin and theme files at the same time)
-*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour) ftp/ssh connections aren't setup yet, since WP will not remember a password need to work out how that will work. Maybe use modal to request password when you save but be able to click save all and save a batch with that password. Passwords defined in wp-config.php are persistent and would fix this problem but people don't generaly add those details. Open to ideas here.
+*   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour) ftp/ssh connections aren't setup yet, since WP will not remember a password need to work out how that will work. Maybe use modal to request password when you save but be able to click save all and save a batch with that password. Passwords defined in wp-config.php are persistent and would fix this problem but people don't generally add those details. Open to ideas here.
+*   Image editing/drawing (requires Flash -  will move over to HTML5 when there is a decent alternative)
 
 = Feature ideas and improvements: =
 
-*   Image editing (combining many of the tools available in most Paint programs with high-quality features that have become ubiquitous in image editing programs)
 *   Improve the code autocomplete command information, providing more information on the commands, adding links through to the WordPress codex and PHP.net website for further info.
 *   Add find and replace functionality
 *   Create an admin panel to choose between syntax highlighting themes and turn on/off other Ajax.org Cloud9 functionality
@@ -63,11 +63,19 @@ Yes you can using the below WordPress settings in wp-config.php which will effec
 define('FS_CHMOD_DIR', (0755 & ~ umask()));
 define('FS_CHMOD_FILE', (0644 & ~ umask()));
 
+= Whenever I try to edit an image the application says that it could not load the image =
+Either the image contains no image data (its a new empty file) or the image is not accessible to the image editor. Your images need to be accessible to the web. i.e. if you're developing a site on your local machine behind a router/firewall your local web server could not be accessible to the web.
+
 == Screenshots ==
 
 1. Editor view, showing line numbers and syntax highlighting.
+2. Image editor in action
+3. Showing auto complete, function reference and file tree.
 
 == Changelog ==
+
+= 2.0.2 =
+* Image editing is now available using the SumoPaint image editor and drawing application http://www.sumopaint.com/
 
 = 2.0.1 =
 * You can now create new files/folders

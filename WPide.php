@@ -362,6 +362,9 @@ class WPide2
 		if ( !current_user_can('edit_themes') )
 		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
 		
+		$app_url = get_bloginfo('url'); //need to make this https if we are currently looking on the site using https (even though https for admin might not be forced it can still cause issues)
+		if (is_ssl()) $app_url = str_replace("http:", "https:", $app_url);
+		
 		?>
 		<script>
 
@@ -419,7 +422,7 @@ class WPide2
 							});
 							
 							
-							window.open('http://www.sumopaint.com/app/?key=ebcdaezjeojbfgih&url=<?php echo get_bloginfo('url') . "/wp-content";?>' + file + '&opt=' + image_data + '&title=Edit image&service=Save back to WPide&target=<?php echo urlencode( get_bloginfo('url') . "/wp-admin/admin.php?wpide_save_image=yes" ) ;?>');
+							window.open('http://www.sumopaint.com/app/?key=ebcdaezjeojbfgih&url=<?php echo $app_url. "/wp-content";?>' + file + '&opt=' + image_data + '&title=Edit image&service=Save back to WPide&target=<?php echo urlencode( $app_url . "/wp-admin/admin.php?wpide_save_image=yes" ) ;?>');
 						
 						}
 				    

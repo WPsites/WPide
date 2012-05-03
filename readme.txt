@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -73,6 +73,9 @@ Either the image contains no image data (its a new empty file) or the image is n
 3. Showing auto complete, function reference and file tree.
 
 == Changelog ==
+
+= 2.0.3 =
+* If WPide cannot access your files due to permissions then when it starts up it will give you an alert to say this.
 
 = 2.0.2 =
 * Image editing is now available using the SumoPaint image editor and drawing application http://www.sumopaint.com/

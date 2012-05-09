@@ -17,15 +17,15 @@ class WPide2
 	public $site_url, $plugin_url;
 	
 	function __construct() {
-	
-		//add WPide to the menu
+        
+    	//add WPide to the menu
 		add_action( 'admin_menu',  array( &$this, 'add_my_menu_page' ) );
 		
 		//hook for processing incoming image saves
 		if ( isset($_GET['wpide_save_image']) ){
 			
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
-			define('FS_METHOD', 'direct');
+			$this->override_fs_method('direct');
 			
 			add_action('admin_init', array($this, 'wpide_save_image'));
 			
@@ -37,7 +37,7 @@ class WPide2
                 
                 
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
-			define('FS_METHOD', 'direct'); 
+			$this->override_fs_method('direct');
 
 			// Uncomment any of these calls to add the functionality that you need.
 			//add_action('admin_head', 'WPide2::add_admin_head');
@@ -72,6 +72,20 @@ class WPide2
 	}
 
 
+    public function override_fs_method($method = 'direct'){
+        
+        
+        if ( defined('FS_METHOD') ){
+            
+            define('WPIDE_FS_METHOD_FORCED', FS_METHOD); //make a note of the forced method
+            
+        }else{
+            
+            define('FS_METHOD', $method); //force direct
+            
+        }
+        
+    }
 
 	public static function add_admin_head()
 	{
@@ -356,18 +370,7 @@ class WPide2
     
     
     public static function wpide_startup_check() {
-		
-    	//check the user has the permissions
-		check_admin_referer('plugin-name-action_wpidenonce'); 
-		if ( !current_user_can('edit_themes') )
-			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
-		
-		//setup wp_filesystem api
-		global $wp_filesystem, $wp_version;
-		if ( ! WP_Filesystem($creds) ) 
-		    return false;
-		
-		$root = WP_CONTENT_DIR;
+        global $wp_filesystem, $wp_version;
         
         echo "\n\n\n\nWPIDE STARUP CHECKS \n";
         echo "___________________ \n\n";
@@ -378,6 +381,30 @@ class WPide2
         }else{
             echo "WordPress version = " . $wp_version . " (which is too old to run WPide) \n\n";
         }
+		
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+            
+        if ( defined( 'WPIDE_FS_METHOD_FORCED' ) ){
+            echo "WordPress filesystem API has been forced to use the " . WPIDE_FS_METHOD_FORCED . " method by another plugin/WordPress. \n\n";
+        }
+		
+		//setup wp_filesystem api
+        $wpide_filesystem_before = $wp_filesystem;
+		if ( ! WP_Filesystem($creds) ) {
+            
+            echo "There has been a problem initialising the filesystem API \n\n";
+            echo "Filesystem API before this plugin ran: \n\n" . print_r($wpide_filesystem_before, true);
+            echo "Filesystem API now: \n\n" . print_r($wp_filesystem, true);
+    	    
+		}
+        unset($wpide_filesystem_before);
+        
+
+		$root = WP_CONTENT_DIR;
+        
 			
         //Running webservers user and group
         echo "Web server user/group = " . getenv('APACHE_RUN_USER') . ":" . getenv('APACHE_RUN_GROUP') . "\n";

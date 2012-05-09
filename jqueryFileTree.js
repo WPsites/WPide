@@ -92,7 +92,7 @@ if(jQuery) (function($){
 				
 				//if nothing returned then let user know something wrong with permissions
 				if ( $(this).children('.jqueryFileTree').length==0 ){
-					alert('It doesn\'t look like WPide will work on your sysetm. \n\n WPide is having trouble accessing your files. Your file permissions may be set to not writable, also on most systems your WordPress files must be owned by the same user that the webserver itself is running under. ');
+					alert('WPide is having trouble accessing your files.');
 				}
 			});
 		}

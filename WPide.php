@@ -35,6 +35,7 @@ class WPide2
 		if ( $_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ||
 			$_GET['page'] === 'wpide' ){
                 
+                
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
 			define('FS_METHOD', 'direct'); 
 
@@ -55,7 +56,8 @@ class WPide2
 			//setup ajax function to create new item (folder, file etc)
 			add_action('wp_ajax_wpide_image_edit_key', 'WPide2::wpide_image_edit_key' );
 			
-			
+			//setup ajax function for startup to get some debug info, checking permissions etc
+    		add_action('wp_ajax_wpide_startup_check', 'WPide2::wpide_startup_check' );
 			
 		
 		}
@@ -351,6 +353,98 @@ class WPide2
 		
 		//return;
 	}
+    
+    
+    public static function wpide_startup_check() {
+		
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+		//setup wp_filesystem api
+		global $wp_filesystem, $wp_version;
+		if ( ! WP_Filesystem($creds) ) 
+		    return false;
+		
+		$root = WP_CONTENT_DIR;
+        
+        echo "\n\n\n\nWPIDE STARUP CHECKS \n";
+        echo "___________________ \n\n";
+        
+        //WordPress version
+        if ($wp_version > 3){
+            echo "WordPress version = " . $wp_version . "\n\n";
+        }else{
+            echo "WordPress version = " . $wp_version . " (which is too old to run WPide) \n\n";
+        }
+			
+        //Running webservers user and group
+        echo "Web server user/group = " . getenv('APACHE_RUN_USER') . ":" . getenv('APACHE_RUN_GROUP') . "\n";
+        //wp-content user and group
+        echo "wp-content owner/group = " . $wp_filesystem->owner( $root ) . ":" . $wp_filesystem->group( $root ) . "\n\n";
+        
+        
+        //check we can list wp-content files
+        if( $wp_filesystem->exists( $root ) ){
+            
+            $files = $wp_filesystem->dirlist( $root );
+            if ( count($files) > 0){
+                echo "wp-content folder exists and contains ". count($files) ." files \n";
+            }else{
+                echo "wp-content folder exists but we cannot read it's contents \n";
+            }
+        }
+        
+        // $wp_filesystem->owner() $wp_filesystem->group() $wp_filesystem->is_writable() $wp_filesystem->is_readable()
+        echo "\nUsing the ".$wp_filesystem->method." method of the WP filesystem API\n";
+        
+        //wp-content editable?
+        echo "The wp-content folder ". ( $wp_filesystem->is_readable( $root )==1 ? "IS":"IS NOT" ) ." readable and ". ( $wp_filesystem->is_writable( $root )==1 ? "IS":"IS NOT" ) ." writable by this method \n";
+        
+        
+        //plugins folder editable
+        echo "The wp-content/plugins folder ". ( $wp_filesystem->is_readable( $root."/plugins" )==1 ? "IS":"IS NOT" ) ." readable and ". ( $wp_filesystem->is_writable( $root."/plugins" )==1 ? "IS":"IS NOT" ) ." writable by this method \n";
+     
+
+        //themes folder editable
+        echo "The wp-content/themes folder ". ( $wp_filesystem->is_readable( $root."/themes" )==1 ? "IS":"IS NOT" ) ." readable and ". ( $wp_filesystem->is_writable( $root."/themes" )==1 ? "IS":"IS NOT" ) ." writable by this method \n";
+     
+        
+        
+        echo "___________________ \n\n\n\n";
+        
+        echo " If the file tree to the right is empty there is a possibility that your server permissions are not compatible with this plugin. \n The startup information above may shed some light on things. \n Paste that information into the support forum for further assistance.";
+        
+        
+		die();
+			
+		//set backup filename
+		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
+		//create backup directory if not there
+		$new_file_info = pathinfo($backup_path);
+		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
+		
+		//do backup
+		$wp_filesystem->move( $file_name, $backup_path );
+		
+	
+		//save file
+		if( $wp_filesystem->put_contents( $file_name, $_POST['content']) ) {
+			$result = "success";
+		}
+		
+		if ($result == "success"){
+			wp_die('<p>'.__('<strong>Image saved.</strong> <br />You may <a href="JavaScript:window.close();">close this window / tab</a>.').'</p>');
+		}else{
+			wp_die('<p>'.__('<strong>Problem saving image.</strong> <br /><a href="JavaScript:window.close();">Close this window / tab</a> and try editing the image again.').'</p>');
+		}
+	
+		
+		//return;
+	}
+    
+    
 	
 	
 	public function add_my_menu_page() {

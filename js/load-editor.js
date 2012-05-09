@@ -551,7 +551,23 @@ jQuery(document).ready(function($) {
 	//get a copy of the initial file contents (the file being edited)
 	//var intialData = $('#newcontent').val()
 	var intialData = "Use the file manager to find a file you wish edit, click the file name to edit. \n\n";
-	editor.getSession().setValue( intialData );
+    
+    
+    //startup info - usefull for debugging
+        var data = { action: 'wpide_startup_check', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val() };
+	
+		jQuery.post(ajaxurl, data, function(response) {
+            if (response == "-1"){
+    			intialData = intialData + "Permission/security problem with ajax request. Refresh WPide and try again. \n\n";
+			}else{
+    		    intialData = intialData + response;
+			}
+            
+            editor.getSession().setValue( intialData );
+            
+		});
+    
+	
 	
 	//make initial editor read only
 	$('#fancyeditordiv textarea').attr("disabled", "disabled");

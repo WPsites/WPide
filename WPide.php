@@ -8,18 +8,30 @@ Author: Simon Dunton
 Author URI: http://www.wpsites.co.uk
 */
 
+// Exit if accessed directly
+if ( !defined( 'ABSPATH' ) ) exit;
 
 
-class WPide2
+if ( !class_exists( 'wpide' ) ) :
+class wpide
 
 {
 
 	public $site_url, $plugin_url;
+    
+    /**
+	 * The main WPide loader (PHP4 compatable)
+	 *
+	 * @uses wpide::__construct() Setup the globals needed
+	 */
+	public function wpide() {
+		$this->__construct();
+	}
 	
 	function __construct() {
         
     	//add WPide to the menu
-		add_action( 'admin_menu',  array( &$this, 'add_my_menu_page' ) );
+		add_action( 'admin_menu',  array( $this, 'add_my_menu_page' ) );
 		
 		//hook for processing incoming image saves
 		if ( isset($_GET['wpide_save_image']) ){
@@ -27,7 +39,7 @@ class WPide2
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
 			$this->override_fs_method('direct');
 			
-			add_action('admin_init', array($this, 'wpide_save_image'));
+			add_action('admin_init', array( $this, 'wpide_save_image') );
 			
 		}
 		
@@ -40,24 +52,23 @@ class WPide2
 			$this->override_fs_method('direct');
 
 			// Uncomment any of these calls to add the functionality that you need.
-			//add_action('admin_head', 'WPide2::add_admin_head');
-			add_action('admin_init', 'WPide2::add_admin_js');
-			add_action('admin_init', 'WPide2::add_admin_styles');
+			add_action('admin_init', array( $this, 'add_admin_js' ) );
+			add_action('admin_init', array( $this, 'add_admin_styles' ) );
 			
 			//setup jqueryFiletree list callback
-			add_action('wp_ajax_jqueryFileTree', 'WPide2::jqueryFileTree_get_list');
+			add_action('wp_ajax_jqueryFileTree', array( $this, 'jqueryFileTree_get_list' ) );
 			//setup ajax function to get file contents for editing 
-			add_action('wp_ajax_wpide_get_file', 'WPide2::wpide_get_file' );
+			add_action('wp_ajax_wpide_get_file',  array( $this, 'wpide_get_file' ) );
 			//setup ajax function to save file contents and do automatic backup if needed
-			add_action('wp_ajax_wpide_save_file', 'WPide2::wpide_save_file' );
+			add_action('wp_ajax_wpide_save_file',  array( $this, 'wpide_save_file' ) );
 			//setup ajax function to create new item (folder, file etc)
-			add_action('wp_ajax_wpide_create_new', 'WPide2::wpide_create_new' );
+			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
 			
 			//setup ajax function to create new item (folder, file etc)
-			add_action('wp_ajax_wpide_image_edit_key', 'WPide2::wpide_image_edit_key' );
+			add_action('wp_ajax_wpide_image_edit_key', array( $this, 'wpide_image_edit_key' )  );
 			
 			//setup ajax function for startup to get some debug info, checking permissions etc
-    		add_action('wp_ajax_wpide_startup_check', 'WPide2::wpide_startup_check' );
+    		add_action('wp_ajax_wpide_startup_check', array( $this, 'wpide_startup_check' ) );
 			
 		
 		}
@@ -77,7 +88,7 @@ class WPide2
         
         if ( defined('FS_METHOD') ){
             
-            define('WPIDE_FS_METHOD_FORCED', FS_METHOD); //make a note of the forced method
+            define('WPIDE_FS_METHOD_FORCED_ELSEWHERE', FS_METHOD); //make a note of the forced method
             
         }else{
             
@@ -387,7 +398,7 @@ class WPide2
 		if ( !current_user_can('edit_themes') )
 			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
             
-        if ( defined( 'WPIDE_FS_METHOD_FORCED' ) ){
+        if ( defined( 'WPIDE_FS_METHOD_FORCED_ELSEWHERE' ) ){
             echo "WordPress filesystem API has been forced to use the " . WPIDE_FS_METHOD_FORCED . " method by another plugin/WordPress. \n\n";
         }
 		
@@ -649,5 +660,9 @@ class WPide2
 	}
 
 }
-add_action("init", create_function('', 'new WPide2();'));
+
+$wpide = new wpide();
+
+endif; // class_exists check
+
 ?>

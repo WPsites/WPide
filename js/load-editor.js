@@ -481,13 +481,12 @@ function wpide_set_file_contents(file, callback_func){
             //clear session and undo
     	   saved_undo_manager[clicksesh] = undefined;
 		   saved_editor_sessions[clicksesh] = undefined;
-          
            
            //Clear the active editor if all tabs closed or activate first tab if required since the active tab may have been deleted
            if (jQuery(".wpide_tab").length == 0){
                editor.getSession().setValue( "" );
            }else if ( activeFallback ){
-               jQuery(".wpide_tab")[0].click();
+               jQuery( "#" + jQuery(".wpide_tab")[0].id ).click();
            }
    
 		});

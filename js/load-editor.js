@@ -15,14 +15,17 @@ var TokenIterator = require("ace/token_iterator").TokenIterator;
 var oHandler;
 
 function onSessionChange(e)  {
-	//don't continue with autocomplete if /n entered
+	
+	if( editor.getSession().enable_autocomplete === false){
+        return;   
+	}
+    
+    //don't continue with autocomplete if /n entered
 	try {
 		if ( e.data.text.charCodeAt(0) === 10 ){
 			return;
 		}
 	}catch(error){}
-	
-	
 
 	try {
 		if ( e.data.action == 'removeText' ){
@@ -428,6 +431,9 @@ function wpide_set_file_contents(file, callback_func){
 		
 			var currentFilename = jQuery(this).attr('rel');
 			var mode;
+            
+            //turn autocomplete off initially, then enable as needed
+            editor.getSession().enable_autocomplete = false;
 
             //set the editor mode based on file name
 			if (/\.css$/.test(currentFilename)) {
@@ -440,11 +446,14 @@ function wpide_set_file_contents(file, callback_func){
 				mode = require("ace/mode/javascript").Mode;
 			}
 			else {
-				mode = require("ace/mode/php").Mode; //default to php	
+				mode = require("ace/mode/php").Mode; //default to php
+                //only enable session change / auto complete if needed
+                editor.getSession().enable_autocomplete = true;
 			}
 			editor.getSession().setMode(new mode());
 			
-			editor.getSession().on('change', onSessionChange);
+            editor.getSession().on('change', onSessionChange);
+            
 			editor.resize(); 
 			editor.focus(); 
 			//make a note of current editor

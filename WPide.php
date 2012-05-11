@@ -43,9 +43,10 @@ class wpide
 			
 		}
 		
+          
 		//only include this plugin if on theme editor, plugin editor or an ajax call
-		if ( $_SERVER['PHP_SELF'] === '/wp-admin/admin-ajax.php' ||
-			$_GET['page'] === 'wpide' ){
+		if ( $_GET['page'] === 'wpide' ||
+			 preg_match('#admin-ajax\.php$#', $_SERVER['PHP_SELF']) ){
                 
                 
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'

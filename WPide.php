@@ -45,7 +45,7 @@ class wpide
 		
           
 		//only include this plugin if on theme editor, plugin editor or an ajax call
-		if ( $_GET['page'] === 'wpide' ||
+		if ( (isset($_GET['page']) && $_GET['page'] === 'wpide') ||
 			 preg_match('#admin-ajax\.php$#', $_SERVER['PHP_SELF']) ){
                 
                 

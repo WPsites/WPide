@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0.7
+Stable tag: 2.0.8
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -14,6 +14,8 @@ WPide is a WordPress code editor with the long term goal of becoming the ultimat
 Please come forward (either on github or the WordPress support forum) with any bugs, annoyances or any improvements you can suggest. I'd like this plugin to be the best it can be and that's only going to happen if users chip in with their feedback. Code contributions welcome, over on Github.
 
 This plugin would not be possible without the Ajax.org Cloud9 Editor (http://ace.ajax.org/) which is the embedded code editor that powers much of the functionality.
+
+This plugin performs best in the Chrome web browser.
 
 = Current Features: =
 
@@ -73,6 +75,9 @@ Either the image contains no image data (its a new empty file) or the image is n
 3. Showing auto complete, function reference and file tree.
 
 == Changelog ==
+
+= 2.0.8 =
+* Fix browser compatibility issues
 
 = 2.0.7 =
 * Fixing issue with closing tabs not focusing onto next tab once closed.

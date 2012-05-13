@@ -218,3 +218,13 @@
             visibility: hidden;
         }
         
+        div#side-info-column{
+               width:23%;
+        }
+        #submitdiv.postbox{
+                min-width:220px;
+        }
+        
+        
+        
+        

@@ -116,21 +116,20 @@ function onSessionChange(e)  {
 	var lead = sel.getSelectionLead();
 
 	var pos = editor.renderer.textToScreenCoordinates(lead.row, lead.column);
-	var ac; // #ac is auto complete html select element
+	var ac = document.getElementById('ac'); // #ac is auto complete html select element
 
+    
 
-
-	if( document.getElementById('ac') ){
-		ac=document.getElementById('ac');
-
-	//add editor click listener
+	if( typeof ac !== 'undefined' ){
+		
+        //add editor click listener
         //editor clicks should hide the autocomplete dropdown
         editor.container.addEventListener('click', function(e){
 		
-		wpide_close_autocomplete();
-	       
-	       	autocompleting=false;
-		autocompletelength = 2;
+            wpide_close_autocomplete();
+            
+            autocompleting=false;
+            autocompletelength = 2;
 		
         }, false);
 	
@@ -241,17 +240,33 @@ function onSessionChange(e)  {
 		oHandler = jQuery("#ac").msDropDown({visibleRows:10, rowHeight:20}).data("dd");
 		
 		jQuery("#ac_child").click(function(item){
-			//console.log(item.srcElement.textContent);
-			selectACitem(item.srcElement.textContent);
+			//get the link node and pass to select AC item function
+            if (typeof item.srcElement != 'undefined'){
+                var link_node = item.srcElement; //works on chrome
+            }else{
+                var link_node = item.target; //works on Firefox etc
+            }
+			
+            selectACitem(link_node);
 		});
 		
 		jQuery("#ac_child a").mouseover(function(item){
 			//show the code in the info panel
-			
+            
+            //get the link ID
+            if (typeof item.srcElement != 'undefined'){
+                var link_id = item.srcElement.id; //works on chrome
+            }else{
+                var link_id = item.target.id; //works on Firefox etc
+            }
+            
+            if (link_id == '') return; //if the link doesn't have an id it's not valid so just stop
+            
+            
 			//if this command item is enabled
-			if (jQuery("#"+item.srcElement.id).hasClass("enabled")){
+			if (jQuery("#"+link_id).hasClass("enabled")){
 				
-				var selected_item_index = jQuery("#"+item.srcElement.id).index();
+				var selected_item_index = jQuery("#"+link_id).index();
 				
 				if (selected_item_index > -1){ //if select item is valid
 					
@@ -288,8 +303,8 @@ function token_test(){
 }
 
 function wpide_close_autocomplete(){
-	if (ac) ac.style.display='none';
-	if (oHandler) oHandler.close();
+	if (typeof document.getElementById('ac') != 'undefined') document.getElementById('ac').style.display='none';
+	if (typeof oHandler != 'undefined') oHandler.close();
 	
 	autocompleting = false;
 	
@@ -518,7 +533,7 @@ function saveDocument() {
 
 //enter/return command
 function selectACitem (item) {
-	if( document.getElementById('ac').style.display === 'block'  ){
+	if( document.getElementById('ac').style.display === 'block' && oHandler.visible() == 'block' ){
 		var ac_dropdwn = document.getElementById('ac');
 		var tag = ac_dropdwn.options[ac_dropdwn.selectedIndex].value;
 		var sel = editor.selection.getRange();
@@ -534,7 +549,7 @@ function selectACitem (item) {
 		//clean up the tag/command
 		tag = tag.replace(")", ""); //remove end parenthesis
 		
-		
+		//console.log(tag);
 		editor.selection.setSelectionRange(sel);				
 		editor.insert(tag);
 		
@@ -619,6 +634,7 @@ jQuery(document).ready(function($) {
 				
 				//show command help panel for this command
 				wpide_function_help();
+                console.log("handler is visible");
 				
 			}else if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
@@ -627,6 +643,7 @@ jQuery(document).ready(function($) {
 				} else {
 					select.selectedIndex = select.selectedIndex-1;
 				}
+                 console.log("ac is visible");
 			} else {
 				var range = editor.getSelectionRange();
 				editor.clearSelection();

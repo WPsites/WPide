@@ -49,8 +49,8 @@ exports.cssText = "\
 }\
 \
 .ace-solarized-dark .ace_gutter {\
-  background: #e8e8e8;\
-  color: #333;\
+  background: #09222b;\
+  color: #d0edf7;\
 }\
 \
 .ace-solarized-dark .ace_print_margin {\
@@ -75,9 +75,14 @@ exports.cssText = "\
   border-left: 0px;\
   border-bottom: 1px solid #D30102;\
 }\
- \
+\
 .ace-solarized-dark .ace_marker-layer .ace_selection {\
   background: #073642;\
+}\
+\
+.ace-solarized-dark.multiselect .ace_selection.start {\
+  box-shadow: 0 0 3px 0px #002B36;\
+  border-radius: 2px;\
 }\
 \
 .ace-solarized-dark .ace_marker-layer .ace_step {\
@@ -92,11 +97,14 @@ exports.cssText = "\
 .ace-solarized-dark .ace_marker-layer .ace_active_line {\
   background: #073642;\
 }\
+.ace-solarized-dark .ace_gutter_active_line{\
+  background: #0d3440;\
+}\
 \
 .ace-solarized-dark .ace_marker-layer .ace_selected_word {\
   border: 1px solid #073642;\
 }\
-       \
+\
 .ace-solarized-dark .ace_invisible {\
   color: rgba(147, 161, 161, 0.50);\
 }\

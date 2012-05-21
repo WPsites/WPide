@@ -84,7 +84,7 @@ var HaxeHighlightRules = function() {
                 token : "comment",
                 regex : "\\/\\/.*$"
             },
-            new DocCommentHighlightRules().getStartRule("doc-start"),
+            DocCommentHighlightRules.getStartRule("doc-start"),
             {
                 token : "comment", // multi line comment
                 regex : "\\/\\*",
@@ -153,7 +153,7 @@ var HaxeHighlightRules = function() {
     };
 
     this.embedRules(DocCommentHighlightRules, "doc-",
-        [ new DocCommentHighlightRules().getEndRule("start") ]);
+        [ DocCommentHighlightRules.getEndRule("start") ]);
 };
 
 oop.inherits(HaxeHighlightRules, TextHighlightRules);
@@ -231,27 +231,24 @@ var DocCommentHighlightRules = function() {
 
 oop.inherits(DocCommentHighlightRules, TextHighlightRules);
 
-(function() {
-
-    this.getStartRule = function(start) {
-        return {
-            token : "comment.doc", // doc comment
-            merge : true,
-            regex : "\\/\\*(?=\\*)",
-            next  : start
-        };
+DocCommentHighlightRules.getStartRule = function(start) {
+    return {
+        token : "comment.doc", // doc comment
+        merge : true,
+        regex : "\\/\\*(?=\\*)",
+        next  : start
     };
-    
-    this.getEndRule = function (start) {
-        return {
-            token : "comment.doc", // closing comment
-            merge : true,
-            regex : "\\*\\/",
-            next  : start
-        };
-    };
+};
 
-}).call(DocCommentHighlightRules.prototype);
+DocCommentHighlightRules.getEndRule = function (start) {
+    return {
+        token : "comment.doc", // closing comment
+        merge : true,
+        regex : "\\*\\/",
+        next  : start
+    };
+};
+
 
 exports.DocCommentHighlightRules = DocCommentHighlightRules;
 
@@ -561,7 +558,8 @@ var CstyleBehaviour = function () {
 oop.inherits(CstyleBehaviour, Behaviour);
 
 exports.CstyleBehaviour = CstyleBehaviour;
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -655,7 +653,8 @@ oop.inherits(FoldMode, BaseFoldMode);
     
 }).call(FoldMode.prototype);
 
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version

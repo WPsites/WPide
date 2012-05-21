@@ -164,7 +164,7 @@ var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocComme
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
 var PhpHighlightRules = function() {
-    var docComment = new DocCommentHighlightRules();
+    var docComment = DocCommentHighlightRules;
     // http://php.net/quickref.php
     var builtinFunctions = lang.arrayToMap(
         ('abs|acos|acosh|addcslashes|addslashes|aggregate|aggregate_info|aggregate_methods|aggregate_methods_by_list|aggregate_methods_by_regexp|' +
@@ -1269,7 +1269,7 @@ var PhpHighlightRules = function() {
     };
 
     this.embedRules(DocCommentHighlightRules, "doc-",
-        [ new DocCommentHighlightRules().getEndRule("start") ]);
+        [ DocCommentHighlightRules.getEndRule("start") ]);
 };
 
 oop.inherits(PhpHighlightRules, TextHighlightRules);
@@ -1347,27 +1347,24 @@ var DocCommentHighlightRules = function() {
 
 oop.inherits(DocCommentHighlightRules, TextHighlightRules);
 
-(function() {
-
-    this.getStartRule = function(start) {
-        return {
-            token : "comment.doc", // doc comment
-            merge : true,
-            regex : "\\/\\*(?=\\*)",
-            next  : start
-        };
+DocCommentHighlightRules.getStartRule = function(start) {
+    return {
+        token : "comment.doc", // doc comment
+        merge : true,
+        regex : "\\/\\*(?=\\*)",
+        next  : start
     };
-    
-    this.getEndRule = function (start) {
-        return {
-            token : "comment.doc", // closing comment
-            merge : true,
-            regex : "\\*\\/",
-            next  : start
-        };
-    };
+};
 
-}).call(DocCommentHighlightRules.prototype);
+DocCommentHighlightRules.getEndRule = function (start) {
+    return {
+        token : "comment.doc", // closing comment
+        merge : true,
+        regex : "\\*\\/",
+        next  : start
+    };
+};
+
 
 exports.DocCommentHighlightRules = DocCommentHighlightRules;
 
@@ -1677,7 +1674,8 @@ var CstyleBehaviour = function () {
 oop.inherits(CstyleBehaviour, Behaviour);
 
 exports.CstyleBehaviour = CstyleBehaviour;
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -1771,7 +1769,8 @@ oop.inherits(FoldMode, BaseFoldMode);
     
 }).call(FoldMode.prototype);
 
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version

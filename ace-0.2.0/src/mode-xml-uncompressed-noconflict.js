@@ -125,12 +125,18 @@ var XmlHighlightRules = function() {
             regex : "<\\!--",
             next : "comment"
         }, {
+            token : "xml_pe",
+            regex : "<\\!.*?>"
+        }, {
             token : "meta.tag", // opening tag
             regex : "<\\/?",
             next : "tag"
         }, {
             token : "text",
             regex : "\\s+"
+        }, {
+            token : "constant.character.entity",
+            regex : "(?:&#[0-9]+;)|(?:&#x[0-9a-fA-F]+;)|(?:&[a-zA-Z0-9_:\\.-]+;)"
         }, {
             token : "text",
             regex : "[^<]+"
@@ -280,7 +286,7 @@ exports.tag = function(states, name, nextState) {
             }
         },        
         merge : true,
-        regex : "[-_a-zA-Z0-9:!]+",
+        regex : "[-_a-zA-Z0-9:]+",
         next : name + "_embed_attribute_list" 
     }, {
         token: "empty",
@@ -403,7 +409,8 @@ var XmlBehaviour = function () {
 oop.inherits(XmlBehaviour, Behaviour);
 
 exports.XmlBehaviour = XmlBehaviour;
-});/* vim:ts=4:sts=4:sw=4:
+});
+/* vim:ts=4:sts=4:sw=4:
  * ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -627,7 +634,8 @@ var CstyleBehaviour = function () {
 oop.inherits(CstyleBehaviour, Behaviour);
 
 exports.CstyleBehaviour = CstyleBehaviour;
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -730,7 +738,7 @@ oop.inherits(FoldMode, BaseFoldMode);
         };
     };
     
-    /**
+    /*
      * reads a full tag and places the iterator after the tag
      */
     this._readTagForward = function(iterator) {
@@ -888,7 +896,8 @@ oop.inherits(FoldMode, BaseFoldMode);
 
 }).call(FoldMode.prototype);
 
-});/* ***** BEGIN LICENSE BLOCK *****
+});
+/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version

@@ -49,8 +49,8 @@ exports.cssText = "\
 }\
 \
 .ace-monokai .ace_gutter {\
-  background: #e8e8e8;\
-  color: #333;\
+  background: #292a24;\
+  color: #f1f1f1;\
 }\
 \
 .ace-monokai .ace_print_margin {\
@@ -75,9 +75,14 @@ exports.cssText = "\
   border-left: 0px;\
   border-bottom: 1px solid #F8F8F0;\
 }\
- \
+\
 .ace-monokai .ace_marker-layer .ace_selection {\
   background: #49483E;\
+}\
+\
+.ace-monokai.multiselect .ace_selection.start {\
+  box-shadow: 0 0 3px 0px #272822;\
+  border-radius: 2px;\
 }\
 \
 .ace-monokai .ace_marker-layer .ace_step {\
@@ -89,14 +94,17 @@ exports.cssText = "\
   border: 1px solid #49483E;\
 }\
 \
-.ace-monokai .ace_marker-layer .ace_active_line {\
+.ace-monokai .ace_marker-layer .ace_active_line{\
   background: #49483E;\
+}\
+.ace-monokai .ace_gutter_active_line{\
+  background: #191916;\
 }\
 \
 .ace-monokai .ace_marker-layer .ace_selected_word {\
   border: 1px solid #49483E;\
 }\
-       \
+\
 .ace-monokai .ace_invisible {\
   color: #49483E;\
 }\

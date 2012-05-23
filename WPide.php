@@ -553,6 +553,8 @@ class wpide
 								image_data = file+'::'+response;
 								
 							});
+                            
+                            jQuery.ajaxSetup({async:true});//enable async again
 							
 							
 							window.open('http://www.sumopaint.com/app/?key=ebcdaezjeojbfgih&url=<?php echo $app_url. "/wp-content";?>' + file + '&opt=' + image_data + '&title=Edit image&service=Save back to WPide&target=<?php echo urlencode( $app_url . "/wp-admin/admin.php?wpide_save_image=yes" ) ;?>');

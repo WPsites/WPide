@@ -89,6 +89,7 @@ if(jQuery) (function($){
 				// Get the initial file list
 				jQuery.ajaxSetup({async:false}); //we need to wait until we get the response 
 				showTree( $(this), escape(o.root) );
+                jQuery.ajaxSetup({async:true}); //enable async again 
 				
 				//if nothing returned then let user know something wrong with permissions
 				if ( $(this).children('.jqueryFileTree').length==0 ){

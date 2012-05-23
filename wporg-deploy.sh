@@ -1,4 +1,7 @@
 #! /bin/bash
+#
+# WordPress.org SVN deploy script for easily publishing your WordPress plugins that primarily use the Git version control system.
+#
 # deploy script came from here: https://github.com/thenbrent/multisite-user-management/blob/master/deploy.sh
 # Which is a modification of Dean Clatworthy's deploy script as found here: https://github.com/deanc/wordpress-plugin-git-svn
 # The difference is that this script lives in the plugin's git repo & doesn't require an existing SVN repo.

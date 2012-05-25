@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0.11
+Stable tag: 2.0.12
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -75,6 +75,12 @@ Either the image contains no image data (its a new empty file) or the image is n
 3. Showing auto complete, function reference and file tree.
 
 == Changelog ==
+
+= 2.0.12 =
+* Added links to the WordPress codex and the PHP manual from within the function refrence for further info
+
+= 2.0.11 =
+* Newly created files use to contain a space, instead it now defaults to a blank file.
 
 = 2.0.10 =
 * Fixed a problem with file loading (ajax) indicator not showing.

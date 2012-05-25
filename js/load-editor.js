@@ -353,7 +353,8 @@ function wpide_function_help() {
 								   "<span class='wpide_func_desc'>" + autocomplete_wordpress[key].desc + "</span><br /><br /><em class='wpide_func_params'>" +
 								   param_text + "</em>"+
 								   "<strong class='wpide_func_highlight'>)</strong> " +
-								   returns_text
+								   returns_text +
+                                   "<p><a href='http://codex.wordpress.org/Function_Reference/" + key  + "' target='_blank'>See " + key  + "() in the WordPress codex</a></p>"
 								   );
 			  }
 			  
@@ -388,7 +389,8 @@ function wpide_function_help() {
 								   autocomplete_php[key].desc + "<br /><br /><em class='wpide_func_params'>" +
 								   param_text + "</em>" +
 								   "<strong class='wpide_func_highlight'>)</strong>" +
-								   returns_text
+								   returns_text +
+                                   "<p><a href='http://php.net/manual/en/function." + key.replace(/_/g, "-")  + ".php' target='_blank'>See " + key  + "() in the PHP manual</a></p>"
 								   );
 				
 			  }

@@ -270,9 +270,10 @@ class wpide
 				
 			}else if ($_POST['type'] == "file"){
 				
+                //write the file
 				$write_result = $wp_filesystem->put_contents(
 					$root . $path . $filename,
-					' ',
+					'',
 					FS_CHMOD_FILE // predefined mode settings for WP files
 				);
 				

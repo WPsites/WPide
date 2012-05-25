@@ -2,9 +2,11 @@
 #
 # WordPress.org SVN deploy script for easily publishing your WordPress plugins that primarily use the Git version control system.
 #
-# deploy script came from here: https://github.com/thenbrent/multisite-user-management/blob/master/deploy.sh
+# Deploy script came from here: https://github.com/thenbrent/multisite-user-management/blob/master/deploy.sh
 # Which is a modification of Dean Clatworthy's deploy script as found here: https://github.com/deanc/wordpress-plugin-git-svn
 # The difference is that this script lives in the plugin's git repo & doesn't require an existing SVN repo.
+
+# This script needs to be executable (chmod +x wporg-deploy.sh)
 
 # main config
 PLUGINSLUG="wpide"
@@ -37,9 +39,9 @@ echo "readme version: $NEWVERSION1"
 NEWVERSION2=`grep "^Version" $GITPATH/$MAINFILE | awk -F' ' '{print $2}'`
 echo "$MAINFILE version: $NEWVERSION2"
 
+# This check just wasn't working so disabled  
 # if [ "$NEWVERSION1" != "$NEWVERSION2" ]; then echo "Versions don't match. Exiting...."; exit 1; fi
-
-#echo "Versions match in readme.txt and PHP file. Let's proceed..."
+# echo "Versions match in readme.txt and PHP file. Let's proceed..."
 
 cd $GITPATH
 echo -e "Enter a commit message for this new version: \c"
@@ -64,7 +66,7 @@ echo "Ignoring github specific files and deployment script"
 svn propset svn:ignore "wporg-deploy.sh
 README.md
 .git
-.gitignore" "$SVNPATH/trunk/"
+.gitignore $SVNIGNORE" "$SVNPATH/trunk/"
 
 echo "Changing directory to SVN and committing to trunk"
 cd $SVNPATH/trunk/

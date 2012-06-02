@@ -312,6 +312,16 @@ function wpide_close_autocomplete(){
 	//jQuery("#wpide_info_content").html("");
 }
 
+function selectionChanged(e)  {
+    var selected_text = editor.getSession().doc.getTextRange(editor.getSelectionRange());
+    
+    //check for hex colour match
+    if ( selected_text.match('^#?([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?$')  != null ){
+        
+        jQuery("#wpide_color_assist").show();
+    }
+}
+
 function wpide_function_help() {
   //mouse over
 
@@ -470,6 +480,8 @@ function wpide_set_file_contents(file, callback_func){
 			editor.getSession().setMode(new mode());
 			
             editor.getSession().on('change', onSessionChange);
+            
+            editor.getSession().selection.on('changeSelection', selectionChanged);
             
 			editor.resize(); 
 			editor.focus(); 
@@ -636,7 +648,7 @@ jQuery(document).ready(function($) {
 				
 				//show command help panel for this command
 				wpide_function_help();
-                console.log("handler is visible");
+                //console.log("handler is visible");
 				
 			}else if( document.getElementById('ac').style.display === 'block'  ) {
 				var select=document.getElementById('ac');
@@ -645,7 +657,7 @@ jQuery(document).ready(function($) {
 				} else {
 					select.selectedIndex = select.selectedIndex-1;
 				}
-                 console.log("ac is visible");
+                 //console.log("ac is visible");
 			} else {
 				var range = editor.getSelectionRange();
 				editor.clearSelection();

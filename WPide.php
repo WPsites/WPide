@@ -134,7 +134,9 @@ class wpide
 		     // load jquery ui  
 		    wp_enqueue_script('jquery-ui', plugins_url("js/jquery-ui-1.8.20.custom.min.js", __FILE__ ), array('jquery'),  '1.8.20');
 		    
-		   
+		    // load color picker  
+    	    wp_enqueue_script('ImageColorPicker', plugins_url("js/ImageColorPicker.js", __FILE__ ), array('jquery'),  '1.8.20');
+		    
     
     
 	}
@@ -385,7 +387,7 @@ class wpide
     public static function wpide_startup_check() {
         global $wp_filesystem, $wp_version;
         
-        echo "\n\n\n\nWPIDE STARUP CHECKS \n";
+        echo "\n\n\n\nWPIDE STARTUP CHECKS \n";
         echo "___________________ \n\n";
         
         //WordPress version
@@ -584,9 +586,20 @@ class wpide
 				// Handler for .ready() called.
 				the_filetree() ;
 				
-				
-			
-				
+				//inialise the color assist
+    			$("#wpide_color_assist img").ImageColorPicker({
+          			afterColorSelected: function(event, color){ 
+                        jQuery("#wpide_color_assist_input").val(color); 
+              		}
+      			});
+                $("#wpide_color_assist").hide(); //hide it until it's needed
+                
+                $("#wpide_color_assist_send").click(function(e){
+                    e.preventDefault();
+                    editor.insert( jQuery("#wpide_color_assist_input").val().replace('#', '') );
+                    
+                    $("#wpide_color_assist").hide(); //hide it until it's needed again
+                });
 				
 				
 			});
@@ -604,7 +617,18 @@ class wpide
 		
 			<div id="side-info-column" class="inner-sidebar">
 				
-				<div id="wpide_info"><div id="wpide_info_content"></div> </div>
+            <div id="wpide_info">
+                <div id="wpide_info_content"></div> 
+            </div>
+            <br style="clear:both;" />
+                 <div id="wpide_color_assist">
+                    <h3>Colour Assist</h3>
+                    <img src='<?php echo plugins_url("images/color-wheel.png", __FILE__ ); ?>' />
+                    <input type="button" id="wpide_color_assist_send" value="&lt; Sent to editor" />
+                    <input type="text" id="wpide_color_assist_input" name="wpide_color_assist_input" value="" />
+                </div>
+                
+                 
 		
 				<div id="submitdiv" class="postbox "> 
 				  <h3 class="hndle"><span>Files</span></h3>

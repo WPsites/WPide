@@ -224,7 +224,52 @@
         #submitdiv.postbox{
                 min-width:220px;
         }
-        
-        
+
+/* color assist */
+
+#wpide_color_assist{
+    width:100%;
+    background-color: whiteSmoke;
+    margin:auto;
+    border:1px solid #ccc;
+    overflow: hidden;
+    padding-right:2px;
+    margin-left:-2px;
+}
+#wpide_color_assist img, #wpide_color_assist canvas{
+    margin:auto;
+    display:block;
+}
+#wpide_color_assist input{
+    float:left;
+    width:100px;
+    margin:5px;
+}
+
+#wpide_color_assist h3{
+    background-color: #F1F1F1;
+    background-image: -ms-linear-gradient(top,#F9F9F9,#ECECEC);
+    background-image: -moz-linear-gradient(top,#F9F9F9,#ECECEC);
+    background-image: -o-linear-gradient(top,#F9F9F9,#ECECEC);
+    background-image: -webkit-gradient(linear,left top,left bottom,from(#F9F9F9),to(#ECECEC));
+    background-image: -webkit-linear-gradient(top,#F9F9F9,#ECECEC);
+    background-image: linear-gradient(top,#F9F9F9,#ECECEC);
+    
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.currentColor, .selectedColor {
+  border: 1px solid #000;
+  background-color: #fff;
+  width:30px;
+  height:30px;
+}
+
+.ImageColorPickerCanvas {
+    cursor:crosshair;
+}
         
         

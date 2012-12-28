@@ -153,3 +153,4 @@ http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-
 
 Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.
 
+https://github.com/lennie/git-webcommit/ may be a route to git functionality 

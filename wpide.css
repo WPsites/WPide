@@ -226,24 +226,51 @@
         }
 
 /* color assist */
-
+.ImageColorPickerWrapper{
+    height: 300px; 
+    width: 100%;
+    overflow: scroll;
+}
 #wpide_color_assist{
-    width:100%;
+    position:relative;
+    width: 100%;
     background-color: whiteSmoke;
-    margin:auto;
-    border:1px solid #ccc;
-    overflow: hidden;
-    padding-right:2px;
-    margin-left:-2px;
+    margin: auto;
+    border: 1px solid #CCC;
+    padding-right: 2px;
+    margin-left: -2px;
+    height: 380px;
 }
 #wpide_color_assist img, #wpide_color_assist canvas{
     margin:auto;
     display:block;
 }
+#wpide_color_assist canvas.ImageColorPickerCanvasColor{
+    position:absolute;
+    left:0;
+    top:0;
+}
 #wpide_color_assist input{
     float:left;
     width:100px;
-    margin:5px;
+    margin: 15px 5px;
+}
+#wpide_color_assist_input{
+    width:80px;
+}
+
+.close_color_picker{
+    padding-bottom: 7px;
+    padding-left: 7px;
+    position: absolute;
+    right: 20px;   
+    top: 5px;
+}
+.close_color_picker a{
+    color: #575757;
+    font-style: normal;
+    text-decoration: none;
+    font-size: 16px;
 }
 
 #wpide_color_assist h3{
@@ -271,5 +298,13 @@
 .ImageColorPickerCanvas {
     cursor:crosshair;
 }
-        
+
+div.ImageColorPickerWrapper{
+ 
+}
+
+
+
+
+
         

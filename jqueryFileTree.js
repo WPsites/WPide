@@ -56,6 +56,17 @@ if(jQuery) (function($){
 						$(c).removeClass('wait').append(data);
 						if( o.root == t ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
 						bindTree(c);
+                        
+                           //make files draggable
+                            $("li.file", $("#wpide_file_browser") ).draggable({
+                                cursor: "move",
+                                 handle: "a",
+                                cursorAt: { top: 20, left: 20 },
+                                helper: function( event ) {
+                                    return $( "<div>Image Path</div>" );
+                                }
+                            });
+                
 					});
 				}
 				
@@ -79,6 +90,9 @@ if(jQuery) (function($){
 						} else {
 							h($(this).parent(), $(this).attr('rel'));
 						}
+                        
+  
+        
 						return false;
 					});
 					// Prevent A from triggering the # on non-click events
@@ -90,6 +104,8 @@ if(jQuery) (function($){
 				jQuery.ajaxSetup({async:false}); //we need to wait until we get the response 
 				showTree( $(this), escape(o.root) );
                 jQuery.ajaxSetup({async:true}); //enable async again 
+                
+
 				
 				//if nothing returned then let user know something wrong with permissions
 				if ( $(this).children('.jqueryFileTree').length==0 ){

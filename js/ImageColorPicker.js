@@ -1,5 +1,5 @@
 /*!
-* jQuery ImageColorPicker Plugin v0.2
+* jQuery ImageColorPicker Plugin v0.3
 * http://github.com/Skarabaeus/ImageColorPicker
 *
 * Copyright 2010, Stefan Siebel
@@ -14,7 +14,7 @@
 var uiImageColorPicker = function(){
 
     var _d2h = function(d) {
-		var result;
+    	var result;
 		if (! isNaN( parseInt(d) ) ) {
 			result = parseInt(d).toString(16);
 		} else {
@@ -30,6 +30,8 @@ var uiImageColorPicker = function(){
 	var _h2d = function(h) {
 		return parseInt(h,16);
 	};
+    
+    var _pointerPos = {};
 
 	var _createImageColorPicker = function(widget) {
 		// store 2D context in widget for later access
@@ -40,14 +42,17 @@ var uiImageColorPicker = function(){
 
 		// create additional DOM elements.
 		widget.$canvas = jQuery('<canvas class="ImageColorPickerCanvas"></canvas>');
+        widget.$canvas2 = jQuery('<canvas class="ImageColorPickerCanvasColor"></canvas>');
 
 		// add them to the DOM
 		widget.element.wrap('<div class="ImageColorPickerWrapper"></div>');
 		widget.$wrapper = widget.element.parent();
 		widget.$wrapper.append(widget.$canvas);
+        widget.$wrapper.append(widget.$canvas2);
 
 		if (typeof(widget.$canvas.get(0).getContext) === 'function') { // FF, Chrome, ...
 			widget.ctx = widget.$canvas.get(0).getContext('2d');
+            widget.ctx2 = widget.$canvas2.get(0).getContext('2d');
 
 		// this does not work yet!
 		} else {
@@ -64,6 +69,20 @@ var uiImageColorPicker = function(){
 		img.src = widget.element.attr("src");
 		widget.$canvas.attr("width", img.width);
 		widget.$canvas.attr("height", img.height);
+        
+        //the floating color
+        widget.$canvas2.attr("width", "40"); 
+		widget.$canvas2.attr("height", "40");
+        
+        var canvas = widget.$canvas;
+        var mouse={x:0,y:0} //make an object to hold mouse position
+        
+        canvas.onmousemove=function(e){mouse={x:e.pageX-this.offsetLeft,y:e.pageY-this.offsetTop};} 
+        canvas.onmousemove=function(e){mouse={x:e.pageX-this.offsetLeft,y:e.pageY-this.offsetTop};} 
+        
+
+
+
 		widget.ctx.drawImage(img, 0, 0);
 
 		// get the image data.
@@ -91,22 +110,22 @@ var uiImageColorPicker = function(){
 		var that = widget;
 
 		widget.$canvas.bind("mousemove", function(e){
-      var point = imageCoordinates( that, e.pageX, e.pageY );
-      var color = lookupColor( that.imageData, point );
-
-      updateCurrentColor( that, color.red, color.green, color.blue );
+          var point = imageCoordinates( that, e.pageX, e.pageY );
+          var color = lookupColor( that.imageData, point );
+    
+          updateCurrentColor( that, color.red, color.green, color.blue, point );
 		});
 
-		widget.$canvas.bind("click", function(e){
-      var point = imageCoordinates( that, e.pageX, e.pageY );
-      var color = lookupColor( that.imageData, point );
-
-      updateSelectedColor( that, color.red, color.green, color.blue );
-			that._trigger("afterColorSelected", 0, that.selectedColor());
+    	widget.$canvas.bind("click", function(e){
+            var point = imageCoordinates( that, e.pageX, e.pageY );
+            var color = lookupColor( that.imageData, point );
+            
+            updateSelectedColor( that, color.red, color.green, color.blue );
+            that._trigger("afterColorSelected", 0, that.selectedColor());
 		});
 
 		widget.$canvas.bind("mouseleave", function(e){
-			updateCurrentColor(that, 255, 255, 255);
+            widget.$canvas2.css("display", "none");
 		});
 
 		// hope that helps to prevent memory leaks
@@ -120,7 +139,7 @@ var uiImageColorPicker = function(){
     var offset = widget.$canvas.offset();
 
     return { x: Math.round( pageX - offset.left ),
-             y: Math.round( pageY - offset.top ) };
+             y: Math.round( pageY - offset.top )  };
   }
 
   // lookup color values for point [x,y] location in image
@@ -133,34 +152,31 @@ var uiImageColorPicker = function(){
 
   }
 
-	var updateCurrentColor = function(widget, red, green, blue) {
+	var updateCurrentColor = function(widget, red, green, blue, point) {
 		var c = widget.ctx;
+        var c2 = widget.ctx2;
 		var canvasWidth = widget.$canvas.attr("width");
 		var canvasHeight = widget.$canvas.attr("height");
+        widget.$canvas2.css("display", "block");
+
 
 		// draw current Color
-		c.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
-		c.fillRect (canvasWidth - 62, canvasHeight - 32, 30, 30);
+		c2.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
+		c2.fillRect (0, 0, 30, 30);
 
 		// draw border
-		c.lineWidth = "3"
-		c.lineJoin = "round";
-		c.strokeRect (canvasWidth - 62, canvasHeight - 32, 30, 30);
+		c2.lineWidth = "3"
+		c2.lineJoin = "round";
+        c2.strokeStyle="#FFFFFF";
+		c2.strokeRect (0, 0, 30, 30);
+        
+        widget.$canvas2.css("top", (point.y+30) - jQuery(widget.$canvas).parent().scrollTop() );
+        widget.$canvas2.css("left", (point.x+30) - jQuery(widget.$canvas).parent().scrollLeft() );
+        
 	}
 
 	var updateSelectedColor = function(widget, red, green, blue) {
-		var c = widget.ctx;
-		var canvasWidth = widget.$canvas.attr("width");
-		var canvasHeight = widget.$canvas.attr("height");
-
-		// draw current Color
-		c.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
-		c.fillRect (canvasWidth - 32, canvasHeight - 32, 30, 30);
-
-		// draw border
-		c.lineWidth = "3"
-		c.lineJoin = "round";
-		c.strokeRect (canvasWidth - 32, canvasHeight - 32, 30, 30);
+        jQuery("#wpide_color_assist_input").css("borderRight", "30px solid #" + _d2h(red) + _d2h(green) + _d2h(blue) );
 
 		// set new selected color
 		var newColor = [red, green, blue];
@@ -207,3 +223,9 @@ var uiImageColorPicker = function(){
 }();
 	jQuery.widget("ui.ImageColorPicker", uiImageColorPicker);
 })();
+
+
+
+
+
+

@@ -132,10 +132,10 @@ class wpide
 		    wp_enqueue_script('wpide-dd', plugins_url("js/jquery.dd.js", __FILE__ ) );
 		    
 		     // load jquery ui  
-		    wp_enqueue_script('jquery-ui', plugins_url("js/jquery-ui-1.8.20.custom.min.js", __FILE__ ), array('jquery'),  '1.8.20');
-		    
+		    wp_enqueue_script('jquery-ui', plugins_url("js/jquery-ui-1.9.2.custom.min.js", __FILE__ ), array('jquery'),  '1.9.2');
+	
 		    // load color picker  
-    	    wp_enqueue_script('ImageColorPicker', plugins_url("js/ImageColorPicker.js", __FILE__ ), array('jquery'),  '1.8.20');
+    	    wp_enqueue_script('ImageColorPicker', plugins_url("js/ImageColorPicker.js", __FILE__ ), array('jquery'),  '0.3');
 		    
     
     
@@ -174,7 +174,7 @@ class wpide
 		    return false;
         
 		$_POST['dir'] = urldecode($_POST['dir']);
-		$root = WP_CONTENT_DIR;
+		$root = WP_CONTENT_DIR; 
 		
 		if( $wp_filesystem->exists($root . $_POST['dir']) ) {
 			//$files = scandir($root . $_POST['dir']);
@@ -505,6 +505,7 @@ class wpide
 		<script>
 
 			var wpide_app_path = "<?php echo plugin_dir_url( __FILE__ ); ?>";
+            var wpide_file_root_url = "<?php echo apply_filters("wpide_file_root_url", WP_CONTENT_URL );?>";
 			
 			function the_filetree() {
 				jQuery('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
@@ -600,7 +601,14 @@ class wpide
                     
                     $("#wpide_color_assist").hide(); //hide it until it's needed again
                 });
+                
+                $(".close_color_picker a").click(function(e){
+                    e.preventDefault();
+                    $("#wpide_color_assist").hide(); //hide it until it's needed again
+                });
 				
+        
+                
 				
 			});
 		</script>
@@ -622,10 +630,12 @@ class wpide
             </div>
             <br style="clear:both;" />
                  <div id="wpide_color_assist">
+                    <div class="close_color_picker"><a href="close-color-picker">x</a></div>
                     <h3>Colour Assist</h3>
                     <img src='<?php echo plugins_url("images/color-wheel.png", __FILE__ ); ?>' />
                     <input type="button" id="wpide_color_assist_send" value="&lt; Sent to editor" />
                     <input type="text" id="wpide_color_assist_input" name="wpide_color_assist_input" value="" />
+                    
                 </div>
                 
                  

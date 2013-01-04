@@ -86,7 +86,7 @@ function onSessionChange(e)  {
 	//console.log(editor.getSelection().getRange());
 	
 	range.end.column = editor.getSession().getSelection().getCursor().column +1;//set end column as cursor pos
-	
+
 	//console.log("[ \.] based: " + editor.getSession().doc.getTextRange(range));
 	
 	//no column lower than 1 thanks
@@ -318,7 +318,15 @@ function selectionChanged(e)  {
     //check for hex colour match
     if ( selected_text.match('^#?([a-f]|[A-F]|[0-9]){3}(([a-f]|[A-F]|[0-9]){3})?$')  != null ){
         
-        jQuery("#wpide_color_assist").show();
+        var therange = editor.getSelectionRange();
+        therange.end.column = therange.start.column;
+        therange.start.column = therange.start.column-1;
+
+        // only show color assist if the character before the selection indicates a hex color (#)
+	    if ( editor.getSession().doc.getTextRange( therange ) == "#" ){
+            jQuery("#wpide_color_assist").show();
+	    }
+       
     }
 }
 
@@ -576,11 +584,27 @@ function selectACitem (item) {
 	
 jQuery(document).ready(function($) {
 	$("#wpide_save").click(saveDocument);
-	
+
+    // drag and drop colour picker image
+    $("#wpide_color_assist").on('drop', function(e) {
+        e.preventDefault();
+        e.originalEvent.dataTransfer.items[0].getAsString(function(url){
+                  
+                $(".ImageColorPickerCanvas", $("#side-info-column") ).remove();
+                $("img", $("#wpide_color_assist")).attr('src', url );
+            
+        });
+    });
+    
+    $("#wpide_color_assist").on('dragover', function(e) {
+        $(this).addClass("hover");
+    }).on('dragleave', function(e) {
+        $(this).removeClass("hover");
+    });
 
 	
 	//add div for ace editor to latch on to
-	//$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
+	$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
 	//create the editor instance
 	editor = ace.edit("fancyeditordiv");
 	//set the editor theme

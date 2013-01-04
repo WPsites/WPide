@@ -170,6 +170,13 @@ class wpide
 		
 		//setup wp_filesystem api
 		global $wp_filesystem;
+        $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+        $form_fields = null; // for now, but at some point the login info should be passed in here
+        if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+             // no credentials yet, just produced a form for the user to fill in
+            return true; // stop the normal page form from displaying
+        }
+        
 		if ( ! WP_Filesystem($creds) ) 
 		    return false;
         
@@ -216,6 +223,12 @@ class wpide
 		
 		//setup wp_filesystem api
 		global $wp_filesystem;
+        $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+        $form_fields = null; // for now, but at some point the login info should be passed in here
+        if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+             // no credentials yet, just produced a form for the user to fill in
+            return true; // stop the normal page form from displaying
+        }
 		if ( ! WP_Filesystem($creds) ) 
 		    return false;
         
@@ -248,6 +261,12 @@ class wpide
 		
 		//setup wp_filesystem api
 		global $wp_filesystem;
+        $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+        $form_fields = null; // for now, but at some point the login info should be passed in here
+        if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+            // no credentials yet, just produced a form for the user to fill in
+            return true; // stop the normal page form from displaying
+        }
 		if ( ! WP_Filesystem($creds) ) 
 		    return false;
 		
@@ -304,6 +323,12 @@ class wpide
         
 		//setup wp_filesystem api
 		global $wp_filesystem;
+        $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+        $form_fields = null; // for now, but at some point the login info should be passed in here
+        if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+            // no credentials yet, just produced a form for the user to fill in
+            return true; // stop the normal page form from displaying
+        }
 		if ( ! WP_Filesystem($creds) ) 
 		    echo "Cannot initialise the WP file system API";
 		
@@ -349,7 +374,12 @@ class wpide
 			
 			//setup wp_filesystem api
 			global $wp_filesystem;
-			
+			$url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+            $form_fields = null; // for now, but at some point the login info should be passed in here
+            if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+                // no credentials yet, just produced a form for the user to fill in
+                return true; // stop the normal page form from displaying
+            }
 			if ( ! WP_Filesystem($creds) ) 
 			    echo "Cannot initialise the WP file system API";
 			
@@ -408,6 +438,17 @@ class wpide
 		
 		//setup wp_filesystem api
         $wpide_filesystem_before = $wp_filesystem;
+        
+        $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
+        $form_fields = null; // for now, but at some point the login info should be passed in here
+	ob_start();
+        if (false === ($creds = request_filesystem_credentials($url, FS_METHOD, false, false, $form_fields) ) ) {
+            // if we get here, then we don't have credentials yet,
+            // but have just produced a form for the user to fill in,
+            // so stop processing for now
+            //return true; // stop the normal page form from displaying
+        }
+	ob_end_clean();
 		if ( ! WP_Filesystem($creds) ) {
             
             echo "There has been a problem initialising the filesystem API \n\n";
@@ -419,7 +460,7 @@ class wpide
         
 
 		$root = WP_CONTENT_DIR;
-        
+        if ( isset($wp_filesystem) ){
 			
         //Running webservers user and group
         echo "Web server user/group = " . getenv('APACHE_RUN_USER') . ":" . getenv('APACHE_RUN_GROUP') . "\n";
@@ -452,7 +493,7 @@ class wpide
         //themes folder editable
         echo "The wp-content/themes folder ". ( $wp_filesystem->is_readable( $root."/themes" )==1 ? "IS":"IS NOT" ) ." readable and ". ( $wp_filesystem->is_writable( $root."/themes" )==1 ? "IS":"IS NOT" ) ." writable by this method \n";
      
-        
+        }
         
         echo "___________________ \n\n\n\n";
         
@@ -613,13 +654,7 @@ class wpide
 			});
 		</script>
 		
-		<?php
-		$url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');
-		if ( ! WP_Filesystem($creds) ) {
-		    request_filesystem_credentials($url, '', true, false, null);
-			return;
-		}
-		?>
+
 		
 		<div id="poststuff" class="metabox-holder has-right-sidebar">
 		

@@ -125,6 +125,7 @@
 		#wpwrap div.ace_gutter{
 			background-color:#f4f4f4;
 			color:#aaa;
+            z-index:999;
 		}
 	#wpide_save_container{
 		float: left;

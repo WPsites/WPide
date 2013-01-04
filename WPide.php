@@ -73,9 +73,10 @@ class wpide
 			//setup ajax function for startup to get some debug info, checking permissions etc
     		add_action('wp_ajax_wpide_startup_check', array( $this, 'wpide_startup_check' ) );
             
+            //add a warning when navigating away from WPide
+            //it has to go after WordPress scripts otherwise WP clears the binding
+			add_action('admin_print_footer_scripts', array( $this, 'add_admin_nav_warning' ), 99 );
             
-			
-		
 		}
 		
 
@@ -103,9 +104,19 @@ class wpide
         
     }
 
-	public static function add_admin_head()
+	public static function add_admin_nav_warning()
 	{
+        ?>
+            <script type="text/javascript">
+            
+                jQuery(document).ready(function($) {
+                    window.onbeforeunload = function() {
+                      return 'You are attempting to navigate away from WPide. Make sure you have saved any changes made to your files otherwise they will be forgotten.' ;
+                    }
+                });
     
+            </script>
+        <?php
 	}
 
 
@@ -628,7 +639,10 @@ class wpide
 				});
 			}
 			
+         
+            
 			jQuery(document).ready(function($) {
+                 
 				// Handler for .ready() called.
 				the_filetree() ;
 				

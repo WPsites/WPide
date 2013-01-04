@@ -76,6 +76,9 @@ Either the image contains no image data (its a new empty file) or the image is n
 
 == Changelog ==
 
+= 2.0.13 =
+* Added 'wpide_filesystem_root' filter (see other notes for info)
+
 = 2.0.12 =
 * Added links to the WordPress codex and the PHP manual from within the function refrence for further info
 
@@ -145,7 +148,19 @@ Either the image contains no image data (its a new empty file) or the image is n
 = 1.0 =
 * Initial release.
 
-== DEV NOTES ==
+== Other Feature notes ==
+
+= You can modify the filesystem root using the 'wpide_filesystem_root' filter =
+
+So to restrict editing to the Twenty Eleven theme only you could do this:
+
+add_filter('wpide_filesystem_root', 'wpide_filesystem_root_override');
+function wpide_filesystem_root_override($path){ 
+    // the default path variable will be WP_CONTENT_DIR
+    return $path . "/themes/twentyeleven"; 
+}
+
+== Dev Notes ==
 
 Maybe some interesting things here we could implement to help with following the WordPress standard and more advanced code syntax checking
 

@@ -49,7 +49,9 @@ class wpide
 			 preg_match('#admin-ajax\.php$#', $_SERVER['PHP_SELF']) ){
                 
                 
-			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
+			// force local file method until I've worked out how to implement the other methods
+            // main problem being password wouldn't/isn't saved between requests
+            // you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
 			$this->override_fs_method('direct');
 
 			// Uncomment any of these calls to add the functionality that you need.
@@ -70,6 +72,8 @@ class wpide
 			
 			//setup ajax function for startup to get some debug info, checking permissions etc
     		add_action('wp_ajax_wpide_startup_check', array( $this, 'wpide_startup_check' ) );
+            
+            
 			
 		
 		}
@@ -181,7 +185,7 @@ class wpide
 		    return false;
         
 		$_POST['dir'] = urldecode($_POST['dir']);
-		$root = WP_CONTENT_DIR; 
+        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
 		
 		if( $wp_filesystem->exists($root . $_POST['dir']) ) {
 			//$files = scandir($root . $_POST['dir']);
@@ -233,7 +237,7 @@ class wpide
 		    return false;
         
          
-		$root = WP_CONTENT_DIR;
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
 		$file_name = $root . stripslashes($_POST['filename']);
 		echo $wp_filesystem->get_contents($file_name);
 		die(); // this is required to return a proper result
@@ -270,7 +274,7 @@ class wpide
 		if ( ! WP_Filesystem($creds) ) 
 		    return false;
 		
-		$root = WP_CONTENT_DIR;
+	    $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
         
 		//check all required vars are passed
 		if (strlen($_POST['path'])>0 && strlen($_POST['type'])>0 && strlen($_POST['file'])>0){
@@ -333,7 +337,7 @@ class wpide
 		    echo "Cannot initialise the WP file system API";
 		
 		//save a copy of the file and create a backup just in case
-		$root = WP_CONTENT_DIR;
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
 		$file_name = $root . stripslashes($_POST['filename']);
 		
 		//set backup filename
@@ -384,7 +388,7 @@ class wpide
 			    echo "Cannot initialise the WP file system API";
 			
 			//save a copy of the file and create a backup just in case
-			$root = WP_CONTENT_DIR;
+			$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
 			$file_name = $root . stripslashes($_POST['filename']);
 			
 			//set backup filename
@@ -459,7 +463,7 @@ class wpide
         unset($wpide_filesystem_before);
         
 
-		$root = WP_CONTENT_DIR;
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
         if ( isset($wp_filesystem) ){
 			
         //Running webservers user and group

@@ -550,7 +550,7 @@ class wpide
 		<script>
 
 			var wpide_app_path = "<?php echo plugin_dir_url( __FILE__ ); ?>";
-            var wpide_file_root_url = "<?php echo apply_filters("wpide_file_root_url", WP_CONTENT_URL );?>";
+            //dont think this is needed any more.. var wpide_file_root_url = "<?php echo apply_filters("wpide_file_root_url", WP_CONTENT_URL );?>";
 			
 			function the_filetree() {
 				jQuery('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {

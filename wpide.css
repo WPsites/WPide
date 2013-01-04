@@ -251,13 +251,16 @@
     left:0;
     top:0;
 }
-#wpide_color_assist input{
+#wpide_color_assist input[type=button]{
+    float:left;
+    width:110px;
+    margin: 15px 5px;
+    font-size: 12px;
+}
+#wpide_color_assist_input{
     float:left;
     width:100px;
     margin: 15px 5px;
-}
-#wpide_color_assist_input{
-    width:80px;
 }
 
 .close_color_picker{

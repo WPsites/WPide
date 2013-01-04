@@ -686,7 +686,7 @@ class wpide
                     <div class="close_color_picker"><a href="close-color-picker">x</a></div>
                     <h3>Colour Assist</h3>
                     <img src='<?php echo plugins_url("images/color-wheel.png", __FILE__ ); ?>' />
-                    <input type="button" id="wpide_color_assist_send" value="&lt; Sent to editor" />
+                    <input type="button" class="button" id="wpide_color_assist_send" value="&lt; Send to editor" />
                     <input type="text" id="wpide_color_assist_input" name="wpide_color_assist_input" value="" />
                     
                 </div>

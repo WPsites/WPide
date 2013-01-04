@@ -2,8 +2,8 @@
 Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
-Tested up to: 3.3.2
-Stable tag: 2.0.12
+Tested up to: 3.5
+Stable tag: 2.0.13
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -22,6 +22,7 @@ This plugin performs best in the Chrome web browser.
 *   Syntax highlighting
 *   Line numbers
 *   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
+*   Colour assist - a colour picker that only shows once you double click a hex colour code in the editor. You can also drag your own image into the colour picker to use instead of the default swatch (see other notes for info).
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups/filepath)
 *   File tree allowing you to access and edit any file in your wp-content folder (plugins, themes, uploads etc)
 *   Create new files and directories
@@ -30,7 +31,7 @@ This plugin performs best in the Chrome web browser.
 *   Auto indentation
 *   Tabbed interface for editing multiple files (editing both plugin and theme files at the same time)
 *   Using the WordPress filesystem API, although currently direct access is forced (edit WPide.php in the constructor to change this behaviour) ftp/ssh connections aren't setup yet, since WP will not remember a password need to work out how that will work. Maybe use modal to request password when you save but be able to click save all and save a batch with that password. Passwords defined in wp-config.php are persistent and would fix this problem but people don't generally add those details. Open to ideas here.
-*   Image editing/drawing (requires Flash -  will move over to HTML5 when there is a decent alternative)
+*   Image editing/drawing (this is currently not working..)
 
 = Feature ideas and improvements: =
 
@@ -43,11 +44,6 @@ This plugin performs best in the Chrome web browser.
 
 
 As with most plugins this one is open source. For issue tracking, further information and anyone wishing to get involved and help contribute to this project can do so over on github https://github.com/WPsites/WPide
-
-== Contributors ==
-
-Simon Dunton - http://www.wpsites.co.uk
-Thomas Wieczorek - http://www.wieczo.net
 
 
 == Installation ==
@@ -73,11 +69,15 @@ Either the image contains no image data (its a new empty file) or the image is n
 1. Editor view, showing line numbers and syntax highlighting.
 2. Image editor in action
 3. Showing auto complete, function reference and file tree.
+4. Default colour picker image
 
 == Changelog ==
 
 = 2.0.13 =
-* Added 'wpide_filesystem_root' filter (see other notes for info)
+* Added colour assist - a colour picker that displays when you double click a hex colour code in the editor (see other notes for info).
+* Added a confirm box to stop you exiting the editor by mistake and losing unsaved chnages.
+* Added 'wpide_filesystem_root' filter (see other notes for info).
+* A number of bug fixes.
 
 = 2.0.12 =
 * Added links to the WordPress codex and the PHP manual from within the function refrence for further info
@@ -160,6 +160,16 @@ function wpide_filesystem_root_override($path){
     return $path . "/themes/twentyeleven"; 
 }
 
+= Colour assist =
+
+The colour picker only shows if you double click a hex colour value in the editor (3 or 6 characters with a proceeding hash #FF0000)
+
+The default colour picker has limited colours. You can replace this image with an image of your own by dragging and dropping a new image onto the default one (due to security reasons this can only be an image from the same domain). 
+
+Using this you can either create your own swatch of colours or just drag in your websites logo or header image.
+
+If you close the editor any custom colour picker image will be forgotten. We maybe thing about making this persist and also make the image uploadable as well as drag+drop.
+
 == Dev Notes ==
 
 Maybe some interesting things here we could implement to help with following the WordPress standard and more advanced code syntax checking
@@ -169,3 +179,8 @@ http://magp.ie/2011/01/10/tidy-and-format-your-php-and-meet-wordpress-standards-
 Checkout the following WordPress plugin "WP Live CSS Editor" to work out how to do LIVE css editing. Combining a LESS compiler with live CSS editing/compile would be a dream.
 
 https://github.com/lennie/git-webcommit/ may be a route to git functionality 
+
+== Contributors ==
+
+Simon Dunton - http://www.wpsites.co.uk
+Thomas Wieczorek - http://www.wieczo.net

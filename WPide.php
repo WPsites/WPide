@@ -127,9 +127,9 @@ class wpide
 		    //include ace theme
 		    wp_enqueue_script('ace-theme', plugins_url("ace-0.2.0/src/theme-dawn.js", __FILE__ ) );//monokai is nice
 		    // wordpress-completion tags
-		    wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete.wordpress.js", __FILE__ ) );
+		    wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete/wordpress.js", __FILE__ ) );
 		    // php-completion tags
-		    wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete.php.js", __FILE__ ) );
+		    wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete/php.js", __FILE__ ) );
 		    // load editor
 		    wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
 		    // load autocomplete dropdown 

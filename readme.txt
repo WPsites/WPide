@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.0.13
+Stable tag: 2.0.14
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -72,6 +72,9 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+= 2.0.14 =
+* Fixed error Warning: Creating default object from empty value in WPide.php
+* Updated the ace editor to current build
 
 = 2.0.13 =
 * Added colour assist - a colour picker that displays when you double click a hex colour code in the editor (see other notes for info).

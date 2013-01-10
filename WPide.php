@@ -83,7 +83,7 @@ class wpide
 		
 
 		
-		$WPide->site_url = get_bloginfo('url');
+		$this->site_url = get_bloginfo('url');
 		
 
 	}

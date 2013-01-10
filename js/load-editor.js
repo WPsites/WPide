@@ -607,6 +607,8 @@ jQuery(document).ready(function($) {
 	$('#template').prepend("<div style='width:80%;height:500px;margin-right:0!important;' id='fancyeditordiv'></div>");
 	//create the editor instance
 	editor = ace.edit("fancyeditordiv");
+    //turn off print margin
+    editor.setPrintMarginColumn(false);
 	//set the editor theme
 	editor.setTheme("ace/theme/dawn"); 
 	//get a copy of the initial file contents (the file being edited)

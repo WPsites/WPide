@@ -75,7 +75,7 @@ Either the image contains no image data (its a new empty file) or the image is n
 == Changelog ==
 
 = 2.0.15 =
-* PHP syntax checking before saving to disk
+* PHP syntax checking before saving to disk (Using: https://github.com/nikic/PHP-Parser)
 
 = 2.0.14 =
 * Fixed error Warning: Creating default object from empty value in WPide.php

@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.0.14
+Stable tag: 2.0.15
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -20,6 +20,7 @@ This plugin performs best in the Chrome web browser.
 = Current Features: =
 
 *   Syntax highlighting
+*   PHP syntax checking before saving to disk to try and banish white screen of death after uploading invalid PHP
 *   Line numbers
 *   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
 *   Colour assist - a colour picker that only shows once you double click a hex colour code in the editor. You can also drag your own image into the colour picker to use instead of the default swatch (see other notes for info).
@@ -72,6 +73,10 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+
+= 2.0.15 =
+* PHP syntax checking before saving to disk
+
 = 2.0.14 =
 * Fixed error Warning: Creating default object from empty value in WPide.php
 * Updated the ace editor to current build

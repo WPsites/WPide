@@ -336,6 +336,24 @@ class wpide
 		if ( !current_user_can('edit_themes') )
 		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
         
+        //check file syntax of PHP files by parsing the PHP
+        if ( preg_match("#\.php$#i", $_POST['filename']) ){
+            
+            require('PHP-Parser/lib/bootstrap.php');
+            ini_set('xdebug.max_nesting_level', 2000);
+            
+            $code = stripslashes($_POST['content']);
+            
+            $parser = new PHPParser_Parser(new PHPParser_Lexer);
+            
+            try {
+                $stmts = $parser->parse($code);
+            } catch (PHPParser_Error $e) {
+                echo 'Parse Error: ', $e->getMessage();
+                die();
+            }
+        }
+
 		//setup wp_filesystem api
 		global $wp_filesystem;
         $url = wp_nonce_url('admin.php?page=wpide','plugin-name-action_wpidenonce');

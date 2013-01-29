@@ -80,6 +80,9 @@ class wpide
             // Add body class to collapse the wp sidebar nav
             add_filter('admin_body_class', array( $this, 'hide_wp_sidebar_nav' ), 11);
             
+            //hide the update nag
+            add_action('admin_menu', array( $this, 'hide_wp_update_nag' ));
+            
 		}
 		
 
@@ -111,6 +114,10 @@ class wpide
     public function hide_wp_sidebar_nav($classes) {
         
     	return  str_replace("auto-fold", "", $classes) . ' folded';
+    }
+    
+    public function hide_wp_update_nag() {
+        remove_action( 'admin_notices', 'update_nag', 3 );
     }
 
 	public static function add_admin_nav_warning()

@@ -128,10 +128,17 @@
             z-index:999;
 		}
 	#wpide_save_container{
-		float: left;
-		clear: left;
-		margin-left: 68%;
-		margin-top: 20px;
+        float: left;
+        clear: left;
+        width: 74%;
+        padding: 0.5%;
+        background-color: #E9E9E9;
+        
+        border-color: #CCC;
+        -webkit-box-shadow: inset 0 1px 0 #fff;
+        box-shadow: inset 0 1px 0 #fff;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
 	}
 	
 	#wpide_info {
@@ -212,7 +219,7 @@
         }
         
         #wpide_save{
-            margin-right:25px;
+            float: right;
         }
         
         #publishing-action img{
@@ -307,7 +314,12 @@ div.ImageColorPickerWrapper{
  
 }
 
-
+#wpfooter{
+    display:none;
+}
+#wpbody-content{
+    padding-bottom:0;
+}
 
 
 

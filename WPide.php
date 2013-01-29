@@ -676,6 +676,8 @@ class wpide
          
             
 			jQuery(document).ready(function($) {
+            
+                $("#fancyeditordiv").css("height", ($('body').height()-120) + 'px' );
                  
 				// Handler for .ready() called.
 				the_filetree() ;

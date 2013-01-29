@@ -10,7 +10,7 @@
 		width: 75%;
 		min-height: 30px;
 		text-align: right;
-		padding-top: 20px;
+		padding-top: 5px;
 		position: relative;
 		float: left;
 	}
@@ -138,7 +138,7 @@
 		position: relative;
 		min-height: 30px;
 		width: 100%;
-		margin-top: 50px;
+		margin-top: 35px;
 		padding-right:2px;
 		float: right;
 		clear: right;

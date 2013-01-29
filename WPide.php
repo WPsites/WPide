@@ -769,7 +769,7 @@ class wpide
 				<div id='fancyeditordiv'></div>
 				
 				<form id="wpide_save_container" action="" method="get">
-				   <a href="#" id="wpide_save" class="button-primary">SAVE 
+				   <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
 				   FILE</a> 
 				   <input type="hidden" id="filename" name="filename" value="" />
 				       <?php

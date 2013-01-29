@@ -3,8 +3,8 @@
 Plugin Name: WPide
 Plugin URI: https://github.com/WPsites/WPide
 Description: WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
-Version: 2.0.16
-Author: Simon Dunton
+Version: 2.1
+Author: Simon @ WPsites
 Author URI: http://www.wpsites.co.uk
 */
 

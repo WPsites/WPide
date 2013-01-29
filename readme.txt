@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.0.16
+Stable tag: 2.1
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -73,6 +73,10 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+= 2.1 =
+* Ramped up the version number because the last one was just getting silly
+* Interface changes to make the editor take up more screen space. Including hiding the WP admin menu and footer.
+
 = 2.0.16 =
 * Fixed problem saving PHP documents - PHP-Parser library wasn't included in the codebase correctly
 

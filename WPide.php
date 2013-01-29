@@ -77,6 +77,9 @@ class wpide
             //it has to go after WordPress scripts otherwise WP clears the binding
 			add_action('admin_print_footer_scripts', array( $this, 'add_admin_nav_warning' ), 99 );
             
+            // Add body class to collapse the wp sidebar nav
+            add_filter('admin_body_class', array( $this, 'hide_wp_sidebar_nav' ), 11);
+            
 		}
 		
 
@@ -102,6 +105,12 @@ class wpide
             
         }
         
+    }
+    
+
+    public function hide_wp_sidebar_nav($classes) {
+        
+    	return  str_replace("auto-fold", "", $classes) . ' folded';
     }
 
 	public static function add_admin_nav_warning()

@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.1
+Stable tag: 2.2
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -55,6 +55,18 @@ As with most plugins this one is open source. For issue tracking, further inform
 
 == Frequently Asked Questions ==
 
+= What is in place to stop me from breaking my website - "The white screen of death" =
+
+When you edit a PHP file, before that file is saved to the filesystem it is syntax checked to make sure there isn't something obvious that will break your site.
+
+Every file that you edit is backed up before your first save to the filesystem and then on subsequent saves WPide will try and make a backup. It will save a maximum of 1 backup per hour to the server.
+
+As you edit or more specifically save PHP files the restore button will display which will allow you to restore the most recent backup.
+
+If your WordPress install is fully functional then you can use the file tree to browse all of your backed up files (plugins/WPide/backups..), if your WordPress install isn't responding then restoring the file using the restore button or directly via FTP/SSH is the only way.
+
+The backed up PHP files cannot be accessed/restored from the web directly without the 40 digit nonce/key so should not pose a security concern.
+
 = Can I override the default file permissions when creating files/directories on the local filesystem =
 
 Yes you can using the below WordPress settings in wp-config.php which will effect files created with WPide and files added during the WordPress upgrade process.
@@ -73,6 +85,12 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+
+= 2.2 =
+* Add restore recent backup facility - It's a primative implementation at this point but it does the job. See FAQ note.
+* Turned on the LESS mode when a .LESS file is edited
+* Made the autocomplete functionality only be enabled for PHP files otherwise it can be a pain to write txt files like this one!
+
 = 2.1 =
 * Ramped up the version number because the last one was just getting silly
 * Interface changes to make the editor take up more screen space. Including hiding the WP admin menu and footer.

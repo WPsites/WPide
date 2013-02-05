@@ -543,13 +543,19 @@ function saveDocument() {
 	//ajax call to save the file and generate a backup if needed
 	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
-		if (response === 'success') {
-			jQuery("#wpide_message").html('<span>File saved.</span>');
-			jQuery("#wpide_message").show();
+        var regexchk=/^\".*\"$/;
+        
+        if ( regexchk.test(response) ){
+            //store the resulting backup file name just incase we need to restore later
+            //temp note: you can then access the data like so  jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" );
+            jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup", response.replace(/(^\"|\"$)/g, "") );
+            
+            jQuery("#wpide_message").html('<span>File saved.</span>');
+    		jQuery("#wpide_message").show();
 			jQuery("#wpide_message").fadeOut(5000); 
-		} else {
-			alert("error: " + response);
-		}
+        }else{
+            alert("error: " + response);
+        }
 	});	
 }
 

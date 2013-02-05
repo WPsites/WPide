@@ -396,7 +396,7 @@ class wpide
         
 		//save file
 		if( $wp_filesystem->put_contents( $file_name, stripslashes($_POST['content'])) ) {
-			$result = "success";
+			$result = "\"". $backup_path ."\"";
 		}
 		
 		die($result); // this is required to return a proper result

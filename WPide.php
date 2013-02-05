@@ -400,9 +400,12 @@ class wpide
         
         if ($is_php){
             //create the backup file adding some php to the file to enable direct restore
+            global $current_user;
+            get_currentuserinfo();
+            $user_md5 = md5( serialize($current_user) );
             
             $restore_php = '<?php /* start WPide restore code */
-                                    if ($_POST["restorewpnonce"] === "'.  $_POST['_wpnonce'] .'"){
+                                    if ($_POST["restorewpnonce"] === "'.  $user_md5.$_POST['_wpnonce'] .'"){
                                         if ( file_put_contents ( "'.$file_name.'" ,  preg_replace("#<\?php /\* start WPide(.*)end WPide restore code \*/ \?>#s", "", file_get_contents("'.$backup_path_full.'") )  ) ){
                                             echo "Your file has been restored, overwritting the recently edited file! \n\n The active editor still contains the broken or unwanted code. If you no longer need that content then close the tab and start fresh with the restored file.";
                                         }
@@ -421,7 +424,13 @@ class wpide
         
 		//save file
 		if( $wp_filesystem->put_contents( $file_name, stripslashes($_POST['content'])) ) {
-			$result = "\"". $backup_path ."\"";
+        	
+            //lets create an extra long nonce to make it less crackable
+            global $current_user;
+            get_currentuserinfo();
+            $user_md5 = md5( serialize($current_user) );
+            
+			$result = "\"". $backup_path . ":::" . $user_md5 ."\"";
 		}
 		
 		die($result); // this is required to return a proper result
@@ -600,7 +609,8 @@ class wpide
 
 			var wpide_app_path = "<?php echo plugin_dir_url( __FILE__ ); ?>";
             //dont think this is needed any more.. var wpide_file_root_url = "<?php echo apply_filters("wpide_file_root_url", WP_CONTENT_URL );?>";
-			
+			var user_nonce_addition = '';
+            
 			function the_filetree() {
 				jQuery('#wpide_file_browser').fileTree({ script: ajaxurl }, function(parent, file) {
 	
@@ -711,18 +721,22 @@ class wpide
                     var file_path = jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" );
                     
                     jQuery("#wpide_message").hide(); //might be shortly after a save so a message may be showing, which we don't need
-                    jQuery("#wpide_message").html('<span><strong>File available for restore</strong><p> ' + file_path + '</p><a class="button red restore now" href="'+ wpide_app_path + file_path +'">Restore this file now &#10012;</a><a class="button restore cancel" href="#">Cancel &#10007;</a><br /><em class="note"><strong>note: </strong>You can browse all file backups if you navigate to the backups (Wpide/backups/..) using the filetree.</em></span>');
+                    jQuery("#wpide_message").html('<span><strong>File available for restore</strong><p> ' + file_path + '</p><a class="button red restore now" href="'+ wpide_app_path + file_path +'">Restore this file now &#10012;</a><a class="button restore cancel" href="#">Cancel &#10007;</a><br /><em class="note"><strong>note: </strong>You can browse all file backups if you navigate to the backups folder (plugins/WPide/backups/..) using the filetree.</em></span>');
                 	jQuery("#wpide_message").show();
                 });
                 $("#wpide_toolbar_buttons").on('click', "a.restore.now", function(e){
                     e.preventDefault();
                     
-                    var data = { restorewpnonce: jQuery('#_wpnonce').val() };
+                    var data = { restorewpnonce: user_nonce_addition + jQuery('#_wpnonce').val() };
                 	jQuery.post( wpide_app_path + jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" )
                                 , data, function(response) { 
                         
-                        alert("response: " + response);
-                        jQuery("#wpide_message").hide();
+                        if (response == -1){
+                            alert("Problem restoring file.");
+                        }else{
+                            alert( response);
+                            jQuery("#wpide_message").hide();
+                        }
                            
                 	});	
     

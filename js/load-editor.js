@@ -520,6 +520,9 @@ function wpide_set_file_contents(file, callback_func){
             }else{
                 jQuery("#wpide_footer_message_last_saved").hide();
             }
+            
+            //hide the message if we have a fresh tab
+            jQuery("#wpide_message").hide();
 		});
         
 		//add click event for tab close. 
@@ -573,7 +576,8 @@ function saveDocument() {
         if ( regexchk.test(response) ){
             //store the resulting backup file name just incase we need to restore later
             //temp note: you can then access the data like so  jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" );
-            jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup", response.replace(/(^\"|\"$)/g, "") );
+            user_nonce_addition = response.match(/:::(.*)\"$/)[1]; //need this to send with restore request
+            jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup", response.replace(/(^\"|:::.*\"$)/g, "") );
             jQuery(".wpide_tab.active", "#wpide_toolbar").data( "lastsave",  saved_when );
             jQuery(".wpide_tab.active", "#wpide_toolbar").data( "unsaved", false);
             

@@ -386,7 +386,7 @@ class wpide
 		$file_name = $root . stripslashes($_POST['filename']);
 		
 		//set backup filename
-		$backup_path = 'backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
+		$backup_path = 'backups' . preg_replace( "#\.php$#i", "_".date("Y-m-d-H").".php", $_POST['filename'] );
 		$backup_path = plugin_dir_path(__FILE__) . $backup_path;
         //create backup directory if not there
 		$new_file_info = pathinfo($backup_path);
@@ -438,8 +438,8 @@ class wpide
 			$file_name = $root . stripslashes($_POST['filename']);
 			
 			//set backup filename
-			$backup_path = 'backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
-			$backup_path = plugin_dir_path(__FILE__) . $backup_path;
+        	$backup_path = 'backups' . preg_replace( "#\.php$#i", "_".date("Y-m-d-H").".php", $_POST['filename'] );
+    		$backup_path = plugin_dir_path(__FILE__) . $backup_path;
             
             //create backup directory if not there
 			$new_file_info = pathinfo($backup_path);

@@ -15,6 +15,10 @@ var TokenIterator = require("ace/token_iterator").TokenIterator;
 var oHandler;
 
 function onSessionChange(e)  {
+    
+    //set the document as unsaved
+    jQuery(".wpide_tab.active", "#wpide_toolbar").data( "unsaved", true);
+    jQuery("#wpide_footer_message_unsaved").html("[ Document contains unsaved content &#9998; ]").show();
 	
 	if( editor.getSession().enable_autocomplete === false){
         return;   
@@ -495,7 +499,27 @@ function wpide_set_file_contents(file, callback_func){
 			editor.focus(); 
 			//make a note of current editor
 			current_editor_session = clicksesh;
-		
+            
+            //hide/show the restore button if it's a php file and the restore url is set (i.e saved in this session)
+            if ( /\.php$/i.test( currentFilename ) && jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" ) != undefined ){
+                jQuery("#wpide_toolbar_buttons .button.restore").show();
+            }else{
+                jQuery("#wpide_toolbar_buttons .button.restore").hide();
+            }
+            
+            //show hide unsaved content message
+            if (  jQuery(".wpide_tab.active", "#wpide_toolbar").data( "unsaved" ) ){
+                jQuery("#wpide_footer_message_unsaved").html("[ Document contains unsaved content &#9998; ]").show();
+            }else{
+                jQuery("#wpide_footer_message_unsaved").hide();
+            }
+            
+            //show last saved message if it's been saved
+            if ( jQuery(".wpide_tab.active", "#wpide_toolbar").data( "lastsave" ) != undefined){
+                jQuery("#wpide_footer_message_last_saved").html("<strong>Last saved: </strong>" + jQuery(".wpide_tab.active", "#wpide_toolbar").data( "lastsave" ) ).show();
+            }else{
+                jQuery("#wpide_footer_message_last_saved").hide();
+            }
 		});
         
 		//add click event for tab close. 
@@ -544,15 +568,25 @@ function saveDocument() {
 	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
         var regexchk=/^\".*\"$/;
+        var saved_when = Date();
         
         if ( regexchk.test(response) ){
             //store the resulting backup file name just incase we need to restore later
             //temp note: you can then access the data like so  jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" );
             jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup", response.replace(/(^\"|\"$)/g, "") );
+            jQuery(".wpide_tab.active", "#wpide_toolbar").data( "lastsave",  saved_when );
+            jQuery(".wpide_tab.active", "#wpide_toolbar").data( "unsaved", false);
             
-            jQuery("#wpide_message").html('<span>File saved.</span>');
-    		jQuery("#wpide_message").show();
-			jQuery("#wpide_message").fadeOut(5000); 
+            if ( /\.php$/i.test( data.filename ) )
+                jQuery("#wpide_toolbar_buttons .button.restore").show();
+                
+            jQuery("#wpide_footer_message_last_saved").html("<strong>Last saved: </strong>" + saved_when).show();
+            jQuery("#wpide_footer_message_unsaved").hide();
+            
+            jQuery("#wpide_message").html('<strong>File saved &#10004;</strong>')
+    		.show()
+            .delay(2000)
+			.fadeOut(600);
         }else{
             alert("error: " + response);
         }

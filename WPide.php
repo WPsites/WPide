@@ -352,8 +352,12 @@ class wpide
 		if ( !current_user_can('edit_themes') )
 		wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
         
+        $is_php = false;
+        
         //check file syntax of PHP files by parsing the PHP
         if ( preg_match("#\.php$#i", $_POST['filename']) ){
+            
+            $is_php = true;
             
             require('PHP-Parser/lib/bootstrap.php');
             ini_set('xdebug.max_nesting_level', 2000);
@@ -387,13 +391,33 @@ class wpide
 		
 		//set backup filename
 		$backup_path = 'backups' . preg_replace( "#\.php$#i", "_".date("Y-m-d-H").".php", $_POST['filename'] );
-		$backup_path = plugin_dir_path(__FILE__) . $backup_path;
+		$backup_path_full = plugin_dir_path(__FILE__) . $backup_path;
         //create backup directory if not there
-		$new_file_info = pathinfo($backup_path);
+		$new_file_info = pathinfo($backup_path_full);
 		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
 		
-		//do backup
-		$wp_filesystem->copy( $file_name, $backup_path );
+
+        
+        if ($is_php){
+            //create the backup file adding some php to the file to enable direct restore
+            
+            $restore_php = '<?php /* start WPide restore code */
+                                    if ($_POST["restorewpnonce"] === "'.  $_POST['_wpnonce'] .'"){
+                                        if ( file_put_contents ( "'.$file_name.'" ,  preg_replace("#<\?php /\* start WPide(.*)end WPide restore code \*/ \?>#s", "", file_get_contents("'.$backup_path_full.'") )  ) ){
+                                            echo "Your file has been restored, overwritting the recently edited file! \n\n The active editor still contains the broken or unwanted code. If you no longer need that content then close the tab and start fresh with the restored file.";
+                                        }
+                                    }else{
+                                        echo "-1";
+                                    }
+                                    die();
+                            /* end WPide restore code */ ?>';
+            
+            file_put_contents ( $backup_path_full ,  $restore_php . file_get_contents($file_name) );
+            
+        }else{
+            //do normal backup
+		    $wp_filesystem->copy( $file_name, $backup_path_full );
+        }
         
 		//save file
 		if( $wp_filesystem->put_contents( $file_name, stripslashes($_POST['content'])) ) {
@@ -682,7 +706,32 @@ class wpide
                     $("#wpide_color_assist").hide(); //hide it until it's needed again
                 });
 				
-        
+                $("#wpide_toolbar_buttons").on('click', "a.restore", function(e){
+                    e.preventDefault();
+                    var file_path = jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" );
+                    
+                    jQuery("#wpide_message").hide(); //might be shortly after a save so a message may be showing, which we don't need
+                    jQuery("#wpide_message").html('<span><strong>File available for restore</strong><p> ' + file_path + '</p><a class="button red restore now" href="'+ wpide_app_path + file_path +'">Restore this file now &#10012;</a><a class="button restore cancel" href="#">Cancel &#10007;</a><br /><em class="note"><strong>note: </strong>You can browse all file backups if you navigate to the backups (Wpide/backups/..) using the filetree.</em></span>');
+                	jQuery("#wpide_message").show();
+                });
+                $("#wpide_toolbar_buttons").on('click', "a.restore.now", function(e){
+                    e.preventDefault();
+                    
+                    var data = { restorewpnonce: jQuery('#_wpnonce').val() };
+                	jQuery.post( wpide_app_path + jQuery(".wpide_tab.active", "#wpide_toolbar").data( "backup" )
+                                , data, function(response) { 
+                        
+                        alert("response: " + response);
+                        jQuery("#wpide_message").hide();
+                           
+                	});	
+    
+                });
+                $("#wpide_toolbar_buttons" ).on('click', "a.cancel", function(e){
+                    e.preventDefault();
+                    
+                    jQuery("#wpide_message").hide(); //might be shortly after a save so a message may be showing, which we don't need
+                });
                 
 				
 			});
@@ -742,13 +791,18 @@ class wpide
 				</div>
 							
 				<div id="wpide_toolbar_buttons"> 
-				  <div id="wpide_message" class="error highlight"></div>
-				  <a href="#"></a> <a href="#"></a> </div>
+				  <div id="wpide_message"></div>
+				  <a class="button restore" style="display:none;" title="Restore the active tab" href="#">Restore &#10012;</a> 
+                  
+                  </div>
 							
 							
 				<div id='fancyeditordiv'></div>
 				
 				<form id="wpide_save_container" action="" method="get">
+                <div id="wpide_footer_message"></div> 
+                <div id="wpide_footer_message_last_saved"></div>
+                <div id="wpide_footer_message_unsaved"></div>
 				   <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
 				   FILE</a> 
 				   <input type="hidden" id="filename" name="filename" value="" />

@@ -116,17 +116,24 @@
 		border-top-left-radius: 0px;
 	}
 		
-		#wpide_toolbar_buttons a{
-			display:block;
-			float:left;
-			margin:6px;
-		}
-		
-		#wpwrap div.ace_gutter{
-			background-color:#f4f4f4;
-			color:#aaa;
-            z-index:999;
-		}
+	#wpide_toolbar_buttons a{
+        display: block;
+        float: right;
+        margin: 2px;
+        padding: 0 10px;
+        height: auto;
+        margin-top: 4px;
+	}
+    #wpide_toolbar_buttons .red{
+        color:#bc201d;
+    }
+	
+	#wpwrap div.ace_gutter{
+		background-color:#f4f4f4;
+		color:#aaa;
+        z-index:999;
+	}
+        
 	#wpide_save_container{
         float: left;
         clear: left;
@@ -194,44 +201,72 @@
 		font-size: 80%;
 		line-height: 100%;
 	}
-        .inner-sidebar{
-            background-image: url(images/wpide_logo.jpg);
-            background-repeat: no-repeat;
-            background-position: top right;
-        }
-        
-        #fancyeditordiv{
-            width:75%;
-            height:1000px;
-            margin-right:0!important;
-            float:left;
-        }
-        
-        #wpide_message{
-            display:none;
-            width: 97%;
-            position: absolute;
-            top: 1px;
-            left: 2px;
-            text-align:left;
-            margin:0;
-            padding:5px;
-        }
-        
-        #wpide_save{
-            float: right;
-        }
-        
-        #publishing-action img{
-            visibility: hidden;
-        }
-        
-        div#side-info-column{
-               width:23%;
-        }
-        #submitdiv.postbox{
-                min-width:220px;
-        }
+    
+    .inner-sidebar{
+        background-image: url(images/wpide_logo.jpg);
+        background-repeat: no-repeat;
+        background-position: top right;
+    }
+    
+    #fancyeditordiv{
+        width:75%;
+        height:1000px;
+        margin-right:0!important;
+        float:left;
+    }
+    
+    #wpide_message{
+        display:none;
+        width: 80%;
+        float: left;
+        text-align: left;
+        margin: 0;
+        padding: 7px;
+    }
+    
+    #wpide_message a{
+        float:none;
+        display:inline-block;
+        margin:2px;
+    }
+    
+    #wpide_message span{
+        width: 80%;
+    }
+    
+    #wpide_message .note{
+        font-size: 10px;
+        margin: 10px 0;
+        display: block;
+    }
+    
+    #wpide_footer_message,
+    #wpide_footer_message_last_saved,
+    #wpide_footer_message_unsaved{
+        display:none;
+        float: left;
+        padding: 8px;
+        font-size: 12px;
+        color: #666;
+    }
+    #wpide_footer_message_unsaved{
+        color:#bc201d;
+    }
+    
+    #wpide_save{
+        float: right;
+    }
+    
+    #publishing-action img{
+        visibility: hidden;
+    }
+    
+    div#side-info-column{
+           width:23%;
+    }
+    #submitdiv.postbox{
+            min-width:220px;
+    }
 
 /* color assist */
 .ImageColorPickerWrapper{

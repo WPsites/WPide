@@ -386,8 +386,9 @@ class wpide
 		$file_name = $root . stripslashes($_POST['filename']);
 		
 		//set backup filename
-		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
-		//create backup directory if not there
+		$backup_path = 'backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
+		$backup_path = plugin_dir_path(__FILE__) . $backup_path;
+        //create backup directory if not there
 		$new_file_info = pathinfo($backup_path);
 		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
 		
@@ -437,8 +438,10 @@ class wpide
 			$file_name = $root . stripslashes($_POST['filename']);
 			
 			//set backup filename
-			$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
-			//create backup directory if not there
+			$backup_path = 'backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
+			$backup_path = plugin_dir_path(__FILE__) . $backup_path;
+            
+            //create backup directory if not there
 			$new_file_info = pathinfo($backup_path);
 			if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
 			
@@ -550,30 +553,7 @@ class wpide
         
         
 		die();
-			
-		//set backup filename
-		$backup_path =  ABSPATH .'wp-content/plugins/' . basename(dirname(__FILE__)) .'/backups/' . str_replace( str_replace('\\', "/", ABSPATH), '', $file_name) .'.'.date("YmdH");
-		//create backup directory if not there
-		$new_file_info = pathinfo($backup_path);
-		if (!$wp_filesystem->is_dir($new_file_info['dirname'])) wp_mkdir_p( $new_file_info['dirname'] ); //should use the filesytem api here but there isn't a comparable command right now
-		
-		//do backup
-		$wp_filesystem->move( $file_name, $backup_path );
-		
-	
-		//save file
-		if( $wp_filesystem->put_contents( $file_name, $_POST['content']) ) {
-			$result = "success";
-		}
-		
-		if ($result == "success"){
-			wp_die('<p>'.__('<strong>Image saved.</strong> <br />You may <a href="JavaScript:window.close();">close this window / tab</a>.').'</p>');
-		}else{
-			wp_die('<p>'.__('<strong>Problem saving image.</strong> <br /><a href="JavaScript:window.close();">Close this window / tab</a> and try editing the image again.').'</p>');
-		}
-	
-		
-		//return;
+
 	}
     
     

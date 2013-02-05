@@ -479,15 +479,17 @@ function wpide_set_file_contents(file, callback_func){
 				mode = require("ace/mode/css").Mode;
 			}
             else if (/\.less$/.test(currentFilename)) {
-				mode = require("ace/mode/css").Mode;
+				mode = require("ace/mode/less").Mode;
 			}
 			else if (/\.js$/.test(currentFilename)) {
 				mode = require("ace/mode/javascript").Mode;
 			}
 			else {
-				mode = require("ace/mode/php").Mode; //default to php
-                //only enable session change / auto complete if needed
-                editor.getSession().enable_autocomplete = true;
+				mode = require("ace/mode/php").Mode; //default to PHP
+                
+                //only enable session change / auto complete for PHP
+                if (/\.php$/.test(currentFilename))
+                    editor.getSession().enable_autocomplete = true;
 			}
 			editor.getSession().setMode(new mode());
 			

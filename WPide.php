@@ -149,6 +149,7 @@ class wpide
 		    wp_enqueue_script('ace', plugins_url("ace-0.2.0/src/ace.js", __FILE__ ) );
 		    //include ace modes for css, javascript & php
 		    wp_enqueue_script('ace-mode-css', $plugin_path . 'ace-0.2.0/src/mode-css.js');
+            wp_enqueue_script('ace-mode-less', $plugin_path . 'ace-0.2.0/src/mode-less.js');
 		    wp_enqueue_script('ace-mode-javascript', $plugin_path . 'ace-0.2.0/src/mode-javascript.js');
 		    wp_enqueue_script('ace-mode-php', $plugin_path . 'ace-0.2.0/src/mode-php.js');
 		    //include ace theme

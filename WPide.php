@@ -818,8 +818,13 @@ class wpide
                 <div id="wpide_footer_message"></div> 
                 <div id="wpide_footer_message_last_saved"></div>
                 <div id="wpide_footer_message_unsaved"></div>
-				   <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
-				   FILE</a> 
+                
+                <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
+    			   FILE</a> 
+                
+                 <a href="#" id="wpide_git" alt="Open the overlay to commit some files to a Git repository" title="Open the overlay to commit some files to a Git repository" class="button-secondary">Git commit files</a> 
+                   
+				   
 				   <input type="hidden" id="filename" name="filename" value="" />
 				       <?php
 				       if ( function_exists('wp_nonce_field') )

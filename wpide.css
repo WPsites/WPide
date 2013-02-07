@@ -257,6 +257,15 @@
         float: right;
     }
     
+    #wpide_git{
+        float: right;
+        margin-right: 20px;
+        background-image: url(images/git.png);
+        background-repeat: no-repeat;
+        background-position: right center;
+        padding-right: 30px;
+    }
+    
     #publishing-action img{
         visibility: hidden;
     }

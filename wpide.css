@@ -266,6 +266,16 @@
         padding-right: 30px;
     }
     
+    #gitdiv{
+        display:none;
+    }
+    
+    #gitdiv label,
+    #gitdiv input[type=text],
+    #gitdiv a.button{
+        margin:7px;
+    }
+    
     #publishing-action img{
         visibility: hidden;
     }

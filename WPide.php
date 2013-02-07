@@ -66,6 +66,9 @@ class wpide
 			add_action('wp_ajax_wpide_save_file',  array( $this, 'wpide_save_file' ) );
 			//setup ajax function to create new item (folder, file etc)
 			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
+            //setup ajax function to show local git repo changes
+    		add_action('wp_ajax_wpide_show_changed_files', array( $this, 'show_changed_files' ) );
+            
 			
 			//setup ajax function to create new item (folder, file etc)
 			add_action('wp_ajax_wpide_image_edit_key', array( $this, 'wpide_image_edit_key' )  );
@@ -270,6 +273,20 @@ class wpide
 		echo $wp_filesystem->get_contents($file_name);
 		die(); // this is required to return a proper result
 	}
+    
+    
+    public static function show_changed_files() {
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        print_r($_POST);
+        
+		die(); // this is required to return a proper result
+	}
+    
+    
 	
 	
 	
@@ -697,7 +714,8 @@ class wpide
                 //set up the git commit overlay
                 $('#gitdiv').dialog({
                    autoOpen: false,
-                   title: 'Git commit'
+                   title: 'Git commit',
+                   width: 750
                 });
                  
 				// Handler for .ready() called.
@@ -760,6 +778,21 @@ class wpide
                     e.preventDefault();
                           
                     $('#gitdiv').dialog( "open" );
+      
+                });
+                
+                $("#gitdiv .show_changed_files" ).on('click', function(e){
+                    e.preventDefault();
+                          
+                	var data = { action: 'wpide_show_changed_files', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+					jQuery.post(ajaxurl, data, function(response) {
+                    
+						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
+						alert(response);
+						
+					});
       
                 });
                 
@@ -847,7 +880,11 @@ class wpide
 				       ?>
 				 </form>
                  
-                 <div id="gitdiv"></div>
+                 <div id="gitdiv">
+                    <label>Local Git path</label><input type="text" name="gitpath" id="gitpath" value="" /> 
+                    <label>Local Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="" />
+                    <a class="button show_changed_files" href="#">Show changed files</a>
+                 </div>
 			</div>	
 				
 			

@@ -85,6 +85,8 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+= 2.3 =
+* Added initial git functions using the following library: PHP-Stream-Wrapper-for-Git from https://github.com/teqneers/PHP-Stream-Wrapper-for-Git
 
 = 2.2 =
 * Add restore recent backup facility - It's a primative implementation at this point but it does the job. See FAQ note.

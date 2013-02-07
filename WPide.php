@@ -693,6 +693,12 @@ class wpide
 			jQuery(document).ready(function($) {
             
                 $("#fancyeditordiv").css("height", ($('body').height()-120) + 'px' );
+                
+                //set up the git commit overlay
+                $('#gitdiv').dialog({
+                   autoOpen: false,
+                   title: 'Git commit'
+                });
                  
 				// Handler for .ready() called.
 				the_filetree() ;
@@ -746,6 +752,15 @@ class wpide
                     e.preventDefault();
                     
                     jQuery("#wpide_message").hide(); //might be shortly after a save so a message may be showing, which we don't need
+                });
+                
+                
+                
+                $("#wpide_git" ).on('click', function(e){
+                    e.preventDefault();
+                          
+                    $('#gitdiv').dialog( "open" );
+      
                 });
                 
 				
@@ -831,6 +846,8 @@ class wpide
 					   wp_nonce_field('plugin-name-action_wpidenonce');
 				       ?>
 				 </form>
+                 
+                 <div id="gitdiv"></div>
 			</div>	
 				
 			

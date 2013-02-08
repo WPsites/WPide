@@ -68,6 +68,8 @@ class wpide
 			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
             //setup ajax function to show local git repo changes
     		add_action('wp_ajax_wpide_show_changed_files', array( $this, 'show_changed_files' ) );
+            //setup ajax function to show local git repo changes
+        	add_action('wp_ajax_wpide_show_diff', array( $this, 'show_diff' ) );
             
 			
 			//setup ajax function to create new item (folder, file etc)
@@ -323,15 +325,14 @@ class wpide
         $status = $git->getStatus();
         $i=0;//row counter
         foreach ($status as $item){
-            echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> <a href='#' class='viewdiff'>[view diff]</a></div>";
+            echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> 
+            <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". base64_encode($item['file']) ."'></div> </div>";
             $i++;
         }
         
         //output the commit message box
-        echo "<label>Commit message</label><br /><input type='text' name='message' class='message' />";
-        
-        //output commit button
-        echo "<p><a href='#' class='button-primary'>Commit the staged chanages</a></p>";
+        echo "<div id='gitdivcommit'><label>Commit message</label><br /><input type='text' name='message' class='message' />
+                <p><a href='#' class='button-primary'>Commit the staged chanages</a></p></div>";
         
         //echo $thebinary;
         
@@ -348,7 +349,58 @@ class wpide
 	}
     
     
-	
+	    public static function show_diff() {
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+        
+        require_once('git/autoload.php.dist');
+        //use TQ\Git\Cli\Binary;
+        //use TQ\Git\Repository\Repository;
+        
+        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
+        
+        //check repo path entered or die
+        if ( !strlen($_POST['gitpath']) ) 
+            die("Error: Path to your git repository is required!");
+            
+            
+        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
+        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
+        
+        if ( $gitbinary==="I'll guess.." ){ //the binary path
+        
+            $thebinary = TQ\Git\Cli\Binary::locateBinary();
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            
+        }else{
+            
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
+            
+        }
+        
+        $file = sanitize_text_field( base64_decode( $_POST['file']) );
+        
+        //generate a diff using the built in WordPress code
+        $args = array(
+            'title'           => 'Differences',
+            'title_left'      => 'Old Version',
+        	'title_right'     => 'New Version'
+        );
+        
+        $contents = $git->showFile( $file);
+        $contents2 = $git->showFile( $file, 'HEAD^');
+        $diff_table = wp_text_diff($contents2, $contents, $args); 
+        
+        echo "here is the diuff table " . $diff_table;
+
+  
+		die(); // this is required to return a proper result
+	}
 	
 	
 	public static function wpide_image_edit_key() {
@@ -853,6 +905,25 @@ class wpide
 						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
 					
                         $("#gitdivcontent").html( response );
+						
+					});
+      
+                });
+                
+                
+                
+                $("#gitdiv" ).on('click', ".viewdiff", function(e){
+                    e.preventDefault();
+                    
+                    var base64_file = jQuery(this).attr('href');      
+                    var data = { action: 'wpide_show_diff', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    file: base64_file, gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+					jQuery.post(ajaxurl, data, function(response) {
+                    
+						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
+					
+                        $(".gitdivdiff."+ base64_file).html( response );
 						
 					});
       

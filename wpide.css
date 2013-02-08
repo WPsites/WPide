@@ -279,6 +279,9 @@
     #gitdiv a.button{
         margin:7px;
     }
+    #gitdiv label{
+        font-weight:bold;
+    }
     
     .gitfilerow{
         background-color: #bbb;
@@ -308,8 +311,28 @@
         color: #bc201d;
     }
     
+    #gitdivcommit{
+        margin-top:20px;
+        padding:10px;
+        border: 1px solid #bbb;
+    }
+    #gitdivcommit a.button-primary{
+        margin-left: 8px;
+    }
     #gitdiv input.message{
-        width:300px;
+        width:70%;
+    }
+    
+    .gitdivdiff{
+        font-size:6px;
+        -webkit-opacity: 1;
+        -moz-opacity: 1;
+        filter:alpha(opacity=100);
+    }
+    
+    .gitdivdiff .diff-addedline,
+    .gitdivdiff .diff-deletedline{
+        font-size:10px;
     }
     
     #publishing-action img{

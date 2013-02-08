@@ -324,10 +324,14 @@ class wpide
         //)
         $status = $git->getStatus();
         $i=0;//row counter
-        foreach ($status as $item){
-            echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> 
-            <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". base64_encode($item['file']) ."'></div> </div>";
-            $i++;
+        if ( count($status) ){
+            foreach ($status as $item){
+                echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> 
+                <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". base64_encode($item['file']) ."'></div> </div>";
+                $i++;
+            }
+        }else{
+            echo "<p>No changed files in this repo so nothing to commit.</p>";
         }
         
         //output the commit message box

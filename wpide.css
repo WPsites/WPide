@@ -325,6 +325,7 @@
     
     .gitdivdiff{
         font-size:6px;
+        line-height:30%;
         -webkit-opacity: 1;
         -moz-opacity: 1;
         filter:alpha(opacity=100);
@@ -333,6 +334,7 @@
     .gitdivdiff .diff-addedline,
     .gitdivdiff .diff-deletedline{
         font-size:10px;
+        line-height:130%;
     }
     
     #publishing-action img{

@@ -268,12 +268,48 @@
     
     #gitdiv{
         display:none;
+        background-color: #efefef;
+    }
+    #gitpath{
+        width:200px;
     }
     
     #gitdiv label,
     #gitdiv input[type=text],
     #gitdiv a.button{
         margin:7px;
+    }
+    
+    .gitfilerow{
+        background-color: #bbb;
+        padding: 10px;
+        
+      -webkit-opacity: 0.9;
+      -moz-opacity: 0.9;
+      filter:alpha(opacity=90);
+    }
+    .gitfilerow:hover{
+      -webkit-opacity: 1;
+      -moz-opacity: 1;
+      filter:alpha(opacity=100);
+    }
+    .gitfilerow.light{
+        background-color: #ddd;   
+    }
+    .gitfilerow input[type=checkbox]{
+        margin-right:20px;
+    }
+    .gitfilerow .filename{
+        width: 70%;
+        display: block;
+        float: left;
+    }
+    .gitfilerow .viewdiff{
+        color: #bc201d;
+    }
+    
+    #gitdiv input.message{
+        width:300px;
     }
     
     #publishing-action img{

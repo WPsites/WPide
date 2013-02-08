@@ -281,7 +281,68 @@ class wpide
 		if ( !current_user_can('edit_themes') )
 			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
 		
-        print_r($_POST);
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+        
+        require_once('git/autoload.php.dist');
+        //use TQ\Git\Cli\Binary;
+        //use TQ\Git\Repository\Repository;
+        
+        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
+        
+        //check repo path entered or die
+        if ( !strlen($_POST['gitpath']) ) 
+            die("Error: Path to your git repository is required!");
+            
+            
+        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
+        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
+        
+        if ( $gitbinary==="I'll guess.." ){ //the binary path
+        
+            $thebinary = TQ\Git\Cli\Binary::locateBinary();
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            
+        }else{
+            
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
+            
+        }
+
+        //echo branch
+        $branch = $git->getCurrentBranch();
+        echo "<p><strong>Current branch:</strong> " . $branch . "</p>";
+        
+        //    [0] => Array
+        //(
+        //    [file] => WPide.php
+        //    [x] => 
+        //    [y] => M
+        //    [renamed] => 
+        //)
+        $status = $git->getStatus();
+        $i=0;//row counter
+        foreach ($status as $item){
+            echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> <a href='#' class='viewdiff'>[view diff]</a></div>";
+            $i++;
+        }
+        
+        //output the commit message box
+        echo "<label>Commit message</label><br /><input type='text' name='message' class='message' />";
+        
+        //output commit button
+        echo "<p><a href='#' class='button-primary'>Commit the staged chanages</a></p>";
+        
+        //echo $thebinary;
+        
+        //$git = Repository::open($repo_path, new Binary('/var/www/siddtes/wpsites.co.uk/git')  );
+        //echo $git->getFileCreationMode()." ----- ";
+        // get status of working directory
+        //$branch = $git->getCurrentBranch();
+        //echo "current branch: " . $branch;
+    
+        
+        //print_r($_POST);
         
 		die(); // this is required to return a proper result
 	}
@@ -715,7 +776,7 @@ class wpide
                 $('#gitdiv').dialog({
                    autoOpen: false,
                    title: 'Git commit',
-                   width: 750
+                   width: 800
                 });
                  
 				// Handler for .ready() called.
@@ -790,7 +851,8 @@ class wpide
 					jQuery.post(ajaxurl, data, function(response) {
                     
 						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
-						alert(response);
+					
+                        $("#gitdivcontent").html( response );
 						
 					});
       
@@ -882,8 +944,10 @@ class wpide
                  
                  <div id="gitdiv">
                     <label>Local Git path</label><input type="text" name="gitpath" id="gitpath" value="" /> 
-                    <label>Local Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="" />
+                    <label>Local Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." />
                     <a class="button show_changed_files" href="#">Show changed files</a>
+                    <div id="gitdivcontent">
+                    </div>
                  </div>
 			</div>	
 				

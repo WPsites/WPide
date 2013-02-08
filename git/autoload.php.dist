@@ -21,6 +21,8 @@
  * THE SOFTWARE.
  */
  
+
+ 
 function tq_namespace_autoload($class)
 {
     if (strpos($class, 'TQ') === 0) {

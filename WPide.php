@@ -331,7 +331,7 @@ class wpide
                 $i++;
             }
         }else{
-            echo "<p>No changed files in this repo so nothing to commit.</p>";
+            echo "<p class='red'>No changed files in this repo so nothing to commit.</p>";
         }
         
         //output the commit message box

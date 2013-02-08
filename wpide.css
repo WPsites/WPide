@@ -270,6 +270,9 @@
         display:none;
         background-color: #efefef;
     }
+    #gitdiv .red{
+        color: #bc201d;
+    }
     #gitpath{
         width:200px;
     }

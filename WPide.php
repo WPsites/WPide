@@ -68,8 +68,10 @@ class wpide
 			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
             //setup ajax function to show local git repo changes
     		add_action('wp_ajax_wpide_show_changed_files', array( $this, 'show_changed_files' ) );
-            //setup ajax function to show local git repo changes
+            //setup ajax function to show diff
         	add_action('wp_ajax_wpide_show_diff', array( $this, 'show_diff' ) );
+            //setup ajax function to commit changes
+            add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
             
 			
 			//setup ajax function to create new item (folder, file etc)
@@ -277,7 +279,7 @@ class wpide
 	}
     
     
-    public static function show_changed_files() {
+    public function show_changed_files() {
 		//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
@@ -325,8 +327,10 @@ class wpide
         $status = $git->getStatus();
         $i=0;//row counter
         if ( count($status) ){
+            
+            //echo out rows of staged files 
             foreach ($status as $item){
-                echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='' checked /> 
+                echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='". base64_encode($item['file']) ."' checked /> 
                 <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". base64_encode($item['file']) ."'></div> </div>";
                 $i++;
             }
@@ -335,7 +339,7 @@ class wpide
         }
         
         //output the commit message box
-        echo "<div id='gitdivcommit'><label>Commit message</label><br /><input type='text' name='message' class='message' />
+        echo "<div id='gitdivcommit'><label>Commit message</label><br /><input type='text' id='gitmessage' name='message' class='message' />
                 <p><a href='#' class='button-primary'>Commit the staged chanages</a></p></div>";
         
         //echo $thebinary;
@@ -353,7 +357,7 @@ class wpide
 	}
     
     
-	    public static function show_diff() {
+	public static function show_diff() {
     	//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
@@ -402,6 +406,57 @@ class wpide
         
         echo "here is the diuff table " . $diff_table;
 
+  
+		die(); // this is required to return a proper result
+	}
+    
+    
+    public static function git_commit() {
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+        
+        require_once('git/autoload.php.dist');
+        //use TQ\Git\Cli\Binary;
+        //use TQ\Git\Repository\Repository;
+        
+        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
+        
+        //check repo path entered or die
+        if ( !strlen($_POST['gitpath']) ) 
+            die("Error: Path to your git repository is required!");
+            
+            
+        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
+        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
+        
+        if ( $gitbinary==="I'll guess.." ){ //the binary path
+        
+            $thebinary = TQ\Git\Cli\Binary::locateBinary();
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            
+        }else{
+            
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
+            
+        }
+        
+        $files = array();
+        foreach ($_POST['files'] as $file){
+            $files[] = base64_decode( $file );
+        }
+        
+        //get the current user to be used for the commit
+        $current_user = wp_get_current_user();
+        
+        $git->add( $files );
+        $git->commit( sanitize_text_field($_POST['gitmessage']) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
+
+        wpide::show_changed_files();
   
 		die(); // this is required to return a proper result
 	}
@@ -915,7 +970,7 @@ class wpide
                 });
                 
                 
-                
+                //view chosen diff
                 $("#gitdiv" ).on('click', ".viewdiff", function(e){
                     e.preventDefault();
                     
@@ -928,6 +983,37 @@ class wpide
 						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
 					
                         $(".gitdivdiff."+ base64_file).html( response );
+						
+					});
+      
+                });
+                
+                //commit selected files
+                $("#gitdiv" ).on('click', "#gitdivcommit a.button-primary", function(e){
+                    e.preventDefault();
+                    
+                    //
+                    console.log('debugging what files we might be able to click at this point...');
+                    console.log( jQuery(".gitfilerow input:checked") );
+                    console.log(jQuery(".gitfilerow input:checked").length);
+                    
+                    if ( jQuery(".gitfilerow input:checked").length > 0 ){
+                        var files_for_commit = [];
+                        jQuery(".gitfilerow input:checked").each(function( index ) {
+                            console.log($(this));
+                            files_for_commit[index] = $(this).val();
+                        });
+                    }else{
+                        $(".gitdivdiff."+ base64_file).html( "No files have been commited." );
+                        return;
+                    }
+                    
+                    var data = { action: 'wpide_git_commit', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    files: files_for_commit, gitmessage: jQuery('#gitmessage').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+    				jQuery.post(ajaxurl, data, function(response) {
+                        
+                        $("#gitdivcontent").html( response );
 						
 					});
       

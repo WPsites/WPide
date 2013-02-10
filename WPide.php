@@ -330,8 +330,8 @@ class wpide
             
             //echo out rows of staged files 
             foreach ($status as $item){
-                echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". base64_encode($item['file']) ."' value='". base64_encode($item['file']) ."' checked /> 
-                <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". base64_encode($item['file']) ."'></div> </div>";
+                echo "<div class='gitfilerow ". ($i % 2 != 0 ? "light" : "")  ."'><span class='filename'>{$item['file']}</span> <input type='checkbox' name='". str_replace("=", '_', base64_encode($item['file']) ) ."' value='". base64_encode($item['file']) ."' checked /> 
+                <a href='". base64_encode($item['file']) ."' class='viewdiff'>[view diff]</a> <div class='gitdivdiff ". str_replace("=", '_', base64_encode($item['file']) ) ."'></div> </div>";
                 $i++;
             }
         }else{
@@ -982,7 +982,7 @@ class wpide
                     
 						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
 					
-                        $(".gitdivdiff."+ base64_file).html( response );
+                        $(".gitdivdiff."+ base64_file.replace(/=/g, '_' ) ).html( response );
 						
 					});
       
@@ -992,7 +992,6 @@ class wpide
                 $("#gitdiv" ).on('click', "#gitdivcommit a.button-primary", function(e){
                     e.preventDefault();
                     
-                    //
                     console.log('debugging what files we might be able to click at this point...');
                     console.log( jQuery(".gitfilerow input:checked") );
                     console.log(jQuery(".gitfilerow input:checked").length);
@@ -1004,7 +1003,7 @@ class wpide
                             files_for_commit[index] = $(this).val();
                         });
                     }else{
-                        $(".gitdivdiff."+ base64_file).html( "No files have been commited." );
+                        alert("You haven't selected any files to be committed!");
                         return;
                     }
                     

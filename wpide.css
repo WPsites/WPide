@@ -266,6 +266,11 @@
         padding-right: 30px;
     }
     
+    /* Make sure the modal window doesn't get hidden behind wp toolbar */
+    .ui-dialog{
+        margin-top:30px;
+    }
+    
     #gitdiv{
         display:none;
         background-color: #efefef;

@@ -400,11 +400,11 @@ class wpide
         	'title_right'     => 'New Version'
         );
         
-        $contents = $git->showFile( $file);
-        $contents2 = $git->showFile( $file, 'HEAD^');
-        $diff_table = wp_text_diff($contents2, $contents, $args); 
+        $contents = file_get_contents($repo_path . "/" . $file); //the git library isn't using the WP filesystem API so should we here? should we fullstop?
+        $contents2 = $git->showFile( $file, 'HEAD@{1}');
         
-        echo "here is the diuff table " . $diff_table;
+        $diff_table = wp_text_diff($contents2, $contents, $args); 
+        echo "<strong>Diff</strong>"  . $diff_table;
 
   
 		die(); // this is required to return a proper result

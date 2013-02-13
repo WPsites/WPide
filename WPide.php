@@ -67,9 +67,9 @@ class wpide
 			//setup ajax function to create new item (folder, file etc)
 			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
             //setup ajax function to show local git repo changes
-    		add_action('wp_ajax_wpide_show_changed_files', array( $this, 'show_changed_files' ) );
+    		add_action('wp_ajax_wpide_git_status', array( $this, 'git_status' ) );
             //setup ajax function to show diff
-        	add_action('wp_ajax_wpide_show_diff', array( $this, 'show_diff' ) );
+        	add_action('wp_ajax_wpide_git_diff', array( $this, 'git_diff' ) );
             //setup ajax function to commit changes
             add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
             
@@ -279,7 +279,7 @@ class wpide
 	}
     
     
-    public function show_changed_files() {
+    public function git_status() {
 		//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
@@ -289,8 +289,6 @@ class wpide
         ini_set("display_errors", 1);
         
         require_once('git/autoload.php.dist');
-        //use TQ\Git\Cli\Binary;
-        //use TQ\Git\Repository\Repository;
         
         $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
         
@@ -309,10 +307,11 @@ class wpide
             
         }else{
             
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
+            $thebinary = $_POST['gitbinary'];
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
             
         }
-
+    
         //echo branch
         $branch = $git->getCurrentBranch();
         echo "<p><strong>Current branch:</strong> " . $branch . "</p>";
@@ -342,22 +341,11 @@ class wpide
         echo "<div id='gitdivcommit'><label>Commit message</label><br /><input type='text' id='gitmessage' name='message' class='message' />
                 <p><a href='#' class='button-primary'>Commit the staged chanages</a></p></div>";
         
-        //echo $thebinary;
-        
-        //$git = Repository::open($repo_path, new Binary('/var/www/siddtes/wpsites.co.uk/git')  );
-        //echo $git->getFileCreationMode()." ----- ";
-        // get status of working directory
-        //$branch = $git->getCurrentBranch();
-        //echo "current branch: " . $branch;
-    
-        
-        //print_r($_POST);
-        
 		die(); // this is required to return a proper result
 	}
     
     
-	public static function show_diff() {
+    public function git_push() {
     	//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
@@ -367,8 +355,55 @@ class wpide
         ini_set("display_errors", 1);
         
         require_once('git/autoload.php.dist');
-        //use TQ\Git\Cli\Binary;
-        //use TQ\Git\Repository\Repository;
+        
+        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
+        
+        //check repo path entered or die
+        if ( !strlen($_POST['gitpath']) ) 
+            die("Error: Path to your git repository is required!");
+            
+            
+        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
+        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
+        
+        if ( $gitbinary==="I'll guess.." ){ //the binary path
+        
+            $thebinary = TQ\Git\Cli\Binary::locateBinary();
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            
+        }else{
+            
+            $thebinary = $_POST['gitbinary'];
+            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            
+        }
+        
+        
+        putenv("GIT_SSH=/var/www/sites/wpsites.co.uk/wpsites.co.uk/subdomains/www-dev/html/wp-content/plugins/WPide/git/wrapper/git-wrapper.sh");
+        putenv("HOME=/var/www/sites/wpsites.co.uk/wpsites.co.uk/subdomains/www-dev/html/wp-content/plugins/WPide/git/wrapper/");
+        //putenv("GIT_AUTHOR_NAME=WPsites");
+        //putenv("GIT_AUTHOR_EMAIL=simon@wpsites.co.uk");
+        putenv("GIT_COMMITTER_NAME=WPide"); //shows under author
+        putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
+        
+        echo "<pre>";
+        echo $git->push( );
+        echo "</pre>";
+        
+		die(); // this is required to return a proper result
+	}
+    
+    
+	public static function git_diff() {
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+        
+        require_once('git/autoload.php.dist');
         
         $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
         
@@ -420,9 +455,10 @@ class wpide
         error_reporting(E_ALL);
         ini_set("display_errors", 1);
         
+        putenv("GIT_COMMITTER_NAME=WPide"); //shows under author
+        putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
+        
         require_once('git/autoload.php.dist');
-        //use TQ\Git\Cli\Binary;
-        //use TQ\Git\Repository\Repository;
         
         $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
         
@@ -456,7 +492,7 @@ class wpide
         $git->add( $files );
         $git->commit( sanitize_text_field($_POST['gitmessage']) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
 
-        wpide::show_changed_files();
+        wpide::git_status();
   
 		die(); // this is required to return a proper result
 	}
@@ -956,14 +992,12 @@ class wpide
                 $("#gitdiv .show_changed_files" ).on('click', function(e){
                     e.preventDefault();
                           
-                	var data = { action: 'wpide_show_changed_files', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                	var data = { action: 'wpide_git_status', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
 					jQuery.post(ajaxurl, data, function(response) {
                     
-						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
-					
-                        $("#gitdivcontent").html( response );
+						$("#gitdivcontent").html( response );
 						
 					});
       
@@ -975,13 +1009,11 @@ class wpide
                     e.preventDefault();
                     
                     var base64_file = jQuery(this).attr('href');      
-                    var data = { action: 'wpide_show_diff', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                    var data = { action: 'wpide_git_diff', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     file: base64_file, gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
 					jQuery.post(ajaxurl, data, function(response) {
-                    
-						//with the response (which is a nonce), build the json data to pass to the image editor. The edit key (nonce) is only valid to edit this image
-					
+      
                         $(".gitdivdiff."+ base64_file.replace(/=/g, '_' ) ).html( response );
 						
 					});

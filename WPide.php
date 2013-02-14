@@ -1180,6 +1180,9 @@ class wpide
                     </div>
                     
                     <div id="gitdivcontent">
+                     <p>So SSH keys (id_rsa and id_rsa.pub) need to be in wp-content/ssh/ along with a known_hosts file</p>
+                     <p>We need to write a new method for creating the SSH keys etc automatically using phpseclib which I've just added</p>
+                     <p>This is very much work in progress</p>
                     </div>
                  </div>
 			</div>	

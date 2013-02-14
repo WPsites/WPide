@@ -17,7 +17,7 @@ class wpide
 
 {
 
-	public $site_url, $plugin_url;
+	public $site_url, $plugin_url, $git, $git_repo_path;
     
     /**
 	 * The main WPide loader (PHP4 compatable)
@@ -280,13 +280,8 @@ class wpide
 		die(); // this is required to return a proper result
 	}
     
-    
-    public function git_status() {
-		//check the user has the permissions
-		check_admin_referer('plugin-name-action_wpidenonce'); 
-		if ( !current_user_can('edit_themes') )
-			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
-		
+    public function git_open_repo(){
+        
         error_reporting(E_ALL);
         ini_set("display_errors", 1);
         
@@ -299,23 +294,33 @@ class wpide
             die("Error: Path to your git repository is required! (see settings)");
             
             
-        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
+        $this->git_repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
         $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
         
         if ( $gitbinary==="I'll guess.." ){ //the binary path
         
             $thebinary = TQ\Git\Cli\Binary::locateBinary();
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
             
         }else{
             
             $thebinary = $_POST['gitbinary'];
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
             
         }
+        
+    }
+    
+    public function git_status() {
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        $this->git_open_repo(); // make sure git repo is open
     
         //echo branch
-        $branch = $git->getCurrentBranch();
+        $branch = $this->git->getCurrentBranch();
         echo "<p><strong>Current branch:</strong> " . $branch . "</p>";
         
         //    [0] => Array
@@ -325,7 +330,7 @@ class wpide
         //    [y] => M
         //    [renamed] => 
         //)
-        $status = $git->getStatus();
+        $status = $this->git->getStatus();
         $i=0;//row counter
         if ( count($status) ){
             
@@ -353,32 +358,7 @@ class wpide
 		if ( !current_user_can('edit_themes') )
 			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
 		
-        error_reporting(E_ALL);
-        ini_set("display_errors", 1);
-        
-        require_once('git/autoload.php.dist');
-        
-        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
-        
-        //check repo path entered or die
-        if ( !strlen($_POST['gitpath']) ) 
-            die("Error: Path to your git repository is required!");
-            
-            
-        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
-        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
-        
-        if ( $gitbinary==="I'll guess.." ){ //the binary path
-        
-            $thebinary = TQ\Git\Cli\Binary::locateBinary();
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
-            
-        }else{
-            
-            $thebinary = $_POST['gitbinary'];
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
-            
-        }
+        $this->git_open_repo(); // make sure git repo is open
         
         $sshpath = preg_replace("#/$#", "", $_POST['sshpath']); //get path replacing end slash if entered
         
@@ -387,7 +367,7 @@ class wpide
         putenv("HOME=". plugin_dir_path(__FILE__) . 'git'); //no trailing slash - set home to the git directory (this may not be needed)
         
         echo "<pre>";
-         $push_result = $git->push( );
+         $push_result = $this->git->push( );
         echo "</pre>";
         
         if ($push_result === '')
@@ -397,37 +377,13 @@ class wpide
 	}
     
     
-	public static function git_diff() {
+	public function git_diff() {
     	//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
 			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
 		
-        error_reporting(E_ALL);
-        ini_set("display_errors", 1);
-        
-        require_once('git/autoload.php.dist');
-        
-        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
-        
-        //check repo path entered or die
-        if ( !strlen($_POST['gitpath']) ) 
-            die("Error: Path to your git repository is required!");
-            
-            
-        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
-        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
-        
-        if ( $gitbinary==="I'll guess.." ){ //the binary path
-        
-            $thebinary = TQ\Git\Cli\Binary::locateBinary();
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
-            
-        }else{
-            
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
-            
-        }
+        $this->git_open_repo(); // make sure git repo is open
         
         $file = sanitize_text_field( base64_decode( $_POST['file']) );
         
@@ -438,8 +394,8 @@ class wpide
         	'title_right'     => 'New Version'
         );
         
-        $contents = file_get_contents($repo_path . "/" . $file); //the git library isn't using the WP filesystem API so should we here? should we fullstop?
-        $contents2 = $git->showFile( $file, 'HEAD@{1}');
+        $contents = file_get_contents($this->git_repo_path . "/" . $file); //the git library isn't using the WP filesystem API so should we here? should we fullstop?
+        $contents2 = $this->git->showFile( $file, 'HEAD@{1}');
         
         $diff_table = wp_text_diff($contents2, $contents, $args); 
         echo "<strong>Diff</strong>"  . $diff_table;
@@ -449,42 +405,13 @@ class wpide
 	}
     
     
-    public static function git_commit() {
+    public function git_commit() {
     	//check the user has the permissions
 		check_admin_referer('plugin-name-action_wpidenonce'); 
 		if ( !current_user_can('edit_themes') )
 			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
 		
-        error_reporting(E_ALL);
-        ini_set("display_errors", 1);
-        
-        //putenv("GIT_AUTHOR_NAME=WPsites"); //author can be set using env but for now we set it during the commit
-        //putenv("GIT_AUTHOR_EMAIL=simon@wpsites.co.uk");
-        putenv("GIT_COMMITTER_NAME=WPide"); //commiter details, shows under author on github
-        putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
-        
-        require_once('git/autoload.php.dist');
-        
-        $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ) . "/"; 
-        
-        //check repo path entered or die
-        if ( !strlen($_POST['gitpath']) ) 
-            die("Error: Path to your git repository is required!");
-            
-            
-        $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
-        $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
-        
-        if ( $gitbinary==="I'll guess.." ){ //the binary path
-        
-            $thebinary = TQ\Git\Cli\Binary::locateBinary();
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
-            
-        }else{
-            
-            $git = TQ\Git\Repository\Repository::open($repo_path, new TQ\Git\Cli\Binary( $_POST['gitbinary'] )  );
-            
-        }
+        $this->git_open_repo(); // make sure git repo is open
         
         $files = array();
         foreach ($_POST['files'] as $file){
@@ -494,8 +421,8 @@ class wpide
         //get the current user to be used for the commit
         $current_user = wp_get_current_user();
         
-        $git->add( $files );
-        $git->commit( sanitize_text_field( stripslashes($_POST['gitmessage']) ) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
+        $this->git->add( $files );
+        $this->git->commit( sanitize_text_field( stripslashes($_POST['gitmessage']) ) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
 
         wpide::git_status();
   

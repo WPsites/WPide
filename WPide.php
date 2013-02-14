@@ -495,7 +495,7 @@ class wpide
         $current_user = wp_get_current_user();
         
         $git->add( $files );
-        $git->commit( sanitize_text_field($_POST['gitmessage']) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
+        $git->commit( sanitize_text_field( stripslashes($_POST['gitmessage']) ) , $files, "{$current_user->user_firstname} {$current_user->user_lastname} <{$current_user->user_email}>");
 
         wpide::git_status();
   

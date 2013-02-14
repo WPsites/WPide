@@ -2,4 +2,4 @@
 set -e
 set -u
 
-ssh -vvv -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$WP_CONTENT_DIR/ssh/known_hosts -i $WP_CONTENT_DIR/ssh/id_rsa $@
+ssh -vvv -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$WPIDE_SSH_PATH/known_hosts -i $WPIDE_SSH_PATH/id_rsa $@

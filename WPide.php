@@ -381,12 +381,8 @@ class wpide
         }
         
         putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper.sh'); //tell Git about our wrapper script
-        putenv("WP_CONTENT_DIR=". WP_CONTENT_DIR); //pass wp-content path to Git wrapper script
-        putenv("HOME=". plugin_dir_path(__FILE__) . 'git/'); //set home to the git directory (this may not be needed)
-        //putenv("GIT_AUTHOR_NAME=WPsites"); //author can be set using env but for now we set it during the commit
-        //putenv("GIT_AUTHOR_EMAIL=simon@wpsites.co.uk");
-        putenv("GIT_COMMITTER_NAME=WPide"); //commiter details, shows under author on github
-        putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
+        putenv("WPIDE_SSH_PATH=". WP_CONTENT_DIR . '/ssh'); //no trailing slash - pass wp-content path to Git wrapper script
+        putenv("HOME=". plugin_dir_path(__FILE__) . 'git'); //no trailing slash - set home to the git directory (this may not be needed)
         
         echo "<pre>";
          $push_result = $git->push( );
@@ -460,7 +456,9 @@ class wpide
         error_reporting(E_ALL);
         ini_set("display_errors", 1);
         
-        putenv("GIT_COMMITTER_NAME=WPide"); //shows under author
+        //putenv("GIT_AUTHOR_NAME=WPsites"); //author can be set using env but for now we set it during the commit
+        //putenv("GIT_AUTHOR_EMAIL=simon@wpsites.co.uk");
+        putenv("GIT_COMMITTER_NAME=WPide"); //commiter details, shows under author on github
         putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
         
         require_once('git/autoload.php.dist');

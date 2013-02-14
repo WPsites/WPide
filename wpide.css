@@ -278,6 +278,9 @@
     #gitdiv .red{
         color: #bc201d;
     }
+    #gitdivcontent{
+        margin:10px;
+    }
     #gitpath{
         width:200px;
     }

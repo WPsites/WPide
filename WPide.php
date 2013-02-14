@@ -296,7 +296,7 @@ class wpide
         
         //check repo path entered or die
         if ( !strlen($_POST['gitpath']) ) 
-            die("Error: Path to your git repository is required!");
+            die("Error: Path to your git repository is required! (see settings)");
             
             
         $repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
@@ -994,6 +994,8 @@ class wpide
                 
                 $("#gitdiv .show_changed_files" ).on('click', function(e){
                     e.preventDefault();
+                    
+                    $(".git_settings_panel").hide();
                           
                 	var data = { action: 'wpide_git_status', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
@@ -1011,6 +1013,8 @@ class wpide
                 $("#gitdiv" ).on('click', ".viewdiff", function(e){
                     e.preventDefault();
                     
+                    $(".git_settings_panel").hide();
+                    
                     var base64_file = jQuery(this).attr('href');      
                     var data = { action: 'wpide_git_diff', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     file: base64_file, gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
@@ -1026,6 +1030,8 @@ class wpide
                 //commit selected files
                 $("#gitdiv" ).on('click', "#gitdivcommit a.button-primary", function(e){
                     e.preventDefault();
+                    
+                    $(".git_settings_panel").hide();
                     
                     console.log('debugging what files we might be able to click at this point...');
                     console.log( jQuery(".gitfilerow input:checked") );
@@ -1057,6 +1063,8 @@ class wpide
                 $("#gitdiv" ).on('click', ".git_push", function(e){
                     e.preventDefault();
                     
+                    $(".git_settings_panel").hide();
+                    
                     var base64_file = jQuery(this).attr('href');      
                     var data = { action: 'wpide_git_push', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
@@ -1068,6 +1076,14 @@ class wpide
 					});
       
                 });
+                
+                //git show settings
+                $("#gitdiv" ).on('click', ".git_settings", function(e){
+                    e.preventDefault();
+                    $(".git_settings_panel").toggle();
+      
+                });
+                
                 
 				
 			});
@@ -1154,11 +1170,15 @@ class wpide
 				 </form>
                  
                  <div id="gitdiv">
-                    <label>Local Git path</label><input type="text" name="gitpath" id="gitpath" value="" /> 
-                    <label>Local Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." />
-                    <br />
+                    <a class="button git_settings" href="#">GIT SETTINGS <em>setting local repo location, keys etc</em></a>
                     <a class="button show_changed_files" href="#">GIT STATUS <em>show status of changed/staged files</em></a>
                     <a class="button git_push" href="#">GIT PUSH <em>push commis to remote repo</em></a>
+                    
+                    <div class="git_settings_panel" style="display:none;">
+                        <label>Local repository path</label><input type="text" name="gitpath" id="gitpath" value="" /> <em>The Git repository you want to work with.</em> </br />
+                        <label>Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." /> <em>Full path to the local Git binary on this server.</em>
+                    </div>
+                    
                     <div id="gitdivcontent">
                     </div>
                  </div>

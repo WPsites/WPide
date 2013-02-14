@@ -380,8 +380,10 @@ class wpide
             
         }
         
+        $sshpath = preg_replace("#/$#", "", $_POST['sshpath']); //get path replacing end slash if entered
+        
         putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper.sh'); //tell Git about our wrapper script
-        putenv("WPIDE_SSH_PATH=". WP_CONTENT_DIR . '/ssh'); //no trailing slash - pass wp-content path to Git wrapper script
+        putenv("WPIDE_SSH_PATH=" . $sshpath); //no trailing slash - pass wp-content path to Git wrapper script
         putenv("HOME=". plugin_dir_path(__FILE__) . 'git'); //no trailing slash - set home to the git directory (this may not be needed)
         
         echo "<pre>";
@@ -1067,7 +1069,7 @@ class wpide
                     
                     var base64_file = jQuery(this).attr('href');      
                     var data = { action: 'wpide_git_push', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
-                                    gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+                                    sshpath: jQuery('#sshpath').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
     				jQuery.post(ajaxurl, data, function(response) {
       
@@ -1175,8 +1177,19 @@ class wpide
                     <a class="button git_push" href="#">GIT PUSH <em>push commis to remote repo</em></a>
                     
                     <div class="git_settings_panel" style="display:none;">
-                        <label>Local repository path</label><input type="text" name="gitpath" id="gitpath" value="" /> <em>The Git repository you want to work with.</em> </br />
-                        <label>Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." /> <em>Full path to the local Git binary on this server.</em>
+                        <h2>Git Settings</h2>
+                        <span class="input_row">
+                        <label>Local repository path</label>
+                        <input type="text" name="gitpath" id="gitpath" value="" /> <em>The Git repository you want to work with.</em>
+                        </span>
+                        <span class="input_row">
+                        <label>Git binary</label>
+                        <input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." /> <em>Full path to the local Git binary on this server.</em>
+                        </span>
+                        <span class="input_row">
+                        <label>SSH key path</label>
+                        <input type="text" name="sshpath" id="sshpath" value="<?php echo WP_CONTENT_DIR . '/ssh';?>" /> <em>Full path to the folder that contains your SSH keys (both id_rsa and id_rsa.pub) and a known_hosts file.</em>
+                        </span>
                     </div>
                     
                     <div id="gitdivcontent">

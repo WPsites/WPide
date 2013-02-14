@@ -291,6 +291,19 @@
         font-weight:bold;
     }
     
+    #gitdiv .button{
+        text-align: center;
+        height: inherit;
+        line-height: 130%;
+        padding-top: 10px;
+        font-weight:bold;
+    }
+    #gitdiv .button em{
+        display:block;
+        font-size: 10px;
+        font-weight:normal;
+    }
+    
     .gitfilerow{
         background-color: #bbb;
         padding: 10px;

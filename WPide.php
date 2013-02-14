@@ -72,6 +72,8 @@ class wpide
         	add_action('wp_ajax_wpide_git_diff', array( $this, 'git_diff' ) );
             //setup ajax function to commit changes
             add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
+            //setup ajax function to push to remote
+            add_action('wp_ajax_wpide_git_push', array( $this, 'git_push' ) );
             
 			
 			//setup ajax function to create new item (folder, file etc)
@@ -387,8 +389,11 @@ class wpide
         putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
         
         echo "<pre>";
-        echo $git->push( );
+        $push_result = $git->push( );
         echo "</pre>";
+        
+        if ($push_result === '')
+            echo "Sucessfully pushed to your remote repo";
         
 		die(); // this is required to return a proper result
 	}
@@ -1050,6 +1055,22 @@ class wpide
       
                 });
                 
+                //git push
+                $("#gitdiv" ).on('click', ".git_push", function(e){
+                    e.preventDefault();
+                    
+                    var base64_file = jQuery(this).attr('href');      
+                    var data = { action: 'wpide_git_push', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+    				jQuery.post(ajaxurl, data, function(response) {
+      
+                        $("#gitdivcontent").html( response );
+						
+					});
+      
+                });
+                
 				
 			});
 		</script>
@@ -1137,7 +1158,9 @@ class wpide
                  <div id="gitdiv">
                     <label>Local Git path</label><input type="text" name="gitpath" id="gitpath" value="" /> 
                     <label>Local Git binary</label><input type="text" name="gitbinary" id="gitbinary" value="I'll guess.." />
-                    <a class="button show_changed_files" href="#">Show changed files</a>
+                    <br />
+                    <a class="button show_changed_files" href="#">GIT STATUS <em>show status of changed/staged files</em></a>
+                    <a class="button git_push" href="#">GIT PUSH <em>push commis to remote repo</em></a>
                     <div id="gitdivcontent">
                     </div>
                  </div>

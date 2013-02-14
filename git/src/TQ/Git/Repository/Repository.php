@@ -798,6 +798,24 @@ class Repository
 
         return $result->getStdOut();
     }
+    
+    /**
+     * Push test
+     *
+     * @return  string
+     */
+    public function push()
+    {
+        $result = $this->getBinary()->{'push'}($this->getRepositoryPath(), array(
+            'origin',
+            'master'
+        ));
+        self::throwIfError($result,
+            sprintf('Cannot push')
+        );
+
+        return $result->getStdOut();
+    }
 
     /**
      * Returns a list of the branches in the repository

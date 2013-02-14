@@ -800,7 +800,7 @@ class Repository
     }
     
     /**
-     * Push test
+     * Push
      *
      * @return  string
      */
@@ -814,7 +814,8 @@ class Repository
             sprintf('Cannot push')
         );
 
-        return $result->getStdOut();
+        //return $result->getStdOut(); //still not getting enough output from the push...
+        return $result->getStdErr();
     }
 
     /**

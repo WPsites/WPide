@@ -370,8 +370,13 @@ class wpide
          $push_result = $this->git->push( );
         echo "</pre>";
         
-        if ($push_result === '')
+        if ($push_result === ''){
             echo "Sucessfully pushed to your remote repo";
+        }else{
+            echo $push_result;
+        }
+        
+        echo "<p>Git push completed.</p>";
         
 		die(); // this is required to return a proper result
 	}

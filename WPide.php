@@ -470,6 +470,11 @@ class wpide
 		
         $this->git_open_repo(); // make sure git repo is open
         
+        //putenv("GIT_AUTHOR_NAME=WPsites"); //author can be set using env but for now we set it during the commit
+        //putenv("GIT_AUTHOR_EMAIL=simon@wpsites.co.uk"); 	
+        putenv("GIT_COMMITTER_NAME=WPide"); //commiter details, shows under author on github
+        putenv("GIT_COMMITTER_EMAIL=wpide@wpide.co.uk");
+        
         $files = array();
         foreach ($_POST['files'] as $file){
             $files[] = base64_decode( $file );

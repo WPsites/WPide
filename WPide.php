@@ -74,6 +74,8 @@ class wpide
             add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
             //setup ajax function to push to remote
             add_action('wp_ajax_wpide_git_push', array( $this, 'git_push' ) );
+            //setup ajax function to view/generate ssh key and known host file
+            add_action('wp_ajax_wpide_git_ssh_gen', array( $this, 'git_ssh_gen' ) );
             
 			
 			//setup ajax function to create new item (folder, file etc)
@@ -280,6 +282,50 @@ class wpide
 		die(); // this is required to return a proper result
 	}
     
+    public function git_ssh_gen(){
+        
+        $gitpath = preg_replace("#/$#", "", sanitize_text_field($_POST['sshpath']) );
+        
+        //create the folder if doesn't exist
+        if (! file_exists($gitpath) ){
+            mkdir( $gitpath, 0700);
+        }
+        
+        //create known hosts if doesn't exist
+        if (! file_exists($gitpath . "/known_hosts") ){
+            touch( $gitpath . "/known_hosts" );
+            chmod( $gitpath . "/known_hosts", 0700 );
+        }
+        
+        //create keys if not exist
+        if (! file_exists($gitpath . "/id_rsa") || ! file_exists($gitpath . "/id_rsa.pub") ){
+            
+            set_include_path(get_include_path() . PATH_SEPARATOR . plugin_dir_path(__FILE__) . 'git/phpseclib');
+
+            include('Crypt/RSA.php');
+
+            $rsa = new Crypt_RSA();
+            
+            $rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
+            
+            extract($rsa->createKey()); // == $rsa->createKey(1024) where 1024 is the key size - $privatekey and $publickey
+            
+            //create private key
+            file_put_contents($gitpath . "/id_rsa", $privatekey);
+            chmod( $gitpath . "/id_rsa", 0700 );
+            
+            //create public key
+            file_put_contents($gitpath . "/id_rsa.pub", $publickey);
+            chmod( $gitpath . "/id_rsa.pub", 0700 );
+            
+        }
+        
+        //return public key
+        echo "\n\n". file_get_contents( $gitpath . "/id_rsa.pub" ) ."\n\n";
+        
+        die();
+    }
+    
     public function git_open_repo(){
         
         error_reporting(E_ALL);
@@ -362,7 +408,13 @@ class wpide
         
         $sshpath = preg_replace("#/$#", "", $_POST['sshpath']); //get path replacing end slash if entered
         
-        putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper.sh'); //tell Git about our wrapper script
+        putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper-nohostcheck.sh'); //tell Git about our wrapper script
+        /*
+            The wrapper we use above doesn't do a host check which means we can't guarentee the other side is who we think it is
+            We have this other wrapper which does a host check which we should swap to after the initial push/connection has been made
+            and the entry automatically added to known hosts but that logic isn't in place yet.
+            putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper.sh');
+        */
         putenv("WPIDE_SSH_PATH=" . $sshpath); //no trailing slash - pass wp-content path to Git wrapper script
         putenv("HOME=". plugin_dir_path(__FILE__) . 'git'); //no trailing slash - set home to the git directory (this may not be needed)
         
@@ -1019,6 +1071,22 @@ class wpide
                 });
                 
                 
+                //git SSH key gen/view
+                $("#gitdiv" ).on('click', ".git_ssh_gen", function(e){
+                    e.preventDefault();
+                         
+                    var data = { action: 'wpide_git_ssh_gen', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    sshpath: jQuery('#sshpath').val() };
+
+        			jQuery.post(ajaxurl, data, function(response) {
+      
+                        alert("Your SSH key is: "+ response);
+						
+					});
+      
+                });
+                
+                
 				
 			});
 		</script>
@@ -1121,6 +1189,9 @@ class wpide
                         <span class="input_row">
                         <label>SSH key path</label>
                         <input type="text" name="sshpath" id="sshpath" value="<?php echo WP_CONTENT_DIR . '/ssh';?>" /> <em>Full path to the folder that contains your SSH keys (both id_rsa and id_rsa.pub) and a known_hosts file.</em>
+                        </span>
+                        <span class="input_row">
+                        <a href="#" class="git_ssh_gen red">Click here to view your SSH key</a>. If an SSH key cannot be found in the SSH path specified above, WPide will create this key for you. You'll need to pass this key to github or any other services/servers you need Git push access to.
                         </span>
                     </div>
                     

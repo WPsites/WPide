@@ -72,10 +72,13 @@ class wpide
         	add_action('wp_ajax_wpide_git_diff', array( $this, 'git_diff' ) );
             //setup ajax function to commit changes
             add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
+            //setup ajax function to view the git log
+            add_action('wp_ajax_wpide_git_log', array( $this, 'git_log' ) );
             //setup ajax function to push to remote
             add_action('wp_ajax_wpide_git_push', array( $this, 'git_push' ) );
             //setup ajax function to view/generate ssh key and known host file
             add_action('wp_ajax_wpide_git_ssh_gen', array( $this, 'git_ssh_gen' ) );
+
             
 			
 			//setup ajax function to create new item (folder, file etc)
@@ -397,6 +400,53 @@ class wpide
 		die(); // this is required to return a proper result
 	}
     
+    
+  
+    public function git_log() {
+        //check the user has the permissions
+    	check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        $this->git_open_repo(); // make sure git repo is open
+        
+        $log = $this->git->getLog(50);
+        
+            echo "<div class='git_log'>";
+                foreach($log as $item){
+                    $matches = array();
+                    $log_array = array();
+                    $bits = explode("\n", $item);
+                   
+                    foreach ($bits as $bit){
+                       if ( preg_match_all("#(.*): (.*)#iS", trim($bit), $matches) ){
+                    
+                           $key = $matches[1][0];
+                           
+                           if (is_string($key) && trim($key) !== ""){
+                                $log_array[ $key ] = trim( $matches[2][0] );
+                           }
+                       
+                       }
+                       
+                    }
+                   
+                    $commit_message = explode( end($log_array), $item);
+                    $log_array[ 'message' ] = trim($commit_message[2]);
+                    
+                    $commit = explode( reset($log_array), $item);
+                    $log_array[ 'commit' ] = trim( str_replace( array("commit ", "Author:"), "", $commit[0] ) );
+                    
+                    
+                    echo "<span class='input_row'>";
+                    echo "<span class='message'>{$log_array[ 'message' ]}</span> {$log_array[ 'AuthorDate' ]} <span style='float:right;'>ID: {$log_array[ 'commit' ]}</span> ";
+                    echo "</span>";
+                }
+            echo "</div>";
+
+        
+		die(); // this is required to return a proper result
+	}
     
     public function git_push() {
     	//check the user has the permissions
@@ -1050,6 +1100,24 @@ class wpide
       
                 });
                 
+                //git log
+                $("#gitdiv" ).on('click', ".git_log", function(e){
+                    e.preventDefault();
+                    
+                    $(".git_settings_panel").hide();
+                    
+                    var base64_file = jQuery(this).attr('href');      
+                    var data = { action: 'wpide_git_log', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    sshpath: jQuery('#sshpath').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+        			jQuery.post(ajaxurl, data, function(response) {
+      
+                        $("#gitdivcontent").html( response );
+						
+					});
+      
+                });
+                
                 //git push
                 $("#gitdiv" ).on('click', ".git_push", function(e){
                     e.preventDefault();
@@ -1179,6 +1247,7 @@ class wpide
                  <div id="gitdiv">
                     <a class="button git_settings" href="#">GIT SETTINGS <em>setting local repo location, keys etc</em></a>
                     <a class="button show_changed_files" href="#">GIT STATUS <em>show status of changed/staged files</em></a>
+                    <a class="button git_log" href="#">GIT LOG <em>view history of commits</em></a>
                     <a class="button git_push" href="#">GIT PUSH <em>push commis to remote repo</em></a>
                     
                     <div class="git_settings_panel" style="display:none;">

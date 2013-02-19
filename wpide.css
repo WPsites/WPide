@@ -308,6 +308,18 @@
         clear:left;
     }
  
+    .git_log .input_row{
+        padding: 5px;
+        width: 99%;
+        background-color: #ddd;
+        margin: 2px;
+        float: left;
+    }
+    .git_log .input_row .message{
+        display:block;
+        font-weight:bold;
+        margin-bottom:10px;
+    }
     
     #gitdiv label,
     #gitdiv input[type=text],

@@ -1379,7 +1379,7 @@ class wpide
                 <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
     			   FILE</a> 
                 
-                 <a href="#" id="wpide_git" alt="Open the overlay to commit some files to a Git repository" title="Open the overlay to commit some files to a Git repository" class="button-secondary">Git commit files</a> 
+                 <a href="#" id="wpide_git" alt="Open the Git overlay" title="Open the Git overlay" class="button-secondary">Git</a> 
                    
 				   
 				   <input type="hidden" id="filename" name="filename" value="" />
@@ -1420,9 +1420,10 @@ class wpide
                     </div>
                     
                     <div id="gitdivcontent">
-                     <p>So SSH keys (id_rsa and id_rsa.pub) need to be in wp-content/ssh/ along with a known_hosts file</p>
-                     <p>We need to write a new method for creating the SSH keys etc automatically using phpseclib which I've just added</p>
-                     <p>This is very much work in progress</p>
+                     <h2>Git functionality is currently experimental, so use at your own risk</h2>
+                     <p>Saying that, it does work. You can create new Git repositories, clone from remote repositories, push to remote repositories etc. <strong>BUT</strong> there are many Git features missing, errors aren't very tidy and the interface needs some serious attention but I just wanted to get it out there!  </p>
+                     <p>For this functionality to work your Git binary needs to be accessible to the web server process/user and that user will probably need an ssh folder in the default place (~/.ssh) otherwise you will have trouble with remote repository access due to the SSH keys</p>
+                     <p>WPide will use it's own SSH key in a custom location which can then even be shared between different WordPress/WPide installs on the same server providing the SSH folder you set in settings is accessible to all installs.</p>
                     </div>
                  </div>
 			</div>	

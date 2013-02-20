@@ -331,8 +331,8 @@ class wpide
     
     public function git_open_repo(){
         
-        error_reporting(E_ALL);
-        ini_set("display_errors", 1);
+        //error_reporting(E_ALL);
+        //ini_set("display_errors", 1);
         
         require_once('git/autoload.php.dist');
         
@@ -494,17 +494,29 @@ class wpide
         
         $file = sanitize_text_field( base64_decode( $_POST['file']) );
         
-        //generate a diff using the built in WordPress code
-        $args = array(
-            'title'           => 'Differences',
-            'title_left'      => 'Old Version',
-        	'title_right'     => 'New Version'
-        );
+            $result = $this->git->getBinary()->{'diff'}($this->git->getRepositoryPath(), array(
+                $file
+            ));
+    
+            //return $result->getStdOut(); //still not getting enough output from the push...
+            if ( $result->getStdErr() === ''){
+                
+                $diff_lines = explode("\n", $result->getStdOut() );
+                foreach ($diff_lines as $a_line){
+                    if ( preg_match("#^\+#", $a_line) ){
+                        $a_class = 'plus';
+                    }elseif ( preg_match("#^\-#", $a_line) ) {
+                         $a_class = 'minus';
+                    }else{
+                         $a_class = '';
+                    }
+                    echo "<span class='diff_line {$a_class}'>{$a_line}</span>";
+                }
+                
+            }else{
+                echo $result->getStdErr();
+            }
         
-        $contents = file_get_contents($this->git_repo_path . "/" . $file); //the git library isn't using the WP filesystem API so should we here? should we fullstop?
-        $contents2 = $this->git->showFile( $file, 'HEAD@{1}');
-        
-        $diff_table = wp_text_diff($contents2, $contents, $args); 
         echo "<strong>Diff</strong>"  . $diff_table;
 
   
@@ -1056,12 +1068,20 @@ class wpide
                     
                     $(".git_settings_panel").hide();
                     
+                    if ( $(this).text() == '[hide diff]'){
+                        $(this).text('[show diff]');
+                        $(this).parent().find(".gitdivdiff").hide();
+                    }else{
+                        $(this).text('[hide diff]');
+                        $(this).parent().find(".gitdivdiff").show();
+                    }
+                    
                     var base64_file = jQuery(this).attr('href');      
                     var data = { action: 'wpide_git_diff', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     file: base64_file, gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
 					jQuery.post(ajaxurl, data, function(response) {
-      
+                        console.log("add content to this div .gitdivdiff."+ base64_file.replace(/=/g, '_' ) );
                         $(".gitdivdiff."+ base64_file.replace(/=/g, '_' ) ).html( response );
 						
 					});

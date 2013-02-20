@@ -354,7 +354,7 @@ class wpide
             
         $this->git_repo_path = $root . sanitize_text_field( $_POST['gitpath'] );
         $gitbinary = sanitize_text_field( stripslashes($_POST['gitbinary']) );
-        
+        /*
         if ( $gitbinary==="I'll guess.." ){ //the binary path
         
             $thebinary = TQ\Git\Cli\Binary::locateBinary();
@@ -366,6 +366,7 @@ class wpide
             $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary ), 0755 );
             
         }
+        */
         
     }
     
@@ -1384,7 +1385,7 @@ class wpide
                 <a href="#" id="wpide_save" alt="Keyboard shortcut to save [Ctrl/Cmd + S]" title="Keyboard shortcut to save [Ctrl/Cmd + S]" class="button-primary">SAVE 
     			   FILE</a> 
                 
-                 <a href="#" id="wpide_git" alt="Open the Git overlay" title="Open the Git overlay" class="button-secondary">Git</a> 
+                 <a href="#" style="display:none;" id="wpide_git" alt="Open the Git overlay" title="Open the Git overlay" class="button-secondary">Git</a> 
                    
 				   
 				   <input type="hidden" id="filename" name="filename" value="" />

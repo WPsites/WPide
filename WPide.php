@@ -291,6 +291,10 @@ class wpide
     
     public function git_ssh_gen(){
         
+        //errors need to be on while experimental
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+        
         $gitpath = preg_replace("#/$#", "", sanitize_text_field($_POST['sshpath']) );
         
         //create the folder if doesn't exist
@@ -335,8 +339,9 @@ class wpide
     
     public function git_open_repo(){
         
-        //error_reporting(E_ALL);
-        //ini_set("display_errors", 1);
+        //errors need to be on while experimental
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
         
         require_once('git/autoload.php.dist');
         

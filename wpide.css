@@ -268,7 +268,7 @@
     
     /* Make sure the modal window doesn't get hidden behind wp toolbar */
     .ui-dialog{
-        margin-top:30px;
+        margin-top:30px; /* this just is not working - the WP admin toolbar gets in the way */
     }
     
     #gitdiv{

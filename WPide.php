@@ -1075,7 +1075,7 @@ class wpide
                 //set up the git commit overlay
                 $('#gitdiv').dialog({
                    autoOpen: false,
-                   title: 'Git commit',
+                   title: 'Git',
                    width: 800
                 });
                  
@@ -1424,6 +1424,7 @@ class wpide
                      <p>Saying that, it does work. You can create new Git repositories, clone from remote repositories, push to remote repositories etc. <strong>BUT</strong> there are many Git features missing, errors aren't very tidy and the interface needs some serious attention but I just wanted to get it out there!  </p>
                      <p>For this functionality to work your Git binary needs to be accessible to the web server process/user and that user will probably need an ssh folder in the default place (~/.ssh) otherwise you will have trouble with remote repository access due to the SSH keys</p>
                      <p>WPide will use it's own SSH key in a custom location which can then even be shared between different WordPress/WPide installs on the same server providing the SSH folder you set in settings is accessible to all installs.</p>
+                     <p>Don't be afraid to close this overlay. It will be in exactly the same state once you press the Git button again.</p>
                     </div>
                  </div>
 			</div>	

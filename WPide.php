@@ -74,6 +74,10 @@ class wpide
             add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
             //setup ajax function to view the git log
             add_action('wp_ajax_wpide_git_log', array( $this, 'git_log' ) );
+            //setup ajax function to initiate a git repo
+            add_action('wp_ajax_wpide_git_init', array( $this, 'git_init' ) );
+            //setup ajax function to clone a remote
+            add_action('wp_ajax_wpide_git_clone', array( $this, 'git_clone' ) );
             //setup ajax function to push to remote
             add_action('wp_ajax_wpide_git_push', array( $this, 'git_push' ) );
             //setup ajax function to view/generate ssh key and known host file
@@ -349,12 +353,12 @@ class wpide
         if ( $gitbinary==="I'll guess.." ){ //the binary path
         
             $thebinary = TQ\Git\Cli\Binary::locateBinary();
-            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary ), 0755  );
             
         }else{
             
             $thebinary = $_POST['gitbinary'];
-            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary )  );
+            $this->git = TQ\Git\Repository\Repository::open($this->git_repo_path, new TQ\Git\Cli\Binary( $thebinary ), 0755 );
             
         }
         
@@ -445,6 +449,99 @@ class wpide
             echo "</div>";
 
         
+		die(); // this is required to return a proper result
+	}
+    
+    
+    public function git_init() {
+        //check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        $this->git_open_repo(); // make sure git repo is open
+        
+        //create the local repo path if it doesn't exist
+        if ( !file_exists( $this->git->getRepositoryPath() ) )
+            mkdir( $this->git->getRepositoryPath() );
+        
+        $result = $this->git->getBinary()->{'init'}($this->git->getRepositoryPath(), array(
+
+        ));
+
+        //return $result->getStdOut(); //still not getting enough output from the push...
+        if ( $result->getStdErr() === ''){
+            
+            echo $result->getStdOut();
+            
+        }else{
+            echo $result->getStdErr();
+        }
+        
+        
+
+  
+		die(); // this is required to return a proper result
+	}
+    
+    
+    public function git_clone() {
+    	//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can('edit_themes') )
+			wp_die('<p>'.__('You do not have sufficient permissions to edit templates for this site. SORRY').'</p>');
+		
+        $this->git_open_repo(); // make sure git repo is open
+        
+        //just incase it's a private repo we will setup the keys
+        $sshpath = preg_replace("#/$#", "", $_POST['sshpath']); //get path replacing end slash if entered
+        
+        putenv("GIT_SSH=". plugin_dir_path(__FILE__) . 'git/git-wrapper-nohostcheck.sh'); //tell Git about our wrapper script
+        /* See note on git_push re wrapper */
+        putenv("WPIDE_SSH_PATH=" . $sshpath); //no trailing slash - pass wp-content path to Git wrapper script
+        putenv("HOME=". plugin_dir_path(__FILE__) . 'git'); //no trailing slash - set home to the git directory (this may not be needed)
+        
+
+        if ($_POST['repo_path'] === '' || is_null($_POST['repo_path']) ){
+            
+            echo "<span class='input_row'>
+                        <label>Clone a remote repository by entering it's remote path</label>
+                        <input type='text' name='repo_path' id='repo_path' value=''> <em>It will be cloned into the repository path/folder defined in the Git settings.</em>
+                        <p><a href='#' class='button-primary git_clone'>Clone</a></p>
+                        </span>";
+            die();
+            
+        }
+        
+        $path = sanitize_text_field( $_POST['repo_path'] );
+        
+        //create the local repo path if it doesn't exist
+        if ( !file_exists( $this->git->getRepositoryPath() ) )
+            mkdir( $this->git->getRepositoryPath() );
+        
+        $result = $this->git->getBinary()->{'clone'}($this->git->getRepositoryPath(), array(
+            $path,
+            $this->git->getRepositoryPath(),
+            '--recursive'
+        ));
+
+        //return $result->getStdOut(); //still not getting enough output from the push...
+        if ( $result->getStdErr() === ''){
+            
+            $result = $result->getStdOut();
+            
+            //format the output a little better
+            $result = str_replace('...', '...<br />', $result);
+            
+            echo $result;
+            
+        }else{
+            echo $result->getStdErr();
+        }
+        
+        
+
+  
 		die(); // this is required to return a proper result
 	}
     
@@ -1081,7 +1178,7 @@ class wpide
                                     file: base64_file, gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
 					jQuery.post(ajaxurl, data, function(response) {
-                        console.log("add content to this div .gitdivdiff."+ base64_file.replace(/=/g, '_' ) );
+                
                         $(".gitdivdiff."+ base64_file.replace(/=/g, '_' ) ).html( response );
 						
 					});
@@ -1094,14 +1191,9 @@ class wpide
                     
                     $(".git_settings_panel").hide();
                     
-                    console.log('debugging what files we might be able to click at this point...');
-                    console.log( jQuery(".gitfilerow input:checked") );
-                    console.log(jQuery(".gitfilerow input:checked").length);
-                    
                     if ( jQuery(".gitfilerow input:checked").length > 0 ){
                         var files_for_commit = [];
                         jQuery(".gitfilerow input:checked").each(function( index ) {
-                            console.log($(this));
                             files_for_commit[index] = $(this).val();
                         });
                     }else{
@@ -1138,13 +1230,46 @@ class wpide
       
                 });
                 
+                //git init
+                $("#gitdiv" ).on('click', ".git_init", function(e){
+                    e.preventDefault();
+                    
+                    $(".git_settings_panel").hide();
+                        
+                    var data = { action: 'wpide_git_init', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    repo_path: jQuery('#repo_path').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+            		jQuery.post(ajaxurl, data, function(response) {
+      
+                        $("#gitdivcontent").html( response );
+						
+					});
+      
+                });
+                
+                //git clone
+                $("#gitdiv" ).on('click', ".git_clone", function(e){
+                    e.preventDefault();
+                    
+                    $(".git_settings_panel").hide();
+                         
+                    var data = { action: 'wpide_git_clone', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
+                                    repo_path: jQuery('#repo_path').val(), sshpath: jQuery('#sshpath').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
+
+        			jQuery.post(ajaxurl, data, function(response) {
+      
+                        $("#gitdivcontent").html( response );
+						
+					});
+      
+                });
+                
                 //git push
                 $("#gitdiv" ).on('click', ".git_push", function(e){
                     e.preventDefault();
                     
                     $(".git_settings_panel").hide();
-                    
-                    var base64_file = jQuery(this).attr('href');      
+                         
                     var data = { action: 'wpide_git_push', _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(),
                                     sshpath: jQuery('#sshpath').val(), gitpath: jQuery('#gitpath').val(), gitbinary: jQuery('#gitbinary').val() };
 
@@ -1266,15 +1391,20 @@ class wpide
                  
                  <div id="gitdiv">
                     <a class="button git_settings" href="#">GIT SETTINGS <em>setting local repo location, keys etc</em></a>
-                    <a class="button show_changed_files" href="#">GIT STATUS <em>show status of changed/staged files</em></a>
-                    <a class="button git_log" href="#">GIT LOG <em>view history of commits</em></a>
-                    <a class="button git_push" href="#">GIT PUSH <em>push commis to remote repo</em></a>
+                    <a class="button git_clone" href="#">GIT CLONE <em>create or clone a repo</em></a>
+                    <a class="button show_changed_files" href="#">GIT STATUS <em>show changed/staged files</em></a>
+                    <a class="button git_log" href="#">GIT LOG <em>history of commits</em></a>
+                    <a class="button git_push" href="#">GIT PUSH <em>push to remote repo</em></a>
                     
                     <div class="git_settings_panel" style="display:none;">
                         <h2>Git Settings</h2>
                         <span class="input_row">
                         <label>Local repository path</label>
-                        <input type="text" name="gitpath" id="gitpath" value="" /> <em>The Git repository you want to work with.</em>
+                        <input type="text" name="gitpath" id="gitpath" value="" /> 
+                        <em>
+                        The Git repository you want to work with. <br />
+                        If it doesn't exist you can <a href="#" class="red git_init">initiate a blank repository by clicking here</a> or you can <a href="#" class="red git_clone">clone a remote repo over here</a>
+                        </em>
                         </span>
                         <span class="input_row">
                         <label>Git binary</label>

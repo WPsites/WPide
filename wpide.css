@@ -286,16 +286,17 @@
         overflow: hidden;
         margin:20px 0px;
     }
-    .git_settings_panel .input_row{
+    .input_row{
         padding: 5px;
         width: 99%;
         background-color: #ddd;
         margin: 2px;
+        display:block;
     }
-    .git_settings_panel input[type=text]{
+    .input_row input[type=text]{
         width:98%;
     }
-    .git_settings_panel .input_row em{
+    .input_row .input_row em{
         margin: 2px;
         font-size: 10px;
     }

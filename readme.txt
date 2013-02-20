@@ -3,7 +3,7 @@ Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 2.2
+Stable tag: 2.3
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -87,6 +87,7 @@ Either the image contains no image data (its a new empty file) or the image is n
 == Changelog ==
 = 2.3 =
 * Added initial git functions using the following library: PHP-Stream-Wrapper-for-Git from https://github.com/teqneers/PHP-Stream-Wrapper-for-Git
+* Initial Git functionality added - it's very experimental!
 
 = 2.2 =
 * Add restore recent backup facility - It's a primative implementation at this point but it does the job. See FAQ note.

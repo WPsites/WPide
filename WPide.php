@@ -234,11 +234,9 @@ class wpide
         $root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
 		
 		if( $wp_filesystem->exists($root . $_POST['dir']) ) {
-			//$files = scandir($root . $_POST['dir']);
-			//print_r($files);
+            
 			$files = $wp_filesystem->dirlist($root . $_POST['dir']);
-			//print_r($files);
-            //var_dump($files);
+
 			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
 			if( count($files) > 0 ) { 
                 

@@ -171,7 +171,7 @@ class wpide
 		    wp_enqueue_script('ace-mode-javascript', $plugin_path . 'js/ace-1.1.1/mode-javascript.js');
 		    wp_enqueue_script('ace-mode-php', $plugin_path . 'js/ace-1.1.1/mode-php.js');
 		    //include ace theme
-		    wp_enqueue_script('ace-theme', plugins_url("js/ace-1.1.1/theme-dawn.js", __FILE__ ) );//monokai is nice
+		    wp_enqueue_script('ace-theme', plugins_url("js/ace-1.1.1/theme-dawn.js", __FILE__ ) );//ambiance looks really nice for high contrast
 		    // wordpress-completion tags
 		    wp_enqueue_script('wpide-wordpress-completion', plugins_url("js/autocomplete/wordpress.js", __FILE__ ) );
 		    // php-completion tags

@@ -238,22 +238,35 @@ class wpide
 			//print_r($files);
 			$files = $wp_filesystem->dirlist($root . $_POST['dir']);
 			//print_r($files);
-            
+            //var_dump($files);
 			echo "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
 			if( count($files) > 0 ) { 
-				
-				// All dirs
-				foreach( $files as $file => $file_info ) {
+                
+                //build seperate arrays for folders and files                
+                $dir_array = array();
+                $file_array = array();
+    			foreach( $files as $file => $file_info ) {
 					if( $file != '.' && $file != '..' && $file_info['type']=='d' ) {
-						echo "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "/\">" . htmlentities($file) . "</a></li>";
+                        $file_string = strtolower( preg_replace("[._-]", "", $file) );
+						$dir_array[$file_string] = $file_info;
+					}elseif ( $file != '.' && $file != '..' &&  $file_info['type']=='f' ){
+                        $file_string = strtolower( preg_replace("[._-]", "", $file) );
+                        $file_array[$file_string] = $file_info;
 					}
 				}
+                
+                //shot those arrays
+                ksort($dir_array);
+                ksort($file_array);
+				
+				// All dirs
+				foreach( $dir_array as $file => $file_info ) {
+					echo "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "/\">" . htmlentities($file_info['name']) . "</a></li>";
+				}
 				// All files
-				foreach( $files as $file => $file_info ) {
-					if( $file != '.' && $file != '..' &&  $file_info['type']!='d') {
-						$ext = preg_replace('/^.*\./', '', $file);
-						echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "\">" . htmlentities($file) . "</a></li>";
-					}
+				foreach( $file_array as $file => $file_info ) {
+					$ext = preg_replace('/^.*\./', '', $file_info['name']);
+					echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "\">" . htmlentities($file_info['name']) . "</a></li>";
 				}
 			}
 			//output toolbar for creating new file, folder etc

@@ -572,7 +572,7 @@ function saveDocument() {
 	//ajax call to save the file and generate a backup if needed
 	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
-        var regexchk=/^\".*\"$/;
+        var regexchk=/\".*:::.*\"/;
         var saved_when = Date();
         
         if ( regexchk.test(response) ){

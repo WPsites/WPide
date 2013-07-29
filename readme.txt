@@ -2,8 +2,8 @@
 Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 2.3.1
+Tested up to: 3.6
+Stable tag: 2.3.2
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -85,6 +85,11 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+= 2.3.2 =
+* Update the Ace component to 1.1.1 which includes some bug fixes, a PHP worker (showing PHP errors as you work) and a greatly improved search box.
+* Fixed issue with file save showing javascript alert as if there was a failure when there wasn't
+* Order folders and files alphabetically 
+
 = 2.3.1 =
 * As a quick fix I have commentted out the git functionality as the namespacing used is causing issues with old versions of PHP
 

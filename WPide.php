@@ -750,7 +750,13 @@ class wpide
         
         $is_php = false;
         
-        //check file syntax of PHP files by parsing the PHP
+        /*
+        * Check file syntax of PHP files by parsing the PHP
+        * If a site is running low on memory this PHP parser library could well tip memory usage over the edge
+        * Especially if you are editing a large PHP file.
+        * Might be worth either making this syntax check optional or it only running if memory is available.
+        * Symptoms: no response on file save, and errors in your log like "Fatal error: Allowed memory size of 8388608 bytes exhausted…"
+        */
         if ( preg_match("#\.php$#i", $_POST['filename']) ){
             
             $is_php = true;

@@ -1104,7 +1104,7 @@ function display_find_dialog() {
 	jQuery( "#editor_find_dialog" ).find( "input[name='find']" ).val( value );
 
     jQuery( "#editor_find_dialog" ).dialog({
-        height: "196",
+        height: "206",
         width: "408",
         resizable: false,
         show: "fade",

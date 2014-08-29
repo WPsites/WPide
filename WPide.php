@@ -1972,14 +1972,16 @@ class wpide
     public function print_find_dialog() {
 ?>
 	<div id="editor_find_dialog" title="Find..." style="padding: 0px; display: none;">
+		<?php if ( false ): ?>
 	    <ul>
 	        <li><a href="#find-inline">Text</a></li>
         	<li><a href="#find-func">Function</a></li>
         </ul>
+		<?php endif; ?>
 		<form id="find-inline" style="position: relative; padding: 4px; margin: 0px; height: 100%; overflow: hidden; width: 400px;">
 			<label class="left"> Find<input type="search" name="find" /></label>
 			<label class="left"> Replace<input type="search" name="replace" /></label>
-			<div class="clear" style="height: 20px;"></div>
+			<div class="clear" style="height: 33px;"></div>
 
 			<label><input type="checkbox" name="wrap" checked="checked" /> Wrap Around</label>
 			<label><input type="checkbox" name="case" /> Case Sensitive</label>
@@ -1998,12 +2000,14 @@ class wpide
 				<input type="button" name="cancel" value="Cancel" class="action_button" />
 			</div>
 		</form>
+		<?php if ( false ): ?>
 		<form id="find-func">
 			<label class="left"> Function<input type="search" name="find" /></label>
 			<div class="right">
 				<input type="submit" name="submit" value="Find Function" class="action_button" />
 			</div>
 		</form>
+		<?php endif; ?>
 	</div>
 	<div id="editor_goto_dialog" title="Go to..." style="padding: 0px; display: none;"></div>
 <?php

@@ -276,12 +276,12 @@ class wpide
 				
 				// All dirs
 				foreach( $dir_array as $file => $file_info ) {
-					echo "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "/\">" . htmlentities($file_info['name']) . "</a></li>";
+					echo "<li class=\"directory collapsed\" draggable=\"true\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "/\" draggable=\"false\">" . htmlentities($file_info['name']) . "</a></li>";
 				}
 				// All files
 				foreach( $file_array as $file => $file_info ) {
 					$ext = preg_replace('/^.*\./', '', $file_info['name']);
-					echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "\">" . htmlentities($file_info['name']) . "</a></li>";
+					echo "<li class=\"file ext_$ext\" draggable=\"true\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file_info['name']) . "\" draggable=\"false\">" . htmlentities($file_info['name']) . "</a></li>";
 				}
 			}
 			//output toolbar for creating new file, folder etc
@@ -1478,8 +1478,13 @@ class wpide
 	
 	
 	public function add_my_menu_page() {
-		//add_menu_page("wpide", "wpide","edit_themes", "wpidesettings", array( &$this, 'my_menu_page') );
-		$this->menu_hook = add_menu_page('WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ));
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '3.8', '<' ) ) {
+			$this->menu_hook = add_menu_page( 'WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ) );
+		} else {
+			$this->menu_hook = add_menu_page( 'WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ), 'dashicons-editor-code' );
+		}
 	}
 	
     public function add_my_menu_icon() {
@@ -1496,14 +1501,6 @@ class wpide
 		#toplevel_page_wpide.current .wp-menu-image {
 			background-position: 6px 6px !important;
 		}
-	</style>
-<?php
-		else:
-?>
-	<style type="text/css">
-		#toplevel_page_wpide .wp-menu-image:before {
-			content: "\f119";
-		}	
 	</style>
 <?php
 		endif;

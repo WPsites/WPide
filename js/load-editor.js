@@ -1124,6 +1124,28 @@ function display_goto_dialog() {
 	});
 }
 
+function filetree_drag_initializer() {
+    var current_element = null;
+
+    // Allows us to keep dataTransfer in the jQuery event
+    jQuery.event.props.push("dataTransfer");
+    jQuery('#wpide_file_browser').on('dragstart', '[draggable=true]', function(e) {
+        current_element = this;
+
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }).on('dragover', '[draggable=true]', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        return false;
+    }).on('dragleave', '[draggable=true]', function(e) {
+    }).on('dragend', '[draggable=true]', function(e) {
+        current_element = null;
+        e.preventDefault();
+        return false;
+    });
+}
+
 jQuery(document).ready(function($) {
 	$("#wpide_save").click(saveDocument);
 
@@ -1615,4 +1637,5 @@ jQuery(document).ready(function($) {
 	load_editor_settings();
 	editor.resize();
 
+	filetree_drag_initializer();
 });//end jquery load

@@ -139,7 +139,8 @@ a.new_file{
 
 ul.jqueryFileTree a:focus {
 	outline: none;
-	border: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 ul.jqueryFileTree .new_file,

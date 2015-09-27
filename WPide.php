@@ -703,7 +703,13 @@ class wpide
 		if (strlen($_POST['path'])>0 && strlen($_POST['type'])>0 && strlen($_POST['file'])>0){
 			
 			
-			$filename = sanitize_file_name( $_POST['file'] );
+			$filename = $_POST['file'];
+            $special_chars = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", chr(0));
+            $filename = preg_replace( "#\x{00a0}#siu", ' ', $filename );
+            $filename = str_replace( $special_chars, '', $filename );
+            $filename = str_replace( array( '%20', '+' ), '-', $filename );
+            $filename = preg_replace( '/[\r\n\t -]+/', '-', $filename );
+
 			$path = $_POST['path'];
 			
 			if ($_POST['type'] == "directory"){

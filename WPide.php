@@ -11,19 +11,20 @@ Author URI: http://www.wpsites.co.uk
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
-
 if ( !class_exists( 'wpide' ) ) :
 class wpide
 
 {
 
 	public $site_url, $plugin_url, $git, $git_repo_path;
-	
-	
+    private $menu_hook;
+    
+
 	function __construct() {
         
     	//add WPide to the menu
-		add_action( 'admin_menu',  array( $this, 'add_my_menu_page' ) );
+		add_action( 'admin_menu', array( &$this, 'add_my_menu_page' ) );
+		add_action( 'admin_head', array( &$this, 'add_my_menu_icon' ) );
 		
 		//hook for processing incoming image saves
 		if ( isset($_GET['wpide_save_image']) ){
@@ -31,73 +32,11 @@ class wpide
 			//force local file method for testing - you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
 			$this->override_fs_method('direct');
 			
-			add_action('admin_init', array( $this, 'wpide_save_image') );
+			add_action('admin_init', array( &$this, 'wpide_save_image') );
 			
 		}
 		
-          
-		//only include this plugin if on theme editor, plugin editor or an ajax call
-		if ( (isset($_GET['page']) && $_GET['page'] === 'wpide') ||
-			 preg_match('#admin-ajax\.php$#', $_SERVER['PHP_SELF']) ){
-                
-                
-			// force local file method until I've worked out how to implement the other methods
-            // main problem being password wouldn't/isn't saved between requests
-            // you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
-			$this->override_fs_method('direct');
-
-			// Uncomment any of these calls to add the functionality that you need.
-			add_action('admin_init', array( $this, 'add_admin_js' ) );
-			add_action('admin_init', array( $this, 'add_admin_styles' ) );
-			
-			//setup jqueryFiletree list callback
-			add_action('wp_ajax_jqueryFileTree', array( $this, 'jqueryFileTree_get_list' ) );
-			//setup ajax function to get file contents for editing 
-			add_action('wp_ajax_wpide_get_file',  array( $this, 'wpide_get_file' ) );
-			//setup ajax function to save file contents and do automatic backup if needed
-			add_action('wp_ajax_wpide_save_file',  array( $this, 'wpide_save_file' ) );
-			//setup ajax function to create new item (folder, file etc)
-			add_action('wp_ajax_wpide_create_new', array( $this, 'wpide_create_new' ) );
-            //setup ajax function to show local git repo changes
-    		add_action('wp_ajax_wpide_git_status', array( $this, 'git_status' ) );
-            //setup ajax function to show diff
-        	add_action('wp_ajax_wpide_git_diff', array( $this, 'git_diff' ) );
-            //setup ajax function to commit changes
-            add_action('wp_ajax_wpide_git_commit', array( $this, 'git_commit' ) );
-            //setup ajax function to view the git log
-            add_action('wp_ajax_wpide_git_log', array( $this, 'git_log' ) );
-            //setup ajax function to initiate a git repo
-            add_action('wp_ajax_wpide_git_init', array( $this, 'git_init' ) );
-            //setup ajax function to clone a remote
-            add_action('wp_ajax_wpide_git_clone', array( $this, 'git_clone' ) );
-            //setup ajax function to push to remote
-            add_action('wp_ajax_wpide_git_push', array( $this, 'git_push' ) );
-            //setup ajax function to view/generate ssh key and known host file
-            add_action('wp_ajax_wpide_git_ssh_gen', array( $this, 'git_ssh_gen' ) );
-
-            
-			
-			//setup ajax function to create new item (folder, file etc)
-			add_action('wp_ajax_wpide_image_edit_key', array( $this, 'wpide_image_edit_key' )  );
-			
-			//setup ajax function for startup to get some debug info, checking permissions etc
-    		add_action('wp_ajax_wpide_startup_check', array( $this, 'wpide_startup_check' ) );
-            
-            //add a warning when navigating away from WPide
-            //it has to go after WordPress scripts otherwise WP clears the binding
-			add_action('admin_print_footer_scripts', array( $this, 'add_admin_nav_warning' ), 99 );
-            
-            // Add body class to collapse the wp sidebar nav
-            add_filter('admin_body_class', array( $this, 'hide_wp_sidebar_nav' ), 11);
-            
-            //hide the update nag
-            add_action('admin_menu', array( $this, 'hide_wp_update_nag' ));
-            
-		}
-		
-
-		
-
+		add_action( 'admin_init', array( &$this, 'setup_hooks' ) );
 		
 		$this->site_url = get_bloginfo('url');
 		
@@ -130,10 +69,84 @@ class wpide
         
     }
     
+	public function setup_hooks() {
+		// force local file method until I've worked out how to implement the other methods
+		// main problem being password wouldn't/isn't saved between requests
+		// you could force other methods 'direct', 'ssh', 'ftpext' or 'ftpsockets'
+		$this->override_fs_method('direct');
+
+		// Uncomment any of these calls to add the functionality that you need.
+		// Will only enqueue on WPide page
+		add_action('admin_print_scripts-' . $this->menu_hook, array( &$this, 'add_admin_js' ) );
+		add_action('admin_print_styles-' . $this->menu_hook, array( &$this, 'add_admin_styles' ) );
+
+		add_action('admin_print_footer_scripts', array( &$this, 'print_find_dialog' ) );
+		add_action('admin_print_footer_scripts', array( &$this, 'print_settings_dialog' ) );
+
+		//setup jqueryFiletree list callback
+		add_action('wp_ajax_jqueryFileTree', array( &$this, 'jqueryFileTree_get_list' ) );
+		//setup ajax function to get file contents for editing 
+		add_action('wp_ajax_wpide_get_file',  array( &$this, 'wpide_get_file' ) );
+		//setup ajax function to save file contents and do automatic backup if needed
+		add_action('wp_ajax_wpide_save_file',  array( &$this, 'wpide_save_file' ) );
+		//setup ajax function to rename file/folder
+		add_action('wp_ajax_wpide_rename_file', array( &$this, 'wpide_rename_file' ) );
+		//setup ajax function to delete file/folder
+		add_action('wp_ajax_wpide_delete_file', array( &$this, 'wpide_delete_file' ) );
+		//setup ajax function to handle upload
+		add_action('wp_ajax_wpide_upload_file', array( &$this, 'wpide_upload_file' ) );
+		//setup ajax function to handle download
+		add_action('wp_ajax_wpide_download_file', array( &$this, 'wpide_download_file' ) );
+		//setup ajax function to unzip file
+		add_action('wp_ajax_wpide_unzip_file', array( &$this, 'wpide_unzip_file' ) );
+		//setup ajax function to zip file
+		add_action('wp_ajax_wpide_zip_file', array( &$this, 'wpide_zip_file' ) );
+		//setup ajax function to create new item (folder, file etc)
+		add_action('wp_ajax_wpide_create_new', array( &$this, 'wpide_create_new' ) );
+		//setup ajax function to show local git repo changes
+		add_action('wp_ajax_wpide_git_status', array( &$this, 'git_status' ) );
+		//setup ajax function to show diff
+		add_action('wp_ajax_wpide_git_diff', array( &$this, 'git_diff' ) );
+		//setup ajax function to commit changes
+		add_action('wp_ajax_wpide_git_commit', array( &$this, 'git_commit' ) );
+		//setup ajax function to view the git log
+		add_action('wp_ajax_wpide_git_log', array( &$this, 'git_log' ) );
+		//setup ajax function to initiate a git repo
+		add_action('wp_ajax_wpide_git_init', array( &$this, 'git_init' ) );
+		//setup ajax function to clone a remote
+		add_action('wp_ajax_wpide_git_clone', array( &$this, 'git_clone' ) );
+		//setup ajax function to push to remote
+		add_action('wp_ajax_wpide_git_push', array( &$this, 'git_push' ) );
+		//setup ajax function to view/generate ssh key and known host file
+		add_action('wp_ajax_wpide_git_ssh_gen', array( &$this, 'git_ssh_gen' ) );
+
+		
+		
+		//setup ajax function to create new item (folder, file etc)
+		add_action('wp_ajax_wpide_image_edit_key', array( &$this, 'wpide_image_edit_key' )  );
+		
+		//setup ajax function for startup to get some debug info, checking permissions etc
+		add_action('wp_ajax_wpide_startup_check', array( &$this, 'wpide_startup_check' ) );
+		
+		//add a warning when navigating away from WPide
+		//it has to go after WordPress scripts otherwise WP clears the binding
+		// This has been implemented in load-editor.js
+		// add_action('admin_print_footer_scripts', array( &$this, 'add_admin_nav_warning' ), 99 );
+		
+		// Add body class to collapse the wp sidebar nav
+		add_filter('admin_body_class', array( &$this, 'hide_wp_sidebar_nav' ), 11);
+		
+		//hide the update nag
+		add_action('admin_menu', array( &$this, 'hide_wp_update_nag' ));
+	}
+    
 
     public function hide_wp_sidebar_nav($classes) {
-        
-    	return  str_replace("auto-fold", "", $classes) . ' folded';
+        global $hook_suffix;
+
+		if ( apply_filters( 'wpide_sidebar_folded', $hook_suffix === $this->menu_hook ) ) {
+	    	return  str_replace("auto-fold", "", $classes) . ' folded';
+		}
     }
     
     public function hide_wp_update_nag() {
@@ -180,9 +193,11 @@ class wpide
 		    wp_enqueue_script('wpide-php-completion', plugins_url("js/autocomplete/php.js", __FILE__ ) );
 		    // load editor
 		    wp_enqueue_script('wpide-load-editor', plugins_url("js/load-editor.js", __FILE__ ) );
+		    // load filetree menu
+		    wp_enqueue_script('wpide-load-filetree-menu', plugins_url("js/load-filetree-menu.js", __FILE__ ) );
 		    // load autocomplete dropdown 
 		    wp_enqueue_script('wpide-dd', plugins_url("js/jquery.dd.js", __FILE__ ) );
-		    
+
 		     // load jquery ui  
 		    wp_enqueue_script('jquery-ui', plugins_url("js/jquery-ui-1.9.2.custom.min.js", __FILE__ ), array('jquery'),  '1.9.2');
 	
@@ -845,7 +860,467 @@ class wpide
 		
 		die($result); // this is required to return a proper result
 	}
+
+
+	public static function wpide_rename_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
+		$file_name = $root . stripslashes( $_POST['filename'] );
+		$new_name = dirname( $file_name ) . '/' . stripslashes( $_POST['newname'] );
+
+		if ( !$wp_filesystem->exists( $file_name ) ) {
+			echo 'The target file doesn\'t exist!';
+			exit;
+		}
+
+		if ( $wp_filesystem->exists( $new_name ) ) {
+			echo 'The destination file exists!';
+			exit;
+		}
+
+		// Move instead of rename
+		$renamed = $wp_filesystem->move( $file_name, $new_name );
+
+		if ( !$renamed ) {
+			echo 'The file could not be renamed!';
+		}
+		exit;
+	}
 	
+	public static function wpide_delete_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
+		$file_name = $root . stripslashes($_POST['filename']);
+
+		if ( !$wp_filesystem->exists( $file_name ) ) {
+			echo 'The file doesn\'t exist!';
+			exit;
+		}
+
+		$deleted = $wp_filesystem->delete( $file_name );
+
+		if (!$deleted) {
+			echo 'The file couldn\'t be deleted.';
+		}
+
+		exit;
+	}
+
+	public static function wpide_upload_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR );
+		$destination_folder = $root . stripslashes( $_POST['destination'] );
+
+		foreach ( $_FILES as $file ) {
+			if ( !is_uploaded_file( $file['tmp_name'] ) ) {
+				continue;
+			}
+
+			$destination = $destination_folder . $file['name'];
+
+			if ( $wp_filesystem->exists( $destination ) ) {
+				exit( $file['name'] . ' already exists!' );
+			}
+
+			if ( !$wp_filesystem->move( $file['tmp_name'], $destination ) ) {
+				exit( $file['name'] . ' could not be moved.' );
+			}
+
+			if ( !$wp_filesystem->chmod( $destination ) ) {
+				exit( $file['name'] . ' could not be chmod.' );
+			}
+		}
+		exit;
+	}
+
+	public static function wpide_download_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+		$root		= apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR );
+		$file_name	= $root . stripslashes($_POST['filename']);
+
+		if ( !$wp_filesystem->exists( $file_name ) ) {
+			echo 'The file doesn\'t exist!';
+			exit;
+		}
+
+		header( 'Content-Description: File Transfer' );
+		header( 'Content-Type: application/octet-stream' );
+        header( 'Content-Disposition: filename="' . basename( $file_name ) . '"' );
+		header( 'Expires: 0' );
+		header( 'Cache-Control: must-revalidate' );
+		header( 'Pragma: public' );
+
+		echo $wp_filesystem->get_contents( $file_name );
+		exit;
+	}
+
+	public static function wpide_zip_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
+		$file_name = $root . stripslashes($_POST['filename']);
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+
+		if ( !$wp_filesystem->exists( $file_name ) ) {
+			echo 'Error: target file does not exist!';
+			exit;
+		}
+
+		$ext = '.zip';
+		switch ( apply_filters( 'wpide_compression_method', 'zip' ) ) {
+			case 'gz':
+				$ext = '.tar.gz';
+				break;
+			case 'tar':
+				$ext = '.tar';
+				break;
+			case 'b2z':
+				$ext = '.b2z';
+				break;
+			case 'zip':
+				$ext = '.zip';
+				break;
+		}
+
+		// Unzip a file to its current directory.
+		if ( $wp_filesystem->is_dir( $file_name ) ) {
+			$output_path = dirname( $file_name ) . '/' . basename( $file_name ) . $ext;
+		} else {
+			$output_path = $file_name;
+			$output_path = strstr( $file_name, '.', true ) . $ext;
+		}
+
+		$zipped = self::do_zip_file( $file_name, $output_path );
+
+		if ( is_wp_error( $zipped ) ) {
+			printf( '%s: %s', $zipped->get_error_code(), $zipped->get_error_message() );
+			exit;
+		}
+
+		exit;
+	}
+	
+	protected static function do_zip_file( $file, $to ) {
+		// Unzip can use a lot of memory, but not this much hopefully
+		@ini_set( 'memory_limit', apply_filters( 'admin_memory_limit', WP_MAX_MEMORY_LIMIT ) );
+
+		$method = apply_filters( 'wpide_compression_method', 'zip' );
+
+		switch ( $method ) {
+			case 'gz':
+			case 'tar':
+				if ( class_exists( 'PharData' ) && apply_filters( 'unzip_file_use_phardata', true ) ) {
+				    exit('yes');
+				    return self::_zip_archive_phardata( $file, $to );
+				} else {
+				    exit( 'figure it out');
+				}
+
+/*				if ( $method === 'gz' ) {
+					$gz = gzopen( $to );
+				}
+*/
+				break;
+			case 'b2z':
+				exit('B2Z!');
+			case 'zip':
+			default:
+				if ( $method !== 'zip' ) {
+					trigger_error( sprintf( '"%s" is not a valid compression mechanism.', $method ) );
+				}
+
+				if ( class_exists( 'ZipArchive' ) && apply_filters( 'unzip_file_use_ziparchive', true ) ) {
+					return self::_zip_file_ziparchive( $file, $to );
+				} else {
+					// Fall through to PclZip if ZipArchive is not available, or encountered an error opening the file.
+					return self::_zip_file_pclzip( $file, $to );
+				}
+				break;
+		}
+	}
+
+	protected static function _zip_file_ziparchive( $file, $to ) {
+		$z = new ZipArchive;
+		$opened = $z->open($to, ZipArchive::CREATE);
+
+		if ( $opened !== true ) {
+			switch ( $opened ) {
+				case ZipArchive::ER_EXISTS:
+					return new WP_Error(
+						'ZipArchive Error',
+						'File already exists',
+						ZipArchive::ER_EXISTS
+					);
+				case ZipArchive::ER_INCONS:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Archive inconsistent',
+						ZipArchive::ER_INCONS
+					);
+				case ZipArchive::ER_INVAL:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Invalid argument',
+						ZipArchive::ER_INVAL
+					);
+				case ZipArchive::ER_MEMORY:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Malloc failure',
+						ZipArchive::ER_MEMORY
+					);
+				case ZipArchive::ER_NOENT:
+					return new WP_Error(
+						'ZipArchive Error',
+						'No such file.',
+						ZipArchive::ER_NOENT
+					);
+				case ZipArchive::ER_NOZIP:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Not a zip archive.',
+						ZipArchive::ER_NOZIP
+					);
+				case ZipArchive::ER_OPEN:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Can\'t open file.',
+						ZipArchive::ER_OPEN
+					);
+				case ZipArchive::ER_READ:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Read Error',
+						ZipArchive::ER_READ
+					);
+				case ZipArchive::ER_SEEK:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Seek Error',
+						ZipArchive::ER_SEEK
+					);
+	
+				default:
+					return new WP_Error(
+						'ZipArchive Error',
+						'Unknown Error',
+						$opened
+					);
+					break;
+			}
+		}
+
+		if ( is_dir( $file ) ) {
+		    $base = dirname( $file );
+		    $file = untrailingslashit( $file );
+
+			$z = self::_zip_folder_ziparchive( $base, $file, $to, $z );
+			if ( is_wp_error( $z ) )
+				return $z;
+		} else {
+			$z->addFile( $file, basename( $file ) );
+		}
+
+		$z->close();
+
+		return true;
+	}
+
+	protected static function _zip_folder_ziparchive( $zip_base, $folder, $to, $z ) {
+		$handle = opendir( $folder );
+		while (1) {
+			$file = readdir( $handle );
+
+			if ( false === $file )
+				break;
+
+			if ( ( $file != '.' ) && ( $file != '..' ) ) {
+				$filePath = "$folder/$file";
+				$filePathRel = str_replace( $zip_base, '', $filePath );
+
+				if ( $filePathRel{0} === '/' )
+					$filePathRel = substr( $filePathRel, 1 );
+
+				if ( is_file( $filePath ) ) {
+					$z->addFile( $filePath, $filePathRel );
+				} elseif ( is_dir( $filePath ) ) {
+					// Add sub-directory.
+					$z->addEmptyDir( $filePathRel );
+					self::_zip_folder_ziparchive( $zip_base, $filePath, $to, $z );
+				}
+			}
+		}
+		closedir($handle);
+
+		return $z;
+	}
+	
+	protected static function _zip_file_pclzip( $file, $to ) {
+		require_once(ABSPATH . 'wp-admin/includes/class-pclzip.php');
+
+		$pz = new PclZip( $to );
+		$created = $pz->create( $file, PCLZIP_OPT_REMOVE_PATH, dirname( $file ) );
+
+		if ( !$created ) {
+			return new WP_Error( 'PclZip Error', $pz->errorInfo( true ) );
+		}
+
+		return true;
+	}
+
+    protected static function _zip_file_phardata( $file, $to ) {
+        $p = new PharData( $to );
+
+        if ( is_dir( $file ) ) {
+            $p->buildFromDirectory( $file );
+        } else {
+            $p->addFile( $file, basename( $file ) );
+        }
+
+        return true;
+    }
+
+	public static function wpide_unzip_file() {
+		global $wp_filesystem;
+
+		//check the user has the permissions
+		check_admin_referer('plugin-name-action_wpidenonce'); 
+		if ( !current_user_can( 'manage_options' ) )
+		wp_die('<p>'.__('You do not have sufficient permissions to modify files for this site. SORRY').'</p>');
+
+		$root = apply_filters( 'wpide_filesystem_root', WP_CONTENT_DIR ); 
+		$file_name = $root . stripslashes($_POST['filename']);
+
+		$url		 = wp_nonce_url( 'admin.php?page=wpide', 'plugin-name-action_wpidenonce' );
+		$form_fields = null; // for now, but at some point the login info should be passed in here
+		$creds		 = request_filesystem_credentials( $url, FS_METHOD, false, false, $form_fields );
+		if ( false === $creds ) {
+			// no credentials yet, just produced a form for the user to fill in
+			return true; // stop the normal page form from displaying
+		}
+		if ( !WP_Filesystem( $creds ) ) 
+			echo "Cannot initialise the WP file system API";
+
+
+		if ( !$wp_filesystem->exists( $file_name ) ) {
+			echo 'Error: Extraction path doesn\'t exist!';
+			exit;
+		}
+
+		$unzipped = self::do_unzip_file( $file_name, dirname( $file_name ) );
+
+		if ( is_wp_error( $unzipped ) ) {
+			printf( '%s: %s', $unzipped->get_error_code(), $unzipped->get_error_message() );
+			exit;
+		}
+
+		exit;
+	}
+
+	protected static function do_unzip_file( $from, $to ) {
+		if ( !file_exists( $from ) ) {
+			return new WP_Error( 'file-missing', 'Archive missing.' );
+		}
+
+		$fp = fopen( $from, 'rb' );
+		$bytes = fread( $fp, 2 );
+		fclose( $fp );
+
+		switch ( $bytes ) {
+			case "\37\213":
+				// gz
+			case 'BZ':
+				return new WP_Error( 'unimplemented', 'That method is not yet implemented.' );
+				break;
+			case 'PK':
+				return unzip_file( $from, $to );
+			default:
+			    return new WP_Error( 'unknown', 'Unknown archive type' );
+		}
+	}
+
 	public static function wpide_save_image() {
 		
 			$filennonce = split("::", $_POST["opt"]); //file::nonce
@@ -1004,8 +1479,35 @@ class wpide
 	
 	public function add_my_menu_page() {
 		//add_menu_page("wpide", "wpide","edit_themes", "wpidesettings", array( &$this, 'my_menu_page') );
-		add_menu_page('WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ));
+		$this->menu_hook = add_menu_page('WPide', 'WPide', 'edit_themes', "wpide", array( &$this, 'my_menu_page' ));
 	}
+	
+    public function add_my_menu_icon() {
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '3.8', '<' ) ):
+?>
+	<style type="text/css">
+		#toplevel_page_wpide .wp-menu-image {
+			background-image: url( '<?php echo plugins_url( 'images/wpide_icon.png', __FILE__ ); ?>' );
+			background-position: 6px -18px !important;
+		}
+		#toplevel_page_wpide:hover .wp-menu-image,
+		#toplevel_page_wpide.current .wp-menu-image {
+			background-position: 6px 6px !important;
+		}
+	</style>
+<?php
+		else:
+?>
+	<style type="text/css">
+		#toplevel_page_wpide .wp-menu-image:before {
+			content: "\f119";
+		}	
+	</style>
+<?php
+		endif;
+    }
 	
 	public function my_menu_page() {
 		if ( !current_user_can('edit_themes') )
@@ -1101,7 +1603,7 @@ class wpide
             
 			jQuery(document).ready(function($) {
             
-                $("#fancyeditordiv").css("height", ($('body').height()-120) + 'px' );
+//                $("#fancyeditordiv").css("height", ($('body').height()-120) + 'px' );
                 
                 //set up the git commit overlay
                 $('#gitdiv').dialog({
@@ -1466,6 +1968,50 @@ class wpide
 			
 		<?php
 	}
+
+    public function print_find_dialog() {
+?>
+	<div id="editor_find_dialog" title="Find..." style="padding: 0px; display: none;">
+	    <ul>
+	        <li><a href="#find-inline">Text</a></li>
+        	<li><a href="#find-func">Function</a></li>
+        </ul>
+		<form id="find-inline" style="position: relative; padding: 4px; margin: 0px; height: 100%; overflow: hidden; width: 400px;">
+			<label class="left"> Find<input type="search" name="find" /></label>
+			<label class="left"> Replace<input type="search" name="replace" /></label>
+			<div class="clear" style="height: 20px;"></div>
+
+			<label><input type="checkbox" name="wrap" checked="checked" /> Wrap Around</label>
+			<label><input type="checkbox" name="case" /> Case Sensitive</label>
+			<label><input type="checkbox" name="whole" /> Match Whole Word</label>
+			<label><input type="checkbox" name="regexp" /> Regular Expression</label>
+
+			<div class="search_direction">
+				Direction:
+				<label><input type="radio" name="direction" value="0" /> Up</label>
+				<label><input type="radio" name="direction" value="1" checked="checked" /> Down</label>
+			</div>
+			<div class="right">
+				<input type="submit" name="submit" value="Find" class="action_button" />
+				<input type="button" name="replace" value="Replace" class="action_button" />
+				<input type="button" name="replace_all" value="Replace All" class="action_button" />
+				<input type="button" name="cancel" value="Cancel" class="action_button" />
+			</div>
+		</form>
+		<form id="find-func">
+			<label class="left"> Function<input type="search" name="find" /></label>
+			<div class="right">
+				<input type="submit" name="submit" value="Find Function" class="action_button" />
+			</div>
+		</form>
+	</div>
+	<div id="editor_goto_dialog" title="Go to..." style="padding: 0px; display: none;"></div>
+<?php
+    }
+
+    public function print_settings_dialog() {
+
+    }
 
 }
 

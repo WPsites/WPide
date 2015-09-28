@@ -14,6 +14,8 @@ var TokenIterator = require("ace/token_iterator").TokenIterator;
 
 var oHandler;
 
+var editor_options = {resizer:{}};
+
 function onSessionChange(e)  {
     
     //set the document as unsaved
@@ -34,7 +36,7 @@ function onSessionChange(e)  {
 	try {
 		if ( e.data.action == 'removeText' ){
 			
-		       if (autocompleting) {
+		    if (autocompleting) {
 				autocompletelength = (autocompletelength - 1) ;
 			}else{
 				return;
@@ -299,6 +301,30 @@ function onSessionChange(e)  {
 
 }
 
+function onSessionScroll(e) {
+    var lh = editor.renderer.lineHeight,
+        new_height = 0, mod = 0;
+ 
+    // If we scroll to exactly the top of a line, this condition shall be 0.
+    if (e % lh) {
+        // We have not landed where we need to.
+        // The variable "mod" will know how many pixels to move.
+        mod = e % lh;
+
+        // Now we know how many pixels to move, we need to deterime direction.
+		//  We need to figure out another method
+        if (mod > (lh/2)) {
+            new_height = (e+mod);   // Down
+        } else {
+            new_height = (e-mod);   // Up
+        }
+
+        // This will trigger this event call again however will not trigger more
+        // than once because new_height will be a perfect modulus of 0.
+        editor.session.setScrollTop(new_height);
+    }
+}
+
 function token_test(){
 	
 	var iterator = new TokenIterator(editor.getSession(), range.start.row, range.start.column);
@@ -437,18 +463,21 @@ function wpide_set_file_contents(file, callback_func){
 	var data = { action: 'wpide_get_file', filename: file, _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val() };
 
 	jQuery.post(ajaxurl, data, function(response) { 
-		var the_path = file.replace(/^.*[\\\/]/, ''); 
+		var the_path = file.replace(/^.*[\\\/]/, '').trim(); 
 		var the_id = "wpide_tab_" + last_added_editor_session;
 		
 		//enable editor now we have a file open
 		jQuery('#fancyeditordiv textarea').removeAttr("disabled");
+		editor.setReadOnly(false);
         
-		jQuery("#wpide_toolbar_tabs").append('<span id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'</a> <a class="close_tab" href="#">x</a> ');		
+		jQuery("#wpide_toolbar_tabs").append('<span id="'+the_id+'" sessionrel="'+last_added_editor_session+'"  title="  '+file+' " rel="'+file+'" class="wpide_tab">'+ the_path +'<a class="close_tab" href="#">x</a></span>');		
 			
 		saved_editor_sessions[last_added_editor_session] = new EditSession(response);//set saved session
 		saved_editor_sessions[last_added_editor_session].on('change', onSessionChange);
 		saved_undo_manager[last_added_editor_session] = new UndoManager(editor.getSession().getUndoManager());//new undo manager for this session
 		
+        saved_editor_sessions[last_added_editor_session].on("changeScrollTop", onSessionScroll);
+
 		last_added_editor_session++; //increment session counter
 			
 		//add click event for the new tab. 
@@ -533,7 +562,12 @@ function wpide_set_file_contents(file, callback_func){
 		event.preventDefault();
 		var clicksesh = jQuery(this).parent().attr('sessionrel');
 		var activeFallback;
-            
+
+			if (jQuery("#wpide_footer_message_unsaved").is(":visible")) {
+				if (!confirm('Are you sure you wish to close the unsaved document?'))
+					return;
+			}
+
             //if the currently selected tab is being removed then remember to make the first tab active
             if ( jQuery("#wpide_tab_"+clicksesh).hasClass('active') ) {
                 activeFallback = true;
@@ -569,6 +603,24 @@ function wpide_set_file_contents(file, callback_func){
 }
 
 function saveDocument() {
+    // Make sure there is actually a document open
+    jQuery("#wpide_message").stop(true,true);
+    if (jQuery("#wpide_message").is(":visible")) {
+    	jQuery("#wpide_message").fadeOut(50);
+	}
+
+	var the_tab = jQuery("#wpide_toolbar_tabs .active");
+	var current_document_index = the_tab.attr('id').replace('wpide_tab_', '');
+	the_tab.removeClass( 'modified' );
+
+    // Display notification to show we are attempting to save
+    jQuery("#wpide_message")
+        .removeClass('error')
+        .removeClass('teapot')
+        .addClass('success')
+        .html('Saving...')
+		.fadeIn(200);
+
 	//ajax call to save the file and generate a backup if needed
 	var data = { action: 'wpide_save_file', filename: jQuery('input[name=filename]').val(),  _wpnonce: jQuery('#_wpnonce').val(), _wp_http_referer: jQuery('#_wp_http_referer').val(), content: editor.getSession().getValue() };
 	jQuery.post(ajaxurl, data, function(response) { 
@@ -626,10 +678,529 @@ function selectACitem (item) {
 		editor.insert('\n');
 	}
 }
-	
-	
+
+function update_scroll_bars_for_resizer() {
+    if ( jQuery( ".ace_scroller" ).css( 'overflowX' ) != 'scroll' ) {
+        var height = jQuery( ".ace_sb" ).height();
+        jQuery( ".ace_sb" ).height( height-16 );
+    }
+}
+
+// Initiate editor settings
+function load_editor_settings() {
+    var theme        = localStorage.custom_editor_theme;
+    var fontSize     = localStorage.custom_editor_fontSize;
+    var folding      = localStorage.custom_editor_folding;
+    var fade_fold    = localStorage.custom_editor_fade_folding;
+    var wrap         = localStorage.custom_editor_wrap;
+    var wrap_limit   = localStorage.custom_editor_wrap_limit;
+    var select_style = localStorage.custom_editor_full_line_select;
+    var highlight    = localStorage.custom_editor_highlight_current_line;
+    var invisibles   = localStorage.custom_editor_invisibles;
+    var indents      = localStorage.custom_editor_indent_guides;
+    var anim_scroll  = localStorage.custom_editor_animate_scrolling;
+    var show_gutter  = localStorage.custom_editor_show_gutter;
+    var use_tabs     = localStorage.custom_editor_use_tabs;
+    var word_hglt    = localStorage.custom_editor_highlight_selected_word;
+    var behaviours   = localStorage.custom_editor_behaviours;
+
+    // Defaults
+    if ( theme === undefined )          theme       = "ace/theme/textmate";
+    if ( fontSize === undefined )       fontSize    = "12";
+    if ( fade_fold === undefined )      fade_fold   = "0";
+    if ( wrap === undefined )           wrap        = "1";
+    if ( wrap_limit === undefined )     wrap_limit  = "0";
+    if ( highlight === undefined )      highlight   = "1";
+    if ( invisibles === undefined )     invisibles  = "0";
+    if ( indents === undefined )        indents     = "1";
+    if ( anim_scroll === undefined )    anim_scroll = "1";
+    if ( show_gutter === undefined )    show_gutter = "1";
+    if ( use_tabs === undefined )       use_tabs    = "1";
+    if ( word_hglt === undefined )      word_hglt   = "1";
+    if ( behaviours === undefined )     behaviours  = "0";
+
+    // Check invalid fold styling
+    if ( !editor.session.$foldStyles[folding] )        folding = "markbegin";
+    if ( select_style != "text" && select_style != "line" ) select_style = "line";
+    
+    // Set
+    editor.setTheme( theme );
+    editor.setFontSize( fontSize + 'px' );
+    editor.session.setFoldStyle( folding );
+    editor.setSelectionStyle( select_style );
+
+    // Boolean values
+    editor.session.setUseSoftTabs( use_tabs == false );         // soft tab is space
+	editor.setHighlightActiveLine( highlight == true );
+    editor.renderer.setShowInvisibles( invisibles == true );
+try {
+    editor.renderer.setDisplayIndentGuides( indents == true );
+} catch(error) {
+window.console && console.error( 'setDisplayIndentGuides not supported' );
+}
+    editor.renderer.setAnimatedScroll( anim_scroll == true );
+    editor.renderer.setShowGutter( show_gutter == true );
+    editor.setHighlightSelectedWord( word_hglt == true );
+    editor.setBehavioursEnabled( behaviours == true );
+    editor.setFadeFoldWidgets( fade_fold == true );
+
+    // To also allow for free range - free by default
+    if ( wrap == true ) {
+        if ( wrap_limit != "0" ) {
+            // Normal wrap
+            editor.session.setWrapLimitRange(wrap_limit,wrap_limit);
+        } else {
+            // 0 represents free scrolling
+            editor.session.setUseWrapMode(true);
+            editor.session.setWrapLimitRange(null, null);
+            editor.renderer.setPrintMarginColumn(80);
+        }
+    } else {
+        editor.session.setUseWrapMode(false);
+        editor.renderer.setPrintMarginColumn(80);
+    }
+}
+
+function display_editor_settings() {
+    // Create HTML dialog
+    if ( !jQuery( "#editor_settings_dialog" ).length ) {
+        // Ensure settings are loaded...
+        load_editor_settings();
+
+        // Create nodes
+        var theme       = jQuery( '<input>' ).attr({
+            type:       'text',
+            id:         'editor_theme_setting',
+            class:      'ipt-sel'
+        });
+
+        var fontSize    = jQuery( '<input>' ).attr({
+            type:       'number',
+            id:         'editor_font_size_setting',
+            class:      'number'
+        });
+        var fadeFold    = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_fade_fold_setting'
+        });
+        var wrap        = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_wrap_setting'
+        });
+        var wrap_limit  = jQuery( '<input>' ).attr({
+            type:       'number',
+            id:         'editor_wrap_limit_setting',
+            class:      'number'
+        });
+        var hglt_ln     = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_highlight_line_setting'
+        });
+        var invisibles  = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_show_invisibles'
+        });
+        var indentguide = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_display_indent_guides_setting'
+        });
+        var anim_scroll = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_animate_scroll_setting'
+        });
+        var show_gutter = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_show_gutter_setting'
+        });
+        var use_tabs    = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_use_tabs_setting'
+        });
+        var word_hglt   = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_word_highlight'
+        });
+        var behaviours  = jQuery( '<input>' ).attr({
+            type:       'checkbox',
+            id:         'editor_behaviours_setting'
+        });
+
+        var folding     = jQuery( '<select>' ).attr({
+                id:     'editor_folding_setting',
+                class:  'ipt-sel'
+            });
+        jQuery( '<option>' ).attr({
+                value:      "manual",
+                selected:   editor.session.$foldStyle == "manual"
+            }).text( 'Manual').appendTo( folding );
+        jQuery( '<option>' ).attr({
+                value:      "markbegin",
+                selected:   ( editor.session.$foldStyle != "manual" && editor.session.$foldStyle != "markbeginend" )
+            }).text( 'Beginning' ).appendTo( folding );
+        jQuery( '<option>' ).attr({
+                value:      "markbeginend",
+                selected:   editor.session.$foldStyle == "markbeginend"
+            }).text( 'Beginning And End' ).appendTo( folding );
+
+
+        // Add Listeners
+        jQuery( theme ).blur(function() {
+            localStorage.custom_editor_theme = jQuery( this ).val();
+        });
+        jQuery( fontSize ).change(function() {
+            localStorage.custom_editor_fontSize = jQuery( this ).val();
+        });
+        jQuery( fadeFold ).change(function() {
+            localStorage.custom_editor_fade_folding = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( wrap ).change(function() {
+            localStorage.custom_editor_wrap = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( wrap_limit ).change(function() {
+            localStorage.custom_editor_wrap_limit = jQuery( this ).val();
+        });
+        jQuery( hglt_ln ).change(function() {
+            localStorage.custom_editor_highlight_current_line = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( invisibles ).change(function() {
+            localStorage.custom_editor_invisibles = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( indentguide ).change(function() {
+            localStorage.custom_editor_indent_guides = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( anim_scroll ).change(function() {
+            localStorage.custom_editor_animate_scrolling = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( show_gutter ).change(function() {
+            localStorage.custom_editor_show_gutter = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( use_tabs ).change(function() {
+            localStorage.custom_editor_use_tabs = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( word_hglt ).change(function() {
+            localStorage.custom_editor_highlight_selected_word = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( behaviours ).change(function() {
+            localStorage.custom_editor_behaviours = ( jQuery( this ).is( ":checked" ) ? 1 : 0 );
+        });
+        jQuery( folding ).change(function() {
+            localStorage.custom_editor_folding = jQuery( this ).val();
+        });
+
+        // Glue together - create dialog content
+        var container   = jQuery("<div>").attr({
+            id:     "editor_settings_dialog",
+            title:  "Editor Settings"
+        }).css( "display", "none" );
+        var left        = jQuery( '<div>' ).attr({
+            class: "left"
+        });
+        var right       = jQuery( '<div>' ).attr({
+            class: "right"
+        });
+
+        jQuery( left )
+        .append(function() {
+            return jQuery( '<label>' ).text( "Theme: " ).append( theme );
+        })  // Theme
+        .append(function() {
+            return jQuery( '<label>' ).text( "Folding: ").append( folding );
+        })
+        .append(function() {
+            return jQuery( '<label>' ).text( "Font Size: " ).append( fontSize );
+        })  // Font Size
+        .append(function() {
+            return jQuery( '<label>' ).text( "Wrap Limit: " ).append( wrap_limit );
+        })  // Wrap Limit
+        .append(function() {
+            return jQuery( '<label>' ).text( "Wrap Long Text: " ).append( wrap );
+        })  // Wrap
+        .append(function() {
+            return jQuery( '<label>' ).text( "Fade Folders: " ).append( fadeFold );
+        }); // Fade
+
+
+
+        jQuery( right )
+			.append(function() {
+				return jQuery( '<label>' ).text( "Highlight Current Line: " ).append( hglt_ln );
+			})  // Highlight Current Line
+			.append(function() {
+			   return jQuery( '<label>' ).text( "Show Invisible Characters: " ).append( invisibles );
+			})  // Invisible
+			.append(function() {
+				return jQuery( '<label>' ).text( "Show Indent Guidelines: " ).append( indentguide );
+			})  // Indent Guides
+			.append(function() {
+				return jQuery( '<label>' ).text( "Animate Scrollbar: ").append( anim_scroll );
+			})  // Animate Scrollbars
+			.append(function() {
+				return jQuery( '<label>' ).text( "Show Gutter: " ).append( show_gutter );
+			})  // Gutter
+			.append(function() {
+				return jQuery( '<label>' ).text( "Use Tabs: " ).append( use_tabs );
+			})  // Use tabs
+			.append(function() {
+				return jQuery( '<label>' ).text( "Highlight Same Words: " ).append( word_hglt );
+			})  // Word Highlight
+			.append(function() {
+				return jQuery( '<label>' ).text( "Show Behaviours: " ).append( behaviours );
+			}); // Behaviours
+
+        jQuery( container ).append( left ).append( right );
+
+        jQuery( document.body ).append( container );
+    }
+
+    // Update values
+    jQuery( '#editor_theme_setting' ).val( editor.getTheme() );
+    jQuery( '#editor_font_size_setting' ).val( editor.container.style.fontSize.replace('px','') || 12 );
+    jQuery( '#editor_fade_fold_setting' ).prop( 'checked', editor.getFadeFoldWidgets() );
+    jQuery( '#editor_wrap_setting' ).prop( 'checked', editor.session.getUseWrapMode() );
+    jQuery( '#editor_wrap_limit_setting' ).prop( 'checked', editor.session.getWrapLimit() || 0 );
+    jQuery( '#editor_highlight_line_setting' ).prop( 'checked', editor.getHighlightActiveLine() );
+    jQuery( '#editor_show_invisibles' ).prop( 'checked', editor.renderer.getShowInvisibles() );
+    jQuery( '#editor_display_indent_guides_setting' ).prop( 'checked', editor.renderer.getDisplayIndentGuides() );
+    jQuery( '#editor_animate_scroll_setting' ).prop( 'checked', editor.getAnimatedScroll() );
+    jQuery( '#editor_show_gutter_setting' ).prop( 'checked', editor.renderer.getShowGutter() );
+    jQuery( '#editor_use_tabs_setting' ).prop( 'checked', !editor.session.getUseSoftTabs() );
+    jQuery( '#editor_word_highlight' ).prop( 'checked', editor.getHighlightSelectedWord() );
+    jQuery( '#editor_behaviours_setting' ).prop( 'checked', editor.getBehavioursEnabled() );
+    jQuery( '#editor_folding_setting option' ).prop( 'selected', false );
+    jQuery( '#editor_folding_setting option[value="' + editor.session.$foldStyle + '"]' ).prop( 'selected', true );
+
+    // Display Dialog
+    jQuery( "#editor_settings_dialog" ).dialog({
+        height: "264",
+        width: "550",
+        modal: true,
+        resizable: false,
+        show: "fade",
+        close: load_editor_settings
+    });
+}
+
+function display_find_dialog() {
+/*
+    if ( !jQuery( "#editor_find_dialog" ).length ) {
+        // Generate dialog
+        var container   = jQuery( '<div>' ).attr({
+            id:     "editor_find_dialog",
+            title:  "Find..."
+        }).css( "padding", "0px" );
+
+        var find_ipt    = jQuery( '<input>' ).attr({
+            type: "search",
+            name: "find"
+        });
+        var replace_ipt = jQuery( '<input>' ).attr({
+            type: "search",
+            name: "replace"
+        });
+        var find_btn    = jQuery( '<input>' ).attr({
+            type: "submit",
+            name: "submit",
+            value: "Find",
+            class: "action_button"
+        });
+        var replace_btn = jQuery( '<input>' ).attr({
+            type: "button",
+            name: "replace",
+            value: "Replace",
+            class: "action_button"
+        });
+        var rep_all_btn = jQuery( '<input>' ).attr({
+            type: "button",
+            name: "replace_all",
+            value: "Replace All",
+            class: "action_button"
+        });
+        var cancel_btn  = jQuery( '<input>' ).attr({
+            type: "button",
+            name: "cancel",
+            value: "Cancel",
+            class: "action_button"
+        });
+        var wrap        = jQuery( '<input>' ).attr({
+            type: "checkbox",
+            name: "wrap",
+        }).prop( "checked", true );
+        var sensitive   = jQuery( '<input>' ).attr({
+            type: "checkbox",
+            name: "case"
+        }).prop( "checked", false );
+        var whole       = jQuery( '<input>' ).attr({
+            type: "checkbox",
+            name: "whole"
+        }).prop( "checked", false );
+        var regEx       = jQuery( '<input>' ).attr({
+            type: "checkbox",
+            name: "regexp"
+        }).prop( "checked", false );
+
+        var fromTop     = jQuery( '<input>' ).attr({
+            type: "radio",
+            name: "direction",
+            value: "0"
+        }).prop( "checked", false );
+        var fromBottom  = jQuery( '<input>' ).attr({
+            type: "radio",
+            name: "direction",
+            value: "1"
+        }).prop( "checked", true );
+
+
+        var buttons         = jQuery( '<div>' )
+                                .attr( "class", "right" )
+                                .append( find_btn )
+                                .append( replace_btn )
+                                .append( rep_all_btn )
+                                .append( cancel_btn );
+        var find_label      = jQuery( '<label>' ).attr( "class", "left" ).text( " Find" ).append( find_ipt );
+        var replace_label   = jQuery( '<label>' ).attr( "class", "left" ).text( " Replace" ).append( replace_ipt );
+        var wrap_label      = jQuery( '<label>' ).text( " Wrap Around" ).prepend( wrap );
+        var sensitive_label = jQuery( '<label>' ).text( " Case Sensitive" ).prepend( sensitive );
+        var whole_label     = jQuery( '<label>' ).text( " Match Whole Word" ).prepend( whole );
+        var regex_label     = jQuery( '<label>' ).text( " Regular Expression" ).prepend( regEx );
+
+        var fromTopLabel    = jQuery( '<label>' ).text( " Up" ).prepend( fromTop );
+        var fromBottomLabel = jQuery( '<label>' ).text( " Down" ).prepend( fromBottom );
+
+        var direction       = jQuery( '<div>' ).attr( "class", "search_direction" ).text( "Direction:" ).append( fromTopLabel ).append( fromBottomLabel );
+        var clear           = jQuery( '<div>' ).attr( 'class', 'clear' ).height( 20 );
+
+
+        var innerContainer = jQuery( '<form>' ).css({
+            position: "relative",
+            padding: "4px",
+            margin: "0px",
+            height: "100%",
+            overflow: "hidden",
+            width: "400px"
+        })
+        .append( find_label )
+        .append( replace_label )
+        .append( clear )
+        .append( wrap_label )
+        .append( sensitive_label )
+        .append( whole_label )
+        .append( regex_label )
+        .append( direction )
+        .append( buttons )
+
+
+        container.append( innerContainer );
+
+        jQuery( document.body ).append( container );
+    }
+*/
+
+	// Initiate the search box with the current selection
+	if ( !editor.session.selection.$isEmpty )
+		var value = editor.session.doc.getTextRange( editor.session.selection.getRange() );
+	else
+		var value = '';
+
+	jQuery( "#editor_find_dialog" ).find( "input[name='find']" ).val( value );
+
+    jQuery( "#editor_find_dialog" ).dialog({
+        height: "196",
+        width: "408",
+        resizable: false,
+        show: "fade",
+        hide: "fade"
+    });
+
+}
+
+function display_goto_dialog() {
+	jQuery( "#editor_goto_dialog" ).find( "input[name='line']").val( editor.session.selection.getCursor().row+1 );
+	jQuery( "#editor_goto_dialog" ).dialog({
+		height: "100",
+		width: "300",
+		resizable: false,
+		show: "fade",
+		hide: "fade"
+	});
+}
+
 jQuery(document).ready(function($) {
 	$("#wpide_save").click(saveDocument);
+
+    // Find dialog actions
+    $("#editor_find_dialog form" ).submit(function( e ) {
+        e.preventDefault();
+        var options = {};
+
+        var direction   = jQuery( "#editor_find_dialog input[name='direction']" ).prop("checked");
+        var start;
+
+        if ( direction ) {
+            start = editor.getSelectionRange().start;
+        } else {
+            start = editor.getSelectionRange().end;
+        }
+    
+        options.needle          = jQuery( "#editor_find_dialog input[name='find']" ).val();
+        options.backwards       = direction;
+        options.wrap            = jQuery( "#editor_find_dialog input[name='wrap']" ).prop("checked");
+        options.caseSensitive   = jQuery( "#editor_find_dialog input[name='case']" ).prop("checked");
+        options.wholeWord       = jQuery( "#editor_find_dialog input[name='whole']" ).prop("checked");
+        options.range           = null;
+        options.regExp          = jQuery( "#editor_find_dialog input[name='regexp']" ).prop("checked");
+        options.start           = start;
+        options.skipCurrent     = false;
+    
+        editor.find(options.needle, options);
+        return false;
+    });
+    $("#editor_find_dialog input[name='replace']").click(function( e ) {
+        e.preventDefault();
+        var options = {};
+    
+        var direction   = jQuery( "#editor_find_dialog input[name='direction']" ).prop("checked");
+        var replacement = jQuery( "#editor_find_dialog input[name='replace']" ).val();
+        var start       = editor.getSelectionRange().start;
+
+
+        options.needle          = jQuery( "#editor_find_dialog input[name='find']" ).val();
+        options.backwards       = direction;
+        options.wrap            = jQuery( "#editor_find_dialog input[name='wrap']" ).prop("checked");
+        options.caseSensitive   = jQuery( "#editor_find_dialog input[name='case']" ).prop("checked");
+        options.wholeWord       = jQuery( "#editor_find_dialog input[name='whole']" ).prop("checked");
+        options.range           = null;
+        options.regExp          = jQuery( "#editor_find_dialog input[name='regexp']" ).prop("checked");
+        options.start           = start;
+        options.skipCurrent     = false;
+
+        editor.replace(replacement, options);
+        editor.find(options.needle, options);
+    });
+    $("#editor_find_dialog input[name='replace_all']").click(function( e ) {
+        e.preventDefault();
+        var options = {};
+    
+        var direction   = jQuery( "#editor_find_dialog input[name='direction']" ).prop("checked");
+        var replacement = jQuery( "#editor_find_dialog input[name='replace']" ).val();
+        var start       = editor.getSelectionRange().start;
+
+        options.needle          = jQuery( "#editor_find_dialog input[name='find']" ).val();
+        options.backwards       = direction;
+        options.wrap            = jQuery( "#editor_find_dialog input[name='wrap']" ).prop("checked");
+        options.caseSensitive   = jQuery( "#editor_find_dialog input[name='case']" ).prop("checked");
+        options.wholeWord       = jQuery( "#editor_find_dialog input[name='whole']" ).prop("checked");
+        options.range           = null;
+        options.regExp          = jQuery( "#editor_find_dialog input[name='regexp']" ).prop("checked");
+        options.start           = start;
+        options.skipCurrent     = false;
+
+        editor.replaceAll(replacement, options);
+    });
+    $("#editor_find_dialog input[name='cancel']").click(function( e ) {
+        e.preventDefault();
+        jQuery( "#editor_find_dialog" ).dialog( "close" );
+        editor.focus();
+    });
 
     // drag and drop colour picker image
     $("#wpide_color_assist").on('drop', function(e) {
@@ -657,6 +1228,9 @@ jQuery(document).ready(function($) {
     editor.setPrintMarginColumn(false);
 	//set the editor theme
 	editor.setTheme("ace/theme/dawn"); 
+	//must always use scrollbar
+	editor.renderer.setVScrollBarAlwaysVisible(true);
+	editor.renderer.setHScrollBarAlwaysVisible(true);
 	//get a copy of the initial file contents (the file being edited)
 	//var intialData = $('#newcontent').val()
 	var intialData = "Use the file manager to find a file you wish edit, click the file name to edit. \n\n";
@@ -679,7 +1253,8 @@ jQuery(document).ready(function($) {
 	
 	
 	//make initial editor read only
-	$('#fancyeditordiv textarea').attr("disabled", "disabled");
+	// $('#fancyeditordiv textarea').attr("disabled", "disabled");
+	editor.setReadOnly(true);
 
 	//use editors php mode
 	var phpMode = require("ace/mode/php").Mode;
@@ -733,7 +1308,21 @@ jQuery(document).ready(function($) {
 			} else {
 				var range = editor.getSelectionRange();
 				editor.clearSelection();
-				editor.moveCursorTo(range.end.row - 1, range.end.column);
+
+/*				// If we have folds, let's skip past them
+                var fold    = editor.getSession().getFoldAt( range.start.row );
+                if ( fold !== null ) {
+                    range.end.row = fold.start.row;
+                }
+
+
+                // Do not go up on a tabbed space
+                if ( editor.session.getUseSoftTabs() ) {
+                    var tabsize     = editor.session.getTabSize();
+                    range.end.column = Math.round( range.end.column / tabsize ) * tabsize;
+                }
+*/
+				editor.moveCursorTo(range.end.row-1, range.end.column);
 			}
 		}
 	});
@@ -793,6 +1382,118 @@ jQuery(document).ready(function($) {
 		exec: saveDocument
 	});
 
+	// duplicate line:
+	editor.commands.addCommand({
+		name: "duplicateLines",
+		bindKey: {
+			win: "Ctrl-D",
+			mac: "Command-D",
+			sender: "editor"
+		},
+		exec: function() {
+			var rows = editor.$getSelectedRows();
+			editor.session.duplicateLines( rows.first, rows.last );
+		}
+	});
+
+	// delete line:
+	editor.commands.addCommand({
+		name: "removeLines",
+		bindKey: {
+			win: "Ctrl-Shift-D",
+			mac: "Command-Shift-D",
+			sender: "editor"
+		},
+		exec: function() {
+			editor.removeLines();
+			editor.selection.moveCursorUp();
+		}
+	});
+
+	// Move lines up
+	editor.commands.addCommand({
+		name: "shiftLinesUp",
+		bindKey: {
+			win: "",
+			mac: "Command-Shift-Up",
+			sender: "editor"
+		},
+		exec: function() {
+			// Move rows down
+			var rows    = editor.$getSelectedRows();
+			editor.session.moveLinesUp( rows.first, rows.last );
+
+			if ( !editor.selection.isEmpty() && ( editor.selection.anchor.row == editor.selection.lead.row ) ) {
+				// Move selection down
+				console.log(rows);
+				rows.start.row++;
+				rows.end.row++;
+				rows.start.column   = 0;
+				rows.end.column     = 0;
+
+				editor.selection.moveCursorUp();
+				editor.selection.setSelectionRange( rows );
+			} else {
+				editor.selection.moveCursorUp();
+			}
+		}
+	});
+
+	// Move lines down
+	editor.commands.addCommand({
+		name: "shiftLinesDown",
+		bindKey: {
+			win: "Ctrl-Shift-Down",
+			mac: "Command-Shift-Down",
+			sender: "editor"
+		},
+		exec: function() {
+			// Move rows down
+			var rows    = editor.$getSelectedRows();
+			editor.session.moveLinesDown( rows.first, rows.last );
+
+			if ( !editor.selection.isEmpty() && ( editor.selection.anchor.row == editor.selection.lead.row ) ) {
+				// Move selection down
+				console.log(rows);
+				rows.start.row++;
+				rows.end.row++;
+				rows.start.column   = 0;
+				rows.end.column     = 0;
+
+				editor.selection.moveCursorDown();
+				editor.selection.setSelectionRange( rows );
+			} else {
+				editor.selection.moveCursorDown();
+			}
+		}
+	});
+
+	// Show find dialog
+	editor.commands.addCommand({
+		name: "findDialog",
+		bindKey: {
+			win: "Ctrl-F",
+			mac: "Command-F",
+			sender: "editor"
+		},
+		exec: function() {
+			display_find_dialog();
+		}
+	});
+
+	// Show goto dialog
+	editor.commands.addCommand({
+		name: "gotoDialog",
+		bindKey: {
+			win: "Ctrl-G",
+			mac: "Command-G",
+			sender: "editor"
+		},
+		exec: function() {
+			display_goto_dialog();
+		}
+	});
+
 	//END COMMANDS
 	
 	
@@ -839,5 +1540,79 @@ jQuery(document).ready(function($) {
 		});
 		
 	});
+
+
+    // Add our resizer to the 
+	$("#fancyeditordiv").prepend('<span id="resizer"></span>');
+
+	// Create resizer handle
+	$("#fancyeditordiv span#resizer").bind('mousedown', function(e) {
+		e = e || window.event;
+
+		var offset = e.offsetY;
+
+		if ( offset === undefined ) {
+			offset = 0;
+		}
+
+		window.editor_options.resizer.handler_offset = (15-offset) - 30;
+
+		function movement_handler(e) {
+			var line_height = editor.renderer.lineHeight;
+			var curr_height = $("#fancyeditordiv").height();
+
+			var o           = jQuery('#wpide_toolbar_buttons').offset();
+
+			// Calculate new height.
+			var new_height	 = e.clientY;                                        // Get mouse Y position in window.
+			new_height		-= o.top;                                            // Add offset from top of window.
+			new_height		+= window.editor_options.resizer.handler_offset;     // Add offset from resizer handle.
+			new_height		+= jQuery(window).scrollTop();                     // Add window scroll offset.
+			new_height		 = Math.round(new_height / line_height) * line_height;     // Round to nearest line height
+
+			// Do not allow if less than 230px
+			if (new_height > 230 || new_height > curr_height) {
+				$("#fancyeditordiv").height(++new_height);
+				editor.resize();
+			}
+		}
+
+		function cancel_drag() {
+			$(window)
+				.unbind('mousemove', movement_handler)
+				.unbind('mouseup', cancel_drag);
+		}
+
+		// Detect movements on mouse
+		$(window).bind('mousemove', movement_handler);
+		$(window).bind('mouseup', cancel_drag);
+
+	});
+
+
+	$("#submitdiv h3")
+		.append('<a href="#" class="wpide-settings">')
+		.find('a')
+		.bind('click', display_editor_settings);
+
+    $("#wpide_file_browser").on("contextmenu", ".directory > a, .file > a", display_context_menu);
+
+    // Figure out the correct size for the editor
+    (function() {
+        var size    = Math.max( ( $(document.body).height() - 230 ), 250 ),
+            lh      = editor.renderer.lineHeight;
+
+        size += lh - (size % lh);
+        size++;                     // Editor seems to always be 1px small
+
+        $("#fancyeditordiv").height(size + 'px');
+    })();
+
+	editor.on('changeSession', function(e) {
+		update_scroll_bars_for_resizer();
+	});
+
+	load_editor_settings();
+	editor.resize();
 
 });//end jquery load

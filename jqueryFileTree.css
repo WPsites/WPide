@@ -18,14 +18,51 @@ UL.jqueryFileTree A {
 	color: #333;
 	text-decoration: none;
 	display: block;
-	padding: 0px 2px;
+	padding: 0 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 123px;
+	margin-right: 26px;
 }
 
-UL.jqueryFileTree LI.directory > A:hover,
-UL.jqueryFileTree LI.file > A:hover
-{
-	background: #BDF;
+.jqueryFileTree .create_new a {
+	min-width: 24px;
+	max-width: 24px;
+	width: 24px;
 }
+ 
+.jqueryFileTree .directory,
+.jqueryFileTree .file {
+	border: 1px solid transparent;
+	outline: none !important;
+	position: relative;
+}
+
+.jqueryFileTree .filetree_node:hover {
+	background-color: #BDF;
+	border-color: #BDF;
+}
+
+.jqueryFileTree .filetree_node:active {
+	border-color: #AAF;
+	background-color: #BDF;
+}
+
+.jqueryFileTree .filetree_delete {
+	float: right;
+	width: 20px;
+	height: 20px;
+	margin-right: 2px;
+	opacity: 0.7;
+	position: absolute;
+	top: 1px;
+	right: 0;
+}
+
+.jqueryFileTree .filetree_delete:hover {
+	opacity: 1;
+}
+
 
 /* Core Styles */
 .jqueryFileTree LI.directory { background: url(images/directory.png) left top no-repeat; }
@@ -98,6 +135,11 @@ a.new_directory{
 
 a.new_file{
 	background: url(images/new-file.png) center center no-repeat;
+}
+
+ul.jqueryFileTree a:focus {
+	outline: none;
+	border: none;
 }
 
 ul.jqueryFileTree .new_file,

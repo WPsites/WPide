@@ -37,7 +37,10 @@ function display_context_menu(e) {
                     .attr("class", "menu-item-edit")
                     .text("Edit")
                     .on("click", function() {
-                        alert("Edit");
+                        $this.parent().addClass('wait');
+						wpide_set_file_contents($this.attr('rel'), function(){
+							$this.parent().removeClass('wait');
+						});
                     });
 
             return $item;

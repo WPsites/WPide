@@ -1,8 +1,25 @@
+	/* This is to make sure the IDE does not overlap anything else in the window */
+	.toplevel_page_wpide #wpcontent {
+		z-index: 10;
+		position: relative;
+	}
+
 	#quicktags, #post-status-info, #editor-toolbar, #newcontent, .ace_print_margin { display: none; }
     #fancyeditordiv {
-	  position: relative;
-	  width: 70%;
-	  height: 400px;
+		position: relative;
+		width: 70%;
+		height: 400px;
+	}
+	#template div{margin-right:0 !important;}
+
+	#fancyeditordiv #resizer {
+		width: 16px;
+		height: 16px;
+		position: absolute;
+		bottom: 0px;
+		right: 0px;
+		cursor: nw-resize;
+		background-image: url( 'images/resize-handle.png' );
 	}
 	#template div{margin-right:0 !important;}
 	
@@ -43,7 +60,6 @@
 		color: #B00001;
 		text-decoration: none;
 		font-style: italic;
-        
         -moz-opacity:.60; 
         filter:alpha(opacity=60); 
         opacity:.60;
@@ -57,6 +73,13 @@
         border-top-color:#bbb;
         border-bottom-color:#dedede;
     }
+	#wpide_toolbar .wpide_tab.modified {
+		color: blue;
+		font-weight: bold;
+	}
+	#wpide_toolbar .wpide-tab.modified:after {
+		content: ' *';
+	}
 	
     #wpide_toolbar .close_tab {
         color: #575757;
@@ -67,11 +90,16 @@
         right: 3px;
         text-decoration: none;
         top: -2px;
+		outline: none !important;
     }
     #wpide_toolbar .close_tab:hover{
         color:#B00001;
         font-weight:bold;
     }
+	#wpide_toolbar .close_tab:active {
+		color: #444444;
+		font-weight: bold;
+	}
     
 	#wpide_file_browser{
 		margin-right:2%;
@@ -133,7 +161,13 @@
 		color:#aaa;
         z-index:999;
 	}
-        
+
+	/* The above fix will make tooltips hide behind the gutter.
+	   This will bring them in front. */
+	#wpwrap .ace_gutter-tooltip {
+		z-index: 1000;
+	}
+
 	#wpide_save_container{
         float: left;
         clear: left;
@@ -213,6 +247,12 @@
         height:1000px;
         margin-right:0!important;
         float:left;
+		min-height: 230px;
+		/* Stop browser text selection of the editor.
+			This will not stop selection IN the editor. */
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		user-select: none;
     }
     
     #wpide_message{
@@ -501,6 +541,163 @@ div.ImageColorPickerWrapper{
     padding-bottom:0;
 }
 
+.wpide-settings {
+	height: 20px;
+	width: 20px;
+	background-image: url( images/settings.png );
+	background-repeat: no-repeat;
+	background-position: 2px 2px;
+	display: inline-block;
+	border: 1px solid transparent;
+	border-radius: 2px;
+	padding: 2px;
+	position: absolute;
+	right: 2px;
+	top: 2px;
+}
 
+.editor_settings_dialog-minbutton {
+	display: none;
+}
 
-        
+.wpide-settings:hover {
+	border-color: #666666;
+	background-color: #F2F2F2;
+}
+
+/* Settings Dialog */
+#editor_settings_dialog label {
+	display: inline-block;
+	width: 100%;
+	margin: 4px 0;
+	font-weight: bold;
+}
+#editor_settings_dialog label .ipt-sel {
+	width: 125px;
+}
+#editor_settings_dialog label .number {
+	width: 117px;
+}
+#editor_settings_dialog label input, #editor_settings_dialog label select {
+	float: right;
+	font-weight: normal;
+}
+#editor_settings_dialog .left {
+	float: left;
+	width: 48%;
+}
+#editor_settings_dialog .right {
+	float: right;
+	width: 48%;
+}
+
+#editor_find_dialog {
+	overflow: hidden;
+}
+#editor_find_dialog_minimized {
+	float: right;
+}
+#editor_find_dialog label {
+	display: block;
+	width: 40%;
+}
+#editor_find_dialog label.left {
+	display: inline-block;
+	float: left;
+	width: 65%;
+}
+#editor_find_dialog input.action_button {
+	display: inline-block;
+	float: right;
+	width: 100%;
+}
+#editor_find_dialog input.action_button:active {
+	box-shadow: 0 0 5px lightGrey inset
+}
+#editor_find_dialog label.left input {
+	float: right;
+	width: 190px;
+}
+#editor_find_dialog div.search_direction {
+	display: inline-block;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	width: 30%;
+}
+#editor_find_dialog div.search_direction label {
+	width: 100%;
+}
+#editor_find_dialog div.right {
+	display: inline-block;
+	position: absolute;
+	top: 4px;
+	right: 10px;
+	width: 30%
+}
+#editor_find_dialog div.right input {
+	border: 1px solid #dfdfdf;
+	background-color: #fefefe;
+	border-radius: 2px;
+}
+#editor_find_dialog div.right input:hover {
+	border-color: #AAAAAA;
+}
+
+ul.jqueryFileTree a {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 123px;
+	margin-right: 26px;
+}
+
+.jqueryFileTree .create_new a {
+	min-width: 24px;
+	max-width: 24px;
+	width: 24px;
+}
+ 
+.jqueryFileTree .directory > a,
+.jqueryFileTree .file > a {
+	border: 1px solid transparent;
+	outline: none !important;
+}
+
+.jqueryFileTree .filetree_delete:hover {
+	opacity: 1;
+}
+
+.jqueryFileTree .directory > a:hover,
+.jqueryFileTree .file > a:hover {
+	background-color: #BDF;
+	border: 1px solid #BDF;
+	outline: none !important;
+}
+
+.jqueryFileTree .directory > a:active,
+.jqueryFileTree .file > a:active {
+	border: 1px solid #AAF;
+	background-color: #BDF;
+	outline: none !important;
+}
+
+#wpide_file_browser .wpide-context-menu {
+	position: absolute;
+	background: white;
+	border: 1px solid #AAAAAA;
+	padding: 3px;
+	z-index: 100;
+	border-radius: 3px;
+	box-shadow: 6px 6px 11px -7px #333;
+}
+#wpide_file_browser .wpide-context-menu li {
+	list-style-type: none;
+	padding: 3px 6px 3px 20px;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: pointer;
+	font-size: 14px;
+}
+#wpide_file_browser .wpide-context-menu li:hover {
+	background-color: #DFDFDF;
+}

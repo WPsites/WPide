@@ -18,15 +18,7 @@ class wpide
 {
 
 	public $site_url, $plugin_url, $git, $git_repo_path;
-    
-    /**
-	 * The main WPide loader (PHP4 compatable)
-	 *
-	 * @uses wpide::__construct() Setup the globals needed
-	 */
-	public function wpide() {
-		$this->__construct();
-	}
+	
 	
 	function __construct() {
         
@@ -111,7 +103,17 @@ class wpide
 		
 
 	}
-
+	
+    
+    /**
+	 * The main WPide loader (PHP4 compatable)
+	 *
+	 * @uses wpide::__construct() Setup the globals needed
+	 */
+	public function wpide() {
+		$this->__construct();
+	}
+	
 
     public function override_fs_method($method = 'direct'){
         

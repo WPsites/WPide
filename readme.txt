@@ -2,8 +2,8 @@
 Contributors: WPsites, Thomas Wieczorek
 Tags: code, theme editor, plugin editor, code editor
 Requires at least: 3.0
-Tested up to: 3.6
-Stable tag: 2.3.2
+Tested up to: 4.3.1
+Stable tag: 2.4.0
 
 WordPress code editor with auto completion of both WordPress and PHP functions with reference, syntax highlighting, line numbers, tabbed editing, automatic backup.
 
@@ -22,10 +22,12 @@ This plugin performs best in the Chrome web browser.
 *   Syntax highlighting
 *   PHP syntax checking before saving to disk to try and banish white screen of death after uploading invalid PHP
 *   Line numbers
+*   Find+replace
 *   Code autocomplete for WordPress and PHP functions along with function description, arguments and return value where applicable
 *   Colour assist - a colour picker that only shows once you double click a hex colour code in the editor. You can also drag your own image into the colour picker to use instead of the default swatch (see other notes for info).
 *   Automatic backup of every file you edit. (one daily backup and one hourly backup of each file stored in plugins/WPide/backups/filepath)
 *   File tree allowing you to access and edit any file in your wp-content folder (plugins, themes, uploads etc)
+*   Use the file browser to rename, delete, download, zip and unzip files (so you can download a zipped version of your whole theme for example)
 *   Create new files and directories
 *   Highlight matching parentheses
 *   Code folding
@@ -37,7 +39,6 @@ This plugin performs best in the Chrome web browser.
 = Feature ideas and improvements: =
 
 *   Improve the code autocomplete command information, providing more information on the commands, adding links through to the WordPress codex and PHP.net website for further info.
-*   Add find and replace functionality
 *   Create an admin panel to choose between syntax highlighting themes and turn on/off other Ajax.org Cloud9 functionality
 *   Better automated file backup process
 *   Templates/shortcuts for frequently used code snippets, maybe even with an interface to accept variables that could be injected into code snippet templates.
@@ -85,6 +86,17 @@ Either the image contains no image data (its a new empty file) or the image is n
 4. Default colour picker image
 
 == Changelog ==
+= 2.4.0
+* Context menu option added to file browser to rename, delete, download, zip, unzip!! thanks to shanept https://github.com/shanept for the code behind this.
+  Right click on a folder/file in the file browser to see options (Thanks to https://github.com/shanept)
+* find+replace
+* Stopped using the full functionality of sanitize_file_name() and using a cut down version instead that allows period, dash and underscore at the beginning and end of filename.
+* corrected invalid regex for determining image type
+* Changed order of PHP4 compatible constructor in an attempt to stop a PHP Strict Standard error
+* Update to Ace Editor 1.2.0
+* Editor settings, so that it’s possible to change the theme and other editor features/behaviours
+* New application icon in menu bar
+
 = 2.3.2 =
 * Update the Ace component to 1.1.1 which includes some bug fixes, a PHP worker (showing PHP errors as you work) and a greatly improved search box.
 * Fixed issue with file save showing javascript alert as if there was a failure when there wasn't

@@ -729,6 +729,9 @@ function load_editor_settings() {
     editor.session.setFoldStyle( folding );
     editor.setSelectionStyle( select_style );
 
+    editor.$blockScrolling = Infinity;
+    editor.setOption("showPrintMargin", false);
+
     // Boolean values
     editor.session.setUseSoftTabs( use_tabs == false );         // soft tab is space
 	editor.setHighlightActiveLine( highlight == true );

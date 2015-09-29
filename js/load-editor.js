@@ -321,7 +321,7 @@ function onSessionScroll(e) {
 
         // This will trigger this event call again however will not trigger more
         // than once because new_height will be a perfect modulus of 0.
-        editor.session.setScrollTop(new_height);
+        //editor.session.setScrollTop(new_height);
     }
 }
 
